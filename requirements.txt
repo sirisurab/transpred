@@ -1,0 +1,9 @@
+#numpy
+pandas
+fuzzywuzzy
+python-Levenshtein
+geopandas
+Rtree
+fastparquet
+descartes
+dask[dataframe]

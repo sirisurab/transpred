@@ -1,0 +1,9 @@
+.git
+.idea/*
+.dockerignore
+data/cabs/*.csv
+data/cabs/*.parquet
+data/traffic/*.csv
+data/transit/*.csv
+data/transit/*.txt
+
