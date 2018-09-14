@@ -26,9 +26,8 @@ FROM base AS stage1
 
 # Set the working directory to /app
 WORKDIR /app
-#RUN chmod -R 777 /app
 # Copy the current directory contents into the container at /app
-#ADD ./transpred/clean_and_wrangle_1.py /app/transpred/clean_and_wrangle_1.py
+#ADD ./src/clean_and_wrangle_1.py /app/src/clean_and_wrangle_1.py
 #ADD ./data/cabs/cabs_green.sh /app/data/cabs/cabs_green.sh
 #ADD ./data/cabs/cabs_yellow.sh /app/data/cabs/cabs_yellow.sh
 #ADD ./data/gas/2018-2008_monthly_gas_NYC.csv /app/data/gas/2018-2008_monthly_gas_NYC.csv
@@ -45,10 +44,15 @@ WORKDIR /app
 
 RUN GIT_URL="https://github.com/sirisurab/transpred/archive/master.zip" && \
 wget --no-check-certificate -O master.zip $GIT_URL && \
-#git clone $GIT_URL && cd transpred && git checkout 9eafa701bd9c04f2bc80d0a7f24bae95b1e2eb7d
+#git clone $GIT_URL && cd src && git checkout 8054d2db3cd16d6862bb140adda7060b4dbbc5cc
 unzip master.zip && \
+mv /app/transpred-master/* /app && \
+chmod -R +x /app && \
+rm -r /app/transpred-master && \
 rm master.zip
 
+
+#RUN chmod -R 777 /app
 # Make port 80 available to the world outside this container
 #EXPOSE 80
 
@@ -57,11 +61,11 @@ rm master.zip
 #VOLUME /app
 #RUN cd bin && \
 #./get_data.sh
-# Run transpred/clean_and_wrangle_1.py when the container launches
-#CMD ["python", "transpred/stations.py"]
-#CMD ["python", "transpred/traffic_links.py"]
-#CMD ["python", "transpred/cabs.py"]
-#CMD ["python", "transpred/clean_and_wrangle_1.py"]
+# Run src/clean_and_wrangle_1.py when the container launches
+#CMD ["python", "src/stations.py"]
+#CMD ["python", "src/traffic_links.py"]
+#CMD ["python", "src/cabs.py"]
+#CMD ["python", "src/clean_and_wrangle_1.py"]
 #CMD ["cd", "bin"]
 #CMD ["./bin/get_data.sh"]
-ENTRYPOINT ["./bin/bash"]
+ENTRYPOINT ["/bin/bash"]
