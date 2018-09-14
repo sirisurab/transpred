@@ -7,3 +7,4 @@ Rtree
 fastparquet
 descartes
 dask[dataframe]
+bokeh

@@ -8,6 +8,7 @@ RUN apt-get update && \
 apt-get install -y curl && \
 apt-get install -y g++ && \
 apt-get install -y make && \
+apt-get install -y unzip && \
 curl -L http://download.osgeo.org/libspatialindex/spatialindex-src-1.8.5.tar.gz | tar xz && \
 cd spatialindex-src-1.8.5 && \
 ./configure && \
@@ -40,7 +41,13 @@ WORKDIR /app
 #ADD ./bin/get_traffic_n_process.sh /app/bin/get_traffic_n_process.sh
 #ADD ./bin/get_transit_data.sh /app/bin/get_transit_data.sh
 #ADD ./bin/get_data.sh /app/bin/get_data.sh
-COPY . /app
+#COPY . /app
+
+RUN GIT_URL="https://github.com/sirisurab/transpred/archive/master.zip" && \
+wget --no-check-certificate -O master.zip $GIT_URL && \
+#git clone $GIT_URL && cd transpred && git checkout 9eafa701bd9c04f2bc80d0a7f24bae95b1e2eb7d
+unzip master.zip && \
+rm master.zip
 
 # Make port 80 available to the world outside this container
 #EXPOSE 80
@@ -56,5 +63,5 @@ COPY . /app
 #CMD ["python", "transpred/cabs.py"]
 #CMD ["python", "transpred/clean_and_wrangle_1.py"]
 #CMD ["cd", "bin"]
-#ENTRYPOINT ["bin/get_data.sh"]
-ENTRYPOINT ["ls","bin"]
+#CMD ["./bin/get_data.sh"]
+ENTRYPOINT ["./bin/bash"]

@@ -2,7 +2,5 @@
 
 cd ../data/traffic
 
-/bin/bash traffic.sh && python process_traffic_data.py
-
-#/bin/bash hydra-curl.sh traffic.txt $ROOT/traffic_speed.csv && python process_traffic_data.py
-
+echo "fetching traffic data"
+/bin/bash traffic.sh && echo "processing traffic and link data" && python process_traffic_data.py

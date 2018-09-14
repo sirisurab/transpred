@@ -1,8 +1,7 @@
 #!/bin/bash
 
 cd ../data/transit
-/bin/bash stations.sh
-/bin/bash turnstile.sh
-
-
-
+echo "fetching station data"
+/bin/bash stations.sh &
+echo "fetching turnstile data"
+/bin/bash turnstile.sh &
