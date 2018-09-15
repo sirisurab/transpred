@@ -88,5 +88,5 @@ df_clean.head()
 # In[35]:
 
 
-df_clean.to_csv(root+'traffic_1617_hourly.csv')
+df_clean.to_csv(root+'traffic_hourly.csv')
 
