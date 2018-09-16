@@ -5,12 +5,12 @@
 # assume block_size is 5 (5 parts of traffic file are fetched by each fetcher as a block)
 # each month is a separate file
 
-cd ../data/traffic
+cd data/traffic
 
 # redis
 # TODO move this to config file
-redis_url="127.0.0.1"
-redis_cli="redis-cli -h $redis_url"
+redis_url="redis"
+redis_cli="redis-cli -h redis -p 6379"
 q1="tf_q"
 q2="tf_p"
 max_bl_num=20

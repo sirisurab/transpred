@@ -6,13 +6,13 @@
 # each month is a separate file
 years=("$@")
 
-cd ../data/transit
+cd data/transit
 echo "years $years"
 
 # redis
 # TODO move this to config file
-redis_url="127.0.0.1"
-redis_cli="redis-cli -h $redis_url"
+redis_url="redis"
+redis_cli="redis-cli -h redis -p 6379"
 q1="ts_q"
 q2="ts_p"
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ../data/transit
+cd data/transit
 rm Stations.csv
 
 echo "spawning the station data thread"

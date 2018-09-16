@@ -1,10 +1,10 @@
 #!/bin/bash
-cd ../data/traffic
+cd data/traffic
 
 # redis
 # TODO move this to config file
-redis_url="127.0.0.1"
-redis_cli="redis-cli -h $redis_url"
+redis_url="redis"
+redis_cli="redis-cli -h redis -p 6379"
 q1="tf_q"
 q2="tf_p"
 chunk_size=60000000
@@ -39,7 +39,7 @@ fi
 
 for chunk_number in $( seq ${start_chunk} ${end_chunk} ); do
     echo "fetching chunk $start_byte to $(( start_byte + chunk_size - 1 ))"
-    #curl --range $start_byte-$(( start_byte + chunk_size - 1 )) -o traffic_speed.part$chunk_number  https://data.cityofnewyork.us/api/views/i4gi-tjb9/rows.csv?accessType=DOWNLOAD&bom=true&query=select+* &
+    curl --range $start_byte-$(( start_byte + chunk_size - 1 )) -o traffic_speed.part$chunk_number  https://data.cityofnewyork.us/api/views/i4gi-tjb9/rows.csv?accessType=DOWNLOAD&bom=true&query=select+* &
     echo "spawned traffic data thread "
     (( start_byte = start_byte + chunk_size ))
 
@@ -48,7 +48,7 @@ done
 if [ "$block_num" -eq "$max_bl_num" ]
 then
     echo "fetching chunk $start_byte to last byte of traffic file"
-    #curl --range $start_byte- -o traffic_speed.part100  https://data.cityofnewyork.us/api/views/i4gi-tjb9/rows.csv?accessType=DOWNLOAD&bom=true&query=select+* &
+    curl --range $start_byte- -o traffic_speed.part100  https://data.cityofnewyork.us/api/views/i4gi-tjb9/rows.csv?accessType=DOWNLOAD&bom=true&query=select+* &
     echo "spawned traffic data thread 100"
 fi
 

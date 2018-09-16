@@ -1,10 +1,10 @@
 #!/bin/bash
-cd ../data/transit
+cd data/transit
 
 # redis
 # TODO move this to config file
-redis_url="127.0.0.1"
-redis_cli="redis-cli -h $redis_url"
+redis_url="redis"
+redis_cli="redis-cli -h redis -p 6379"
 q1="ts_q"
 q2="ts_p"
 
@@ -28,7 +28,7 @@ echo "spawning green cab curl processes for ${msg[@]}"
 
 echo $year","$month
 
-#curl -O --fail  http://web.mta.info/developers/data/nyct/turnstile/turnstile_${year}${month}[01-31].txt &
+curl -O --fail  http://web.mta.info/developers/data/nyct/turnstile/turnstile_${year}${month}[01-31].txt &
 
 echo "spawned green cab data threads for $msg"
 

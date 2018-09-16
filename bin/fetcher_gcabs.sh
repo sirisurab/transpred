@@ -1,10 +1,10 @@
 #!/bin/bash
-cd ../data/cabs
+cd data/cabs
 
 # redis
 # TODO move this to config file
-redis_url="127.0.0.1"
-redis_cli="redis-cli -h $redis_url"
+redis_url="redis"
+redis_cli="redis-cli -h redis -p 6379"
 q1="g_cabs_q"
 q2="g_cabs_p"
 
@@ -28,7 +28,7 @@ echo "spawning green cab curl processes for ${msg[@]}"
 
 echo $year","$month_range
 
-#curl -O -v https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_${year}-[${month_range}].csv &
+curl -O -v https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_${year}-[${month_range}].csv &
 
 echo "spawned green cab data threads for $msg"
 

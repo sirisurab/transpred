@@ -1,15 +1,24 @@
-version: '1'
+version: '3.3'
 
 services:
 
   redis:
     image: redis:4.0.11
 
+  #rcli:
+    #image: redis:latest
+    #links:
+      #- redis
+    #command: >
+      #sh -c 'redis-cli -h redis '
+
   g_cabs_combiner:
     build: .
     image: transpred
     container_name: g_cabs_combiner
-    command: ./combiner_gcabs.sh 2016 2017
+    links:
+      - redis
+    command: ./bin/combiner_gcabs.sh 2016 2017
     volumes:
       - transpred-vol:/app
     depends_on:
@@ -19,11 +28,12 @@ services:
     build: .
     image: transpred
     container_name: g_cabs_fetcher
-    command: ./fetcher_gcabs.sh
+    links:
+      - redis
+    command: ./bin/fetcher_gcabs.sh
     volumes:
       - transpred-vol:/app
     depends_on:
-      - redis
       - g_cabs_combiner
     deploy:
       mode: replicated
@@ -33,7 +43,9 @@ services:
     build: .
     image: transpred
     container_name: y_cabs_combiner
-    command: ./combiner_ycabs.sh 2016 2017
+    links:
+      - redis
+    command: ./bin/combiner_ycabs.sh 2016 2017
     volumes:
       - transpred-vol:/app
     depends_on:
@@ -43,11 +55,12 @@ services:
     build: .
     image: transpred
     container_name: y_cabs_fetcher
-    command: ./fetcher_ycabs.sh
+    links:
+      - redis
+    command: ./bin/fetcher_ycabs.sh
     volumes:
       - transpred-vol:/app
     depends_on:
-      - redis
       - y_cabs_combiner
     deploy:
       mode: replicated
@@ -57,54 +70,73 @@ services:
     build: .
     image: transpred
     container_name: turnstile_combiner
-    command: ./combiner_turnstile.sh 2016 2017
+    links:
+      - redis
+    command: ./bin/combiner_turnstile.sh 2016 2017
     volumes:
       - transpred-vol:/app
     depends_on:
       - redis
 
   turnstile_fetcher:
-      build: .
-      image: transpred
-      container_name: turnstile_fetcher
-      command: ./fetcher_turnstile.sh
-      volumes:
-        - transpred-vol:/app
-      depends_on:
-        - redis
-        - turnstile_combiner
-      deploy:
-        mode: replicated
-        replicas: 24
+    build: .
+    image: transpred
+    container_name: turnstile_fetcher
+    links:
+      - redis
+    command: ./bin/fetcher_turnstile.sh
+    volumes:
+      - transpred-vol:/app
+    depends_on:
+      - turnstile_combiner
+    deploy:
+      mode: replicated
+      replicas: 24
 
   stations_fetcher:
-      build: .
-      image: transpred
-      container_name: stations_fetcher
-      command: ./stations.sh
-      volumes:
-        - transpred-vol:/app
+    build: .
+    image: transpred
+    container_name: stations_fetcher
+    command: ./bin/stations.sh
+    volumes:
+      - transpred-vol:/app
 
   traffic_combiner:
     build: .
     image: transpred
     container_name: traffic_combiner
-    command: ./combiner_traffic.sh 2016 2017
+    links:
+      - redis
+    command: ./bin/combiner_traffic.sh 2016 2017
     volumes:
       - transpred-vol:/app
     depends_on:
       - redis
 
   traffic_fetcher:
-      build: .
-      image: transpred
-      container_name: traffic_fetcher
-      command: ./fetcher_traffic.sh
-      volumes:
-        - transpred-vol:/app
-      depends_on:
-        - redis
-        - traffic_combiner
-      deploy:
-        mode: replicated
-        replicas: 20
+    build: .
+    image: transpred
+    container_name: traffic_fetcher
+    links:
+      - redis
+    command: ./bin/fetcher_traffic.sh
+    volumes:
+      - transpred-vol:/app
+    depends_on:
+      - traffic_combiner
+    deploy:
+      mode: replicated
+      replicas: 20
+
+  dashboard:
+    build: ./utils/dashboard
+    image: dashboard
+    container_name: dashboard
+    links:
+      - redis
+    ports:
+      - '9181:9181'
+    command: rq-dashboard -H redis
+
+volumes:
+  transpred-vol:
