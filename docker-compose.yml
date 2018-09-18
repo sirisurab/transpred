@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.6'
 
 services:
 
@@ -14,7 +14,8 @@ services:
 
   g_cabs_combiner:
     build: .
-    image: transpred
+    #image: ${REGISTRY}/transpred-aws-repo:latest
+    image: sirisurab/transpred:latest
     container_name: g_cabs_combiner
     links:
       - redis
@@ -26,7 +27,8 @@ services:
 
   g_cabs_fetcher:
     build: .
-    image: transpred
+    #image: ${REGISTRY}/transpred-aws-repo:latest
+    image: sirisurab/transpred:latest
     container_name: g_cabs_fetcher
     links:
       - redis
@@ -41,7 +43,8 @@ services:
 
   y_cabs_combiner:
     build: .
-    image: transpred
+    #image: ${REGISTRY}/transpred-aws-repo:latest
+    image: sirisurab/transpred:latest
     container_name: y_cabs_combiner
     links:
       - redis
@@ -53,7 +56,8 @@ services:
 
   y_cabs_fetcher:
     build: .
-    image: transpred
+    #image: ${REGISTRY}/transpred-aws-repo:latest
+    image: sirisurab/transpred:latest
     container_name: y_cabs_fetcher
     links:
       - redis
@@ -68,7 +72,8 @@ services:
 
   turnstile_combiner:
     build: .
-    image: transpred
+    #image: ${REGISTRY}/transpred-aws-repo:latest
+    image: sirisurab/transpred:latest
     container_name: turnstile_combiner
     links:
       - redis
@@ -80,7 +85,8 @@ services:
 
   turnstile_fetcher:
     build: .
-    image: transpred
+    #image: ${REGISTRY}/transpred-aws-repo:latest
+    image: sirisurab/transpred:latest
     container_name: turnstile_fetcher
     links:
       - redis
@@ -95,7 +101,8 @@ services:
 
   stations_fetcher:
     build: .
-    image: transpred
+    #image: ${REGISTRY}/transpred-aws-repo:latest
+    image: sirisurab/transpred:latest
     container_name: stations_fetcher
     command: ./bin/stations.sh
     volumes:
@@ -103,7 +110,8 @@ services:
 
   traffic_combiner:
     build: .
-    image: transpred
+    #image: ${REGISTRY}/transpred-aws-repo:latest
+    image: sirisurab/transpred:latest
     container_name: traffic_combiner
     links:
       - redis
@@ -115,7 +123,8 @@ services:
 
   traffic_fetcher:
     build: .
-    image: transpred
+    #image: ${REGISTRY}/transpred-aws-repo:latest
+    image: sirisurab/transpred:latest
     container_name: traffic_fetcher
     links:
       - redis
@@ -128,15 +137,18 @@ services:
       mode: replicated
       replicas: 20
 
-  dashboard:
-    build: ./utils/dashboard
-    image: dashboard
-    container_name: dashboard
-    links:
-      - redis
-    ports:
-      - '9181:9181'
-    command: rq-dashboard -H redis
+  #dashboard:
+    #build: ./utils/dashboard
+    #image: dashboard
+    #container_name: dashboard
+    #links:
+      #- redis
+    #ports:
+      #- '9181:9181'
+    #command: rq-dashboard -H redis
 
 volumes:
   transpred-vol:
+    #driver: cloudstor:aws
+    #driver_opts:
+      #perfmode: maxio
