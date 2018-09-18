@@ -8,9 +8,9 @@
 cd data/traffic
 
 # redis
-# TODO move this to config file
+# TODO move this to .env file
 redis_url="redis"
-redis_cli="redis-cli -h redis -p 6379"
+redis_cli="redis-cli -h 192.168.254.68 -p 7001"
 q1="tf_q"
 q2="tf_p"
 max_bl_num=20

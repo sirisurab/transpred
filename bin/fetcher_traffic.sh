@@ -4,7 +4,7 @@ cd data/traffic
 # redis
 # TODO move this to config file
 redis_url="redis"
-redis_cli="redis-cli -h redis -p 6379"
+redis_cli="redis-cli -h 192.168.254.68 -p 7001"
 q1="tf_q"
 q2="tf_p"
 chunk_size=60000000
