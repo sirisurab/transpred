@@ -10,12 +10,6 @@ apt-get install -y g++ && \
 apt-get install -y make && \
 apt-get install -y redis-tools && \
 apt-get install -y unzip && \
-Try installing freetype with `apt-get install
-                            * libfreetype6-dev` and pkg-config with `apt-get
-                            * install pkg-config`
-                            * Try installing png with `apt-get install
-                            * libpng12-dev` and pkg-config with `apt-get install
-                            * pkg-config
 apt-get install -y libfreetype6-dev && \
 apt-get install -y pkg-config && \
 apt-get install -y libpng12-dev && \
