@@ -5,12 +5,15 @@ services:
   #redis:
     #image: redis:4.0.11
 
+  docker:
+    image: docker:latest
+
   g_cabs_combiner:
     build: .
     image: sirisurab/transpred:latest
     container_name: g_cabs_combiner
     links:
-      - redis
+      - docker
     command: ./bin/combiner_gcabs.sh 2016 2017
     volumes:
       - transpred-vol:/app
@@ -22,7 +25,7 @@ services:
     image: sirisurab/transpred:latest
     container_name: g_cabs_fetcher
     links:
-      - redis
+      - docker
     command: ./bin/fetcher_gcabs.sh
     volumes:
       - transpred-vol:/app
@@ -37,7 +40,7 @@ services:
     image: sirisurab/transpred:latest
     container_name: y_cabs_combiner
     links:
-      - redis
+      - docker
     command: ./bin/combiner_ycabs.sh 2016 2017
     volumes:
       - transpred-vol:/app
@@ -49,7 +52,7 @@ services:
     image: sirisurab/transpred:latest
     container_name: y_cabs_fetcher
     links:
-      - redis
+      - docker
     command: ./bin/fetcher_ycabs.sh
     volumes:
       - transpred-vol:/app
@@ -64,7 +67,7 @@ services:
     image: sirisurab/transpred:latest
     container_name: turnstile_combiner
     links:
-      - redis
+      - docker
     command: ./bin/combiner_turnstile.sh 2016 2017
     volumes:
       - transpred-vol:/app
@@ -76,7 +79,7 @@ services:
     image: sirisurab/transpred:latest
     container_name: turnstile_fetcher
     links:
-      - redis
+      - docker
     command: ./bin/fetcher_turnstile.sh
     volumes:
       - transpred-vol:/app
@@ -99,7 +102,7 @@ services:
     image: sirisurab/transpred:latest
     container_name: traffic_combiner
     links:
-      - redis
+      - docker
     command: ./bin/combiner_traffic.sh 2016 2017
     volumes:
       - transpred-vol:/app
@@ -111,7 +114,7 @@ services:
     image: sirisurab/transpred:latest
     container_name: traffic_fetcher
     links:
-      - redis
+      - docker
     command: ./bin/fetcher_traffic.sh
     volumes:
       - transpred-vol:/app

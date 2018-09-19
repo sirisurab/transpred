@@ -7,7 +7,7 @@ RUN apt-get update && \
 apt-get install -y curl && \
 apt-get install -y g++ && \
 apt-get install -y make && \
-apt-get install -y redis-tools && \
+# apt-get install -y redis-tools && \
 apt-get install -y unzip && \
 curl -L http://download.osgeo.org/libspatialindex/spatialindex-src-1.8.5.tar.gz | tar xz && \
 cd spatialindex-src-1.8.5 && \
