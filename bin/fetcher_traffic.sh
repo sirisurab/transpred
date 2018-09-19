@@ -16,7 +16,7 @@ max_bl_num=20
 # pick next block to fetch (pop first line of block_queue)
 while true;do
     block_num=$(echo "RPOPLPUSH $q1 $q2" | ${redis_cli})
-    if [[ "$block_num" -ne "nil" ]] && [[ ! -z "$block_num" ]]
+    if [[ ! -z "$block_num" ]]
     then
         break
     fi

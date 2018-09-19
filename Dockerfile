@@ -12,7 +12,7 @@ apt-get install -y redis-tools && \
 apt-get install -y unzip && \
 apt-get install -y libfreetype6-dev && \
 apt-get install -y pkg-config && \
-apt-get install -y libpng12-dev && \
+#apt-get install -y libpng12-dev && \
 curl -L http://download.osgeo.org/libspatialindex/spatialindex-src-1.8.5.tar.gz | tar xz && \
 cd spatialindex-src-1.8.5 && \
 ./configure && \

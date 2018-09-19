@@ -12,7 +12,7 @@ q2="g_cabs_p"
 # pick next block to fetch (pop first line of block_queue)
 while true;do
     msg=($(echo "RPOPLPUSH $q1 $q2" | ${redis_cli}))
-    if [[ "$msg" -ne "nil" ]] && [[ ! -z "$msg" ]]
+    if [[ ! -z "$msg" ]]
     then
         break
     fi

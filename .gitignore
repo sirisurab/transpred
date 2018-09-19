@@ -1,5 +1,5 @@
 .git
-.idea/*
+.idea
 data/cabs/*.csv
 data/cabs/*.parquet
 data/traffic/*.csv
