@@ -10,7 +10,7 @@ cd data/traffic
 # redis
 # TODO move this to .env file
 redis_url="redis"
-redis_cli="redis-cli -h 192.168.254.68 -p 7001"
+redis_cli="redis-cli -c -h 192.168.254.68 -p 7001"
 q1="{tf}:q"
 q2="{tf}:p"
 max_bl_num=20

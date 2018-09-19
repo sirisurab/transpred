@@ -12,7 +12,7 @@ echo "years $years"
 # redis
 # TODO move this to config file
 redis_url="redis"
-redis_cli="redis-cli -h 192.168.254.68 -p 7001"
+redis_cli="redis-cli -c -h 192.168.254.68 -p 7001"
 q1="{y_cabs}:q"
 q2="{y_cabs}:p"
 
