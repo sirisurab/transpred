@@ -9,8 +9,9 @@ cd data/traffic
 
 # redis
 # TODO move this to .env file
-redis_url="redis"
-redis_cli="redis-cli -u redis://redis:6379/0"
+redis_prfx="redis-cluster-m-"
+redis_port='7001'
+redis_cli="redis-cli -c -h $redis_prfx$redis_port -p $redis_port"
 #readonly NAME_PREFIX="redis-cluster-m-"
 #readonly LOCAL_CONTAINER_ID=$(docker ps -f name="$NAME_PREFIX" -q | head -n 1)
 #readonly LOCAL_PORT=$(docker inspect --format='{{index .Config.Labels "com.docker.swarm.service.name"}}' "$LOCAL_CONTAINER_ID" | sed 's|.*-||')
