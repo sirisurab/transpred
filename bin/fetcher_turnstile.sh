@@ -5,8 +5,8 @@ cd data/transit
 # TODO move this to config file
 redis_url="redis"
 redis_cli="redis-cli -h 192.168.254.68 -p 7001"
-q1="ts_q"
-q2="ts_p"
+q1="{ts}:q"
+q2="{ts}:p"
 
 # check blocks (file block_queue in directory cabs)
 # pick next block to fetch (pop first line of block_queue)
