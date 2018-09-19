@@ -4,6 +4,9 @@ services:
 
   redis:
     image: redis:4.0.11
+    hostname: redis
+    networks:
+      - backend
 
   #docker:
     #image: docker:latest
@@ -12,11 +15,11 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: g_cabs_combiner
-    links:
-      - redis
     command: ./bin/combiner_gcabs.sh 2016 2017
     volumes:
       - transpred-vol:/app
+    networks:
+        - backend
     depends_on:
       - redis
 
@@ -24,11 +27,11 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: g_cabs_fetcher
-    links:
-      - redis
     command: ./bin/fetcher_gcabs.sh
     volumes:
       - transpred-vol:/app
+    networks:
+        - backend
     depends_on:
       - g_cabs_combiner
     deploy:
@@ -39,8 +42,8 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: y_cabs_combiner
-    links:
-      - redis
+    networks:
+      - backend
     command: ./bin/combiner_ycabs.sh 2016 2017
     volumes:
       - transpred-vol:/app
@@ -51,8 +54,8 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: y_cabs_fetcher
-    links:
-      - redis
+    networks:
+      - backend
     command: ./bin/fetcher_ycabs.sh
     volumes:
       - transpred-vol:/app
@@ -66,8 +69,8 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: turnstile_combiner
-    links:
-      - redis
+    networks:
+      - backend
     command: ./bin/combiner_turnstile.sh 2016 2017
     volumes:
       - transpred-vol:/app
@@ -78,8 +81,8 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: turnstile_fetcher
-    links:
-      - redis
+    networks:
+      - backend
     command: ./bin/fetcher_turnstile.sh
     volumes:
       - transpred-vol:/app
@@ -101,8 +104,8 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: traffic_combiner
-    links:
-      - redis
+    networks:
+      - backend
     command: ./bin/combiner_traffic.sh 2016 2017
     volumes:
       - transpred-vol:/app
@@ -113,8 +116,8 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: traffic_fetcher
-    links:
-      - redis
+    networks:
+      - backend
     command: ./bin/fetcher_traffic.sh
     volumes:
       - transpred-vol:/app
