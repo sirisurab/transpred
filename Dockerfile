@@ -17,7 +17,7 @@ make install && \
 ldconfig
 
 RUN apt-get install -y libfreetype6-dev && \
-#apt-get install -y pkg-config && \
+apt-get install -y pkg-config && \
 # this is for fastparquet
 pip install numpy
 
