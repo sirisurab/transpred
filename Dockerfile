@@ -21,6 +21,12 @@ apt-get install -y pkg-config && \
 # this is for fastparquet
 pip install numpy
 
+ENV docker_version=18.03.1-ce
+RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${docker_version}.tgz && \
+tar xzvf docker-${docker_version}.tgz --strip 1 \
+    -C /usr/local/bin docker/docker && \
+rm docker-${docker_version}.tgz
+ENV PATH="/usr/local/bin:${PATH}"
 
 FROM base AS app-pkgs
 # Install any needed packages specified in requirements_1.txt
