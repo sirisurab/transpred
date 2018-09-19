@@ -1,0 +1,4 @@
+geopandas
+Rtree
+descartes
+bokeh

@@ -2,7 +2,6 @@
 FROM continuumio/miniconda3 AS base
 
 RUN mkdir app
-COPY ./requirements.txt /app/requirements.txt
 # this is for geopandas
 RUN apt-get update && \
 apt-get install -y curl && \
@@ -15,18 +14,24 @@ cd spatialindex-src-1.8.5 && \
 ./configure && \
 make && \
 make install && \
-ldconfig && \
-apt-get install -y libfreetype6-dev && \
+ldconfig
+
+RUN apt-get install -y libfreetype6-dev && \
 apt-get install -y pkg-config && \
 # this is for fastparquet
 pip install numpy
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --trusted-host pypi.python.org -r /app/requirements.txt
+
+FROM base AS app-pkgs
+# Install any needed packages specified in requirements_1.txt
+COPY ./requirements_1.txt /app/requirements_1.txt
+COPY ./requirements_2.txt /app/requirements_2.txt
+RUN pip install --trusted-host pypi.python.org -r /app/requirements_1.txt
+RUN pip install --trusted-host pypi.python.org -r /app/requirements_2.txt
 
 
 
-FROM base AS stage1
+FROM app-pkgs AS app
 
 # Set the working directory to /app
 WORKDIR /app
