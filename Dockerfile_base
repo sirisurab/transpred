@@ -7,11 +7,11 @@ FROM continuumio/miniconda3 AS base
 RUN mkdir app
 # this is for geopandas
 RUN apt-get update && \
-apt-get install -y curl && \
-apt-get install -y g++ && \
-apt-get install -y make && \
+apt-get -y install  curl \
+                    g++  \
+                    make \
+                    unzip && \
 # apt-get install -y redis-tools && \
-apt-get install -y unzip && \
 curl -L http://download.osgeo.org/libspatialindex/spatialindex-src-1.8.5.tar.gz | tar xz && \
 cd spatialindex-src-1.8.5 && \
 ./configure && \
@@ -24,16 +24,32 @@ apt-get install -y pkg-config && \
 # this is for fastparquet
 pip install numpy
 
-ENV docker_version=18.03.1-ce
-RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${docker_version}.tgz && \
-tar xzvf docker-${docker_version}.tgz --strip 1 \
-    -C /usr/local/bin docker/docker && \
-rm docker-${docker_version}.tgz
-ENV PATH="/usr/local/bin:${PATH}"
+
+FROM base AS beefy-base
+
+RUN apt-get update && \
+apt-get -y install  apt-transport-https \
+                    ca-certificates \
+                    gnupg2 \
+                    software-properties-common && \
+curl -fsSL https://download.docker.com/linux/debian/gpg | \
+apt-key add - && \
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
+apt-get update && \
+apt-get -y install docker-ce
+
+#ENV docker_version=18.03.1-ce
+#RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${docker_version}.tgz && \
+#tar xzvf docker-${docker_version}.tgz --strip 1 \
+#    -C /usr/local/bin docker/docker && \
+#rm docker-${docker_version}.tgz
+#ENV PATH="/usr/local/bin:${PATH}"
+
+RUN bash service docker start
 
 # to be tagged as sirisurab/tp-app-pkgs
 
-FROM base AS app-pkgs
+FROM beefy-base AS app-pkgs
 # Install any needed packages specified in requirements_1.txt
 COPY ./requirements_1.txt /app/requirements_1.txt
 COPY ./requirements_2.txt /app/requirements_2.txt
