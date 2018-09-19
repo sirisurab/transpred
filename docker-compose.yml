@@ -2,8 +2,8 @@ version: '3.6'
 
 services:
 
-  #redis:
-    #image: redis:4.0.11
+  redis:
+    image: redis:4.0.11
 
   #docker:
     #image: docker:latest
@@ -12,20 +12,20 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: g_cabs_combiner
-    #links:
-      #- docker
+    links:
+      - redis
     command: ./bin/combiner_gcabs.sh 2016 2017
     volumes:
       - transpred-vol:/app
-    #depends_on:
-      #- redis
+    depends_on:
+      - redis
 
   g_cabs_fetcher:
     build: .
     image: sirisurab/tp-app:latest
     container_name: g_cabs_fetcher
-    #links:
-      #- docker
+    links:
+      - redis
     command: ./bin/fetcher_gcabs.sh
     volumes:
       - transpred-vol:/app
@@ -39,20 +39,20 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: y_cabs_combiner
-    #links:
-      #- docker
+    links:
+      - redis
     command: ./bin/combiner_ycabs.sh 2016 2017
     volumes:
       - transpred-vol:/app
-    #depends_on:
-      #- redis
+    depends_on:
+      - redis
 
   y_cabs_fetcher:
     build: .
     image: sirisurab/tp-app:latest
     container_name: y_cabs_fetcher
-    #links:
-      #- docker
+    links:
+      - redis
     command: ./bin/fetcher_ycabs.sh
     volumes:
       - transpred-vol:/app
@@ -66,20 +66,20 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: turnstile_combiner
-    #links:
-      #- docker
+    links:
+      - redis
     command: ./bin/combiner_turnstile.sh 2016 2017
     volumes:
       - transpred-vol:/app
-    #depends_on:
-      #- redis
+    depends_on:
+      - redis
 
   turnstile_fetcher:
     build: .
     image: sirisurab/tp-app:latest
     container_name: turnstile_fetcher
-    #links:
-      #- docker
+    links:
+      - redis
     command: ./bin/fetcher_turnstile.sh
     volumes:
       - transpred-vol:/app
@@ -101,20 +101,20 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     container_name: traffic_combiner
-    #links:
-      #- docker
+    links:
+      - redis
     command: ./bin/combiner_traffic.sh 2016 2017
     volumes:
       - transpred-vol:/app
-    #depends_on:
-      #- redis
+    depends_on:
+      - redis
 
   traffic_fetcher:
     build: .
     image: sirisurab/tp-app:latest
     container_name: traffic_fetcher
-    #links:
-      #- docker
+    links:
+      - redis
     command: ./bin/fetcher_traffic.sh
     volumes:
       - transpred-vol:/app

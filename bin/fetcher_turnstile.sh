@@ -3,15 +3,15 @@ cd data/transit
 
 # redis
 # TODO move this to config file
-#redis_url="redis"
-#redis_cli="redis-cli -c -h 192.168.254.68 -p 7001"
-readonly NAME_PREFIX="redis-cluster-m-"
-readonly LOCAL_CONTAINER_ID=$(docker ps -f name="$NAME_PREFIX" -q | head -n 1)
-readonly LOCAL_PORT=$(docker inspect --format='{{index .Config.Labels "com.docker.swarm.service.name"}}' "$LOCAL_CONTAINER_ID" | sed 's|.*-||')
-host_node="$NAME_PREFIX$LOCAL_PORT"
-host_ip=$(docker service inspect -f '{{index .Endpoint.VirtualIPs 1).Addr}}' "$host_node" | sed 's|/.*||')
-redis_cli="docker exec -it \"$LOCAL_CONTAINER_ID\"\
-           redis-cli -c -h \"$host_ip\" -p \"$LOCAL_PORT\""
+redis_url="redis"
+redis_cli="redis-cli -c -h $redis_url -p 6379"
+#readonly NAME_PREFIX="redis-cluster-m-"
+#readonly LOCAL_CONTAINER_ID=$(docker ps -f name="$NAME_PREFIX" -q | head -n 1)
+#readonly LOCAL_PORT=$(docker inspect --format='{{index .Config.Labels "com.docker.swarm.service.name"}}' "$LOCAL_CONTAINER_ID" | sed 's|.*-||')
+#host_node="$NAME_PREFIX$LOCAL_PORT"
+#host_ip=$(docker service inspect -f '{{index .Endpoint.VirtualIPs 1).Addr}}' "$host_node" | sed 's|/.*||')
+#redis_cli="docker exec -it \"$LOCAL_CONTAINER_ID\"\
+#           redis-cli -c -h \"$host_ip\" -p \"$LOCAL_PORT\""
 q1="{ts}:q"
 q2="{ts}:p"
 
