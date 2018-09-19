@@ -2,17 +2,18 @@ version: '3.6'
 
 services:
 
-#  redis:
-#    image: redis:alpine
-#    command: redis-server /usr/local/redis.conf
-#    configs:
-#      - source: redis_config
-#        target: /usr/local/redis.conf
-#    #ports:
-#    #  - 6379:6379
-#    hostname: redis
-#    networks:
-#      - backend
+# redis standalone - uncomment
+  redis:
+    image: redis:alpine
+    command: redis-server /usr/local/redis.conf
+    configs:
+      - source: redis_config
+        target: /usr/local/redis.conf
+    #ports:
+    #  - 6379:6379
+    hostname: redis
+    networks:
+      - backend
 
   #docker:
     #image: docker:latest
@@ -26,8 +27,8 @@ services:
       - transpred-vol:/app
     networks:
         - backend
-#    depends_on:
-#      - redis
+    depends_on:
+      - redis
 
   g_cabs_fetcher:
     build: .
@@ -53,8 +54,8 @@ services:
     command: ./bin/combiner_ycabs.sh 2016 2017
     volumes:
       - transpred-vol:/app
-#    depends_on:
-#      - redis
+    depends_on:
+      - redis
 
   y_cabs_fetcher:
     build: .
@@ -80,8 +81,8 @@ services:
     command: ./bin/combiner_turnstile.sh 2016 2017
     volumes:
       - transpred-vol:/app
-#    depends_on:
-#      - redis
+    depends_on:
+      - redis
 
   turnstile_fetcher:
     build: .
@@ -115,8 +116,8 @@ services:
     command: ./bin/combiner_traffic.sh 2016 2017
     volumes:
       - transpred-vol:/app
-#    depends_on:
-#      - redis
+    depends_on:
+      - redis
 
   traffic_fetcher:
     build: .
@@ -136,16 +137,18 @@ services:
 volumes:
   transpred-vol:
 
-#configs:
-#  redis_config:
-#    file: ./config/redis.conf
+configs:
+  redis_config:
+    file: ./config/redis.conf
 
 networks:
   backend:
-    external:
-      name: backend
-#    driver: overlay
-#    attachable: true
-#    ipam:
-#      config:
-#        - subnet: 10.0.0.0/24
+# redis cluster - uncomment
+#    external:
+
+# redis standalone - uncomment
+    driver: overlay
+    attachable: true
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24

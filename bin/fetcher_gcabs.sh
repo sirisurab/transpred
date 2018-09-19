@@ -3,9 +3,13 @@ cd data/cabs
 
 # redis
 # TODO move this to config file
-redis_prfx="redis-cluster-m-"
-redis_port='7001'
-redis_cli="redis-cli -c -h $redis_prfx$redis_port -p $redis_port"
+# cluster
+#redis_prfx="redis-cluster-m-"
+#redis_port='7001'
+#redis_cli="redis-cli -c -h $redis_prfx$redis_port -p $redis_port"
+# standalone
+redis_host='redis'
+redis_cli="redis-cli -h $redis_host -p 6379"
 #readonly NAME_PREFIX="redis-cluster-m-"
 #readonly LOCAL_CONTAINER_ID=$(docker ps -f name="$NAME_PREFIX" -q | head -n 1)
 #readonly LOCAL_PORT=$(docker inspect --format='{{index .Config.Labels "com.docker.swarm.service.name"}}' "$LOCAL_CONTAINER_ID" | sed 's|.*-||')
