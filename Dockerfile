@@ -15,14 +15,14 @@ cd spatialindex-src-1.8.5 && \
 ./configure && \
 make && \
 make install && \
-ldconfig
-
-RUN apt-get install -y libfreetype6-dev && \
+ldconfig && \
+apt-get install -y libfreetype6-dev && \
 apt-get install -y pkg-config && \
 # this is for fastparquet
-pip install numpy && \
+pip install numpy
+
 # Install any needed packages specified in requirements.txt
-pip install --trusted-host pypi.python.org -r /app/requirements.txt
+RUN pip install --trusted-host pypi.python.org -r /app/requirements.txt
 
 
 
