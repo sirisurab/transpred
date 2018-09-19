@@ -10,7 +10,7 @@ services:
 
   g_cabs_combiner:
     build: .
-    image: sirisurab/transpred:latest
+    image: sirisurab/tp-app:latest
     container_name: g_cabs_combiner
     #links:
       #- docker
@@ -22,7 +22,7 @@ services:
 
   g_cabs_fetcher:
     build: .
-    image: sirisurab/transpred:latest
+    image: sirisurab/tp-app:latest
     container_name: g_cabs_fetcher
     #links:
       #- docker
@@ -37,7 +37,7 @@ services:
 
   y_cabs_combiner:
     build: .
-    image: sirisurab/transpred:latest
+    image: sirisurab/tp-app:latest
     container_name: y_cabs_combiner
     #links:
       #- docker
@@ -49,7 +49,7 @@ services:
 
   y_cabs_fetcher:
     build: .
-    image: sirisurab/transpred:latest
+    image: sirisurab/tp-app:latest
     container_name: y_cabs_fetcher
     #links:
       #- docker
@@ -64,7 +64,7 @@ services:
 
   turnstile_combiner:
     build: .
-    image: sirisurab/transpred:latest
+    image: sirisurab/tp-app:latest
     container_name: turnstile_combiner
     #links:
       #- docker
@@ -76,7 +76,7 @@ services:
 
   turnstile_fetcher:
     build: .
-    image: sirisurab/transpred:latest
+    image: sirisurab/tp-app:latest
     container_name: turnstile_fetcher
     #links:
       #- docker
@@ -91,7 +91,7 @@ services:
 
   stations_fetcher:
     build: .
-    image: sirisurab/transpred:latest
+    image: sirisurab/tp-app:latest
     container_name: stations_fetcher
     command: ./bin/stations.sh
     volumes:
@@ -99,7 +99,7 @@ services:
 
   traffic_combiner:
     build: .
-    image: sirisurab/transpred:latest
+    image: sirisurab/tp-app:latest
     container_name: traffic_combiner
     #links:
       #- docker
@@ -111,7 +111,7 @@ services:
 
   traffic_fetcher:
     build: .
-    image: sirisurab/transpred:latest
+    image: sirisurab/tp-app:latest
     container_name: traffic_fetcher
     #links:
       #- docker
