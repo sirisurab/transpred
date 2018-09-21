@@ -40,7 +40,7 @@ month_range="${msg[1]}"
 # for each item in block (total items = 6)
 # build url and fetch file (spawn curl in parallel)
 # save file in cabs directory
-echo "spawning green cab curl processes for ${msg[@]}"
+echo "spawning green cab data threads for ${msg[@]}"
 
 echo $year","$month_range
 
@@ -50,12 +50,13 @@ cd gcabs${year}${month_range}
 
 curl -O -s https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_${year}-[${month_range}].csv &
 
-echo "spawned green cab data threads for $msg"
+echo "spawned green cab data threads for ${msg[@]}"
 
 wait
 
-mc cp *.csv ${bucket}
-echo "pushed green cab data to minio for $msg"
+cd ..
+mc cp -r gcabs${year}${month_range}/ ${bucket}
+echo "pushed green cab data to minio for ${msg[@]}"
 
 # block finished , remove from processing queue
 echo "LREM $q2 1 \"${msg[@]}\"" | ${redis_cli}
