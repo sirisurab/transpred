@@ -53,7 +53,7 @@ echo "spawned green cab data threads for $msg"
 
 wait
 
-mc cp ./*.csv ${bucket}
+mc cp *.csv ${bucket}
 echo "pushed green cab data to minio for $msg"
 
 # block finished , remove from processing queue
@@ -62,3 +62,5 @@ echo "LREM $q2 1 \"${msg[@]}\"" | ${redis_cli}
 cd .. && rm -r gcabs${year}${month_range}
 
 echo "fetched block for ${msg[@]}"
+
+exit 0

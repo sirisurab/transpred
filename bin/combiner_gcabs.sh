@@ -102,3 +102,5 @@ echo "all green cab data fetched"
 #rm green_tripdata_*.csv
 
 # TODO combine in minio
+
+exit 0

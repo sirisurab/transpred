@@ -32,6 +32,7 @@ services:
     image: sirisurab/tp-app:latest
     container_name: g_cabs_combiner
     command: ./bin/combiner_gcabs.sh 2016 2017
+    restart: on-failure
     volumes:
       - tp:/app
     networks:
@@ -45,6 +46,7 @@ services:
     image: sirisurab/tp-app:latest
     container_name: g_cabs_fetcher
     command: ./bin/fetcher_gcabs.sh
+    restart: on-failure
     volumes:
       - tp:/app
     networks:
