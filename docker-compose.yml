@@ -9,14 +9,23 @@ services:
     configs:
       - source: redis_config
         target: /usr/local/redis.conf
-    #ports:
-    #  - 6379:6379
     hostname: redis
     networks:
       - backend
 
-  #docker:
-    #image: docker:latest
+  minio:
+    image: minio/minio:RELEASE.2018-09-12T18-49-56Z
+    volumes:
+      - minio:/data
+    ports:
+      - "9000"
+    command: server /data
+    environment:
+      MINIO_ACCESS_KEY:  minio
+      MINIO_SECRET_KEY:   minio123
+    networks:
+      - backend
+
 
   g_cabs_combiner:
     build: .
@@ -24,10 +33,11 @@ services:
     container_name: g_cabs_combiner
     command: ./bin/combiner_gcabs.sh 2016 2017
     volumes:
-      - transpred-vol:/app
+      - tp:/app
     networks:
         - backend
     depends_on:
+      - minio
       - redis
 
   g_cabs_fetcher:
@@ -36,7 +46,7 @@ services:
     container_name: g_cabs_fetcher
     command: ./bin/fetcher_gcabs.sh
     volumes:
-      - transpred-vol:/app
+      - tp:/app
     networks:
         - backend
     depends_on:
@@ -45,97 +55,98 @@ services:
       mode: replicated
       replicas: 8
 
-  y_cabs_combiner:
-    build: .
-    image: sirisurab/tp-app:latest
-    container_name: y_cabs_combiner
-    networks:
-      - backend
-    command: ./bin/combiner_ycabs.sh 2016 2017
-    volumes:
-      - transpred-vol:/app
-    depends_on:
-      - redis
+#  y_cabs_combiner:
+#    build: .
+#    image: sirisurab/tp-app:latest
+#    container_name: y_cabs_combiner
+#    networks:
+#      - backend
+#    command: ./bin/combiner_ycabs.sh 2016 2017
+#    volumes:
+#      - tp:/app
+#    depends_on:
+#      - redis
 
-  y_cabs_fetcher:
-    build: .
-    image: sirisurab/tp-app:latest
-    container_name: y_cabs_fetcher
-    networks:
-      - backend
-    command: ./bin/fetcher_ycabs.sh
-    volumes:
-      - transpred-vol:/app
-    depends_on:
-      - y_cabs_combiner
-    deploy:
-      mode: replicated
-      replicas: 8
+#  y_cabs_fetcher:
+#    build: .
+#    container_name: y_cabs_fetcher
+#    networks:
+#      - backend
+#    command: ./bin/fetcher_ycabs.sh
+#    volumes:
+#      - tp:/app
+#    depends_on:
+#      - y_cabs_combiner
+#    deploy:
+#      mode: replicated
+#      replicas: 8
 
-  turnstile_combiner:
-    build: .
-    image: sirisurab/tp-app:latest
-    container_name: turnstile_combiner
-    networks:
-      - backend
-    command: ./bin/combiner_turnstile.sh 2016 2017
-    volumes:
-      - transpred-vol:/app
-    depends_on:
-      - redis
+#  turnstile_combiner:
+#    build: .
+#    image: sirisurab/tp-app:latest
+#    container_name: turnstile_combiner
+#    networks:
+#      - backend
+#    command: ./bin/combiner_turnstile.sh 2016 2017
+#    volumes:
+#      - tp:/app
+#    depends_on:
+#      - redis
 
-  turnstile_fetcher:
-    build: .
-    image: sirisurab/tp-app:latest
-    container_name: turnstile_fetcher
-    networks:
-      - backend
-    command: ./bin/fetcher_turnstile.sh
-    volumes:
-      - transpred-vol:/app
-    depends_on:
-      - turnstile_combiner
-    deploy:
-      mode: replicated
-      replicas: 24
+#  turnstile_fetcher:
+#    build: .
+#    image: sirisurab/tp-app:latest
+#    container_name: turnstile_fetcher
+#    networks:
+#      - backend
+#    command: ./bin/fetcher_turnstile.sh
+#    volumes:
+#      - tp:/app
+#    depends_on:
+#      - turnstile_combiner
+#    deploy:
+#      mode: replicated
+#      replicas: 24
 
-  stations_fetcher:
-    build: .
-    image: sirisurab/tp-app:latest
-    container_name: stations_fetcher
-    command: ./bin/stations.sh
-    volumes:
-      - transpred-vol:/app
+#  stations_fetcher:
+#    build: .
+#    image: sirisurab/tp-app:latest
+#    container_name: stations_fetcher
+#    command: ./bin/stations.sh
+#    volumes:
+#      - tp:/app
 
-  traffic_combiner:
-    build: .
-    image: sirisurab/tp-app:latest
-    container_name: traffic_combiner
-    networks:
-      - backend
-    command: ./bin/combiner_traffic.sh 2016 2017
-    volumes:
-      - transpred-vol:/app
-    depends_on:
-      - redis
+#  traffic_combiner:
+#    build: .
+#    image: sirisurab/tp-app:latest
+#    container_name: traffic_combiner
+#    networks:
+#      - backend
+#    command: ./bin/combiner_traffic.sh 2016 2017
+#    volumes:
+#      - tp:/app
+#    depends_on:
+#      - redis
 
-  traffic_fetcher:
-    build: .
-    image: sirisurab/tp-app:latest
-    container_name: traffic_fetcher
-    networks:
-      - backend
-    command: ./bin/fetcher_traffic.sh
-    volumes:
-      - transpred-vol:/app
-    depends_on:
-      - traffic_combiner
-    deploy:
-      mode: replicated
-      replicas: 20
+#  traffic_fetcher:
+#    build: .
+#    image: sirisurab/tp-app:latest
+#    container_name: traffic_fetcher
+#    networks:
+#      - backend
+#    command: ./bin/fetcher_traffic.sh
+#    volumes:
+#      - tp:/app
+#    depends_on:
+#      - traffic_combiner
+#    deploy:
+#      mode: replicated
+#      replicas: 20
 
 volumes:
-  transpred-vol:
+  tp:
+#    driver: convoy
+  minio:
 
 configs:
   redis_config:
@@ -145,7 +156,6 @@ networks:
   backend:
 # redis cluster - uncomment
 #    external:
-
 # redis standalone - uncomment
     driver: overlay
     attachable: true

@@ -20,6 +20,9 @@ redis_cli="redis-cli -h $redis_host -p 6379"
 q1="{g_cabs}:q"
 q2="{g_cabs}:p"
 
+# minio
+bucket='tp/g_cabs'
+
 # check blocks (file block_queue in directory cabs)
 # pick next block to fetch (pop first line of block_queue)
 while true;do
@@ -40,13 +43,22 @@ echo "spawning green cab curl processes for ${msg[@]}"
 
 echo $year","$month_range
 
+mkdir gcabs${year}${month_range}
+
+cd gcabs${year}${month_range}
+
 curl -O -v https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_${year}-[${month_range}].csv &
 
 echo "spawned green cab data threads for $msg"
 
 wait
 
+mc cp ./*.csv ${bucket}
+echo "pushed green cab data to minio for $msg"
+
 # block finished , remove from processing queue
 echo "LREM $q2 1 \"${msg[@]}\"" | ${redis_cli}
+
+cd .. && rm -r gcabs${year}${month_range}
 
 echo "fetched block for ${msg[@]}"

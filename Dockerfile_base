@@ -41,8 +41,16 @@ apt-get -y install  libfreetype6-dev \
                     pkg-config \
 # for redis-cli
                     redis-tools && \
+mkdir /minio && \
+wget -P /minio/ https://dl.minio.io/client/mc/release/linux-amd64/mc && \
+chmod -R +x /minio && \
+# configure mc
+#/minio/mc config host add --insecure minio http://minio:9000 minio minio123 && \
 # for fastparquet
 pip install numpy
+
+ENV PATH="/minio:${PATH}"
+
 
 # to be tagged as sirisurab/tp-app-pkgs
 

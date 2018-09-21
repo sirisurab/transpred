@@ -28,6 +28,8 @@ redis_cli="redis-cli -h $redis_host -p 6379"
 q1="{g_cabs}:q"
 q2="{g_cabs}:p"
 
+# minio
+bucket='tp/g_cabs'
 
 # initialize blocks
 # create empty file block_queue.txt in directory cabs
@@ -35,6 +37,24 @@ q2="{g_cabs}:p"
 #touch block_queue
 echo "DEL $q1" | ${redis_cli}
 echo "DEL $q2" | ${redis_cli}
+
+while true; do
+
+    if mc config host add minio http://minio:9000 minio minio123
+    then
+        echo "mc connected to minio service"
+        break
+    else
+        echo "minio service not running. waiting to retry connection"
+        sleep 5
+    fi
+
+done
+
+
+
+# create minio bucket
+mc mb ${bucket}
 
 # for each year in years
 # write 2 blocks (each in separate line)
@@ -69,13 +89,16 @@ while true; do
 
 done
 
+echo "all green cab data fetched"
 
-rm all_green.csv
+#rm all_green.csv
 
 # combine all cab files into output file
-awk '
-    FNR==1 && NR!=1 { while (/^<header>/) getline; }
-    1 {print}
-    ' green_tripdata_*.csv > all_green.csv
+#awk '
+#    FNR==1 && NR!=1 { while (/^<header>/) getline; }
+#    1 {print}
+#    ' green_tripdata_*.csv > all_green.csv
 
-rm green_tripdata_*.csv
+#rm green_tripdata_*.csv
+
+# TODO combine in minio
