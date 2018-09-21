@@ -22,6 +22,7 @@ q2="{g_cabs}:p"
 
 # minio
 bucket='tp/g_cabs'
+export bucket
 
 # check blocks (file block_queue in directory cabs)
 # pick next block to fetch (pop first line of block_queue)
@@ -47,7 +48,7 @@ mkdir gcabs${year}${month_range}
 
 cd gcabs${year}${month_range}
 
-curl -O -v https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_${year}-[${month_range}].csv &
+curl -O -s https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_${year}-[${month_range}].csv &
 
 echo "spawned green cab data threads for $msg"
 

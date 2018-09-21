@@ -30,6 +30,7 @@ q2="{g_cabs}:p"
 
 # minio
 bucket='tp/g_cabs'
+export bucket
 
 # initialize blocks
 # create empty file block_queue.txt in directory cabs
