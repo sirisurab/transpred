@@ -53,6 +53,19 @@ echo "spawned green cab data threads for ${msg[@]}"
 
 wait
 
+while true; do
+
+    if mc config host add --insecure --debug tp http://minio:9000 7IJ4DAYBU6H352EQBYZW M1yXcAzEkW1wkAoD7ylsXbnZqJ9zhGM/3mcLnsjq
+    then
+        echo "mc connected to minio service"
+        break
+    else
+        echo "minio service not running. waiting to retry connection"
+        sleep 2
+    fi
+
+done
+
 cd ..
 mc cp --recursive --debug gcabs${year}${month_range}/ ${bucket}
 
