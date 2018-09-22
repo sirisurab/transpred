@@ -10,9 +10,7 @@ unzip master.zip && \
 mv /app/transpred-master/* /app && \
 chmod -R +x /app && \
 rm -r /app/transpred-master && \
-rm master.zip && \
-# copy minio config file
-cp secret/config.json ~/.mc/
+rm master.zip
 
 
 #RUN chmod -R 777 /app

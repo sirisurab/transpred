@@ -49,6 +49,8 @@ chmod -R +x /minio && \
 # for fastparquet
 pip install numpy
 
+# copy minio config file
+COPY  ./secret/config.json $HOME/.mc/
 ENV PATH="/minio:${PATH}"
 
 

@@ -1,6 +1,5 @@
 .git
 .idea
-secret
 .dockerignore
 data/cabs/*.csv
 data/cabs/*.parquet
