@@ -44,13 +44,15 @@ apt-get -y install  libfreetype6-dev \
 mkdir /minio && \
 wget -P /minio/ https://dl.minio.io/client/mc/release/linux-amd64/mc && \
 chmod -R +x /minio && \
+# copy minio config file
+#mkdir /root/.mc && \
+#yes | cp -f /tmp/config.json /root/.mc/ && \
 # configure mc
 #/minio/mc config host add --insecure minio http://minio:9000 minio minio123 && \
 # for fastparquet
 pip install numpy
 
-# copy minio config file
-COPY  ./secret/config.json $HOME/.mc/
+
 ENV PATH="/minio:${PATH}"
 
 

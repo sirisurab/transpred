@@ -21,7 +21,7 @@ q1="{g_cabs}:q"
 q2="{g_cabs}:p"
 
 # minio
-bucket='s3/sirisurab/tp/gcabs/'
+bucket='tp'
 
 # check blocks (file block_queue in directory cabs)
 # pick next block to fetch (pop first line of block_queue)
@@ -43,9 +43,9 @@ echo "spawning green cab data threads for ${msg[@]}"
 
 echo $year","$month_range
 
-mkdir gcabs${year}${month_range}
+mkdir gcabs${year}${month_range}/gcabs
 
-cd gcabs${year}${month_range}
+cd gcabs${year}${month_range}/gcabs
 
 curl -O -s https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_${year}-[${month_range}].csv &
 
@@ -53,7 +53,7 @@ echo "spawned green cab data threads for ${msg[@]}"
 
 wait
 
-cd ..
+cd ../..
 mc cp --recursive --debug gcabs${year}${month_range}/ ${bucket}
 
 wait

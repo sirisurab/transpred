@@ -28,8 +28,6 @@ redis_cli="redis-cli -h $redis_host -p 6379"
 q1="{g_cabs}:q"
 q2="{g_cabs}:p"
 
-# minio
-bucket='s3/sirisurab/tp/gcabs/'
 
 # initialize blocks
 # create empty file block_queue.txt in directory cabs
@@ -38,24 +36,24 @@ bucket='s3/sirisurab/tp/gcabs/'
 echo "DEL $q1" | ${redis_cli}
 echo "DEL $q2" | ${redis_cli}
 
-#while true; do
+while true; do
 
-#    if mc config host add --insecure --debug tp http://minio:9000 minio minio123
-#    then
-#        echo "mc connected to minio service"
-#        break
-#    else
-#        echo "minio service not running. waiting to retry connection"
-#        sleep 2
-#    fi
+    if mc config host add --insecure --debug tp http://minio:9000 minio minio123
+    then
+        echo "mc connected to minio service"
+        break
+    else
+        echo "minio service not running. waiting to retry connection"
+        sleep 2
+    fi
 
-#done
+done
 
 # create minio bucket
-mc mb --ignore-existing --debug ${bucket}
+#mc mb --ignore-existing --debug ${bucket}
 
 # add read-only permission to bucket
-mc policy --debug download ${bucket}
+#mc policy --debug download ${bucket}
 
 # for each year in years
 # write 2 blocks (each in separate line)
