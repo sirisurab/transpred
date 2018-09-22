@@ -22,7 +22,6 @@ q2="{g_cabs}:p"
 
 # minio
 bucket='tp/gcabs'
-export bucket
 
 # check blocks (file block_queue in directory cabs)
 # pick next block to fetch (pop first line of block_queue)

@@ -30,7 +30,6 @@ q2="{g_cabs}:p"
 
 # minio
 bucket='tp/gcabs'
-export bucket
 
 # initialize blocks
 # create empty file block_queue.txt in directory cabs
@@ -52,10 +51,11 @@ while true; do
 
 done
 
-
-
 # create minio bucket
-mc mb ${bucket}
+mc mb --ignore-existing --insecure --debug ${bucket}
+
+# add read/write permission to bucket
+mc policy --insecure --debug public ${bucket}
 
 # for each year in years
 # write 2 blocks (each in separate line)
