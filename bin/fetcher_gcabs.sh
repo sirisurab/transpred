@@ -61,7 +61,7 @@ echo "pushed green cab data to minio for ${msg[@]}"
 # block finished , remove from processing queue
 echo "LREM $q2 1 \"${msg[@]}\"" | ${redis_cli}
 
-cd .. && rm -r gcabs${year}${month_range}
+rm -r gcabs${year}${month_range}
 
 echo "fetched block for ${msg[@]}"
 

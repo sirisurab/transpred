@@ -41,13 +41,13 @@ echo "DEL $q2" | ${redis_cli}
 
 while true; do
 
-    if mc config host add minio http://minio:9000 minio minio123
+    if mc config host add tp http://minio:9000 minio minio123
     then
         echo "mc connected to minio service"
         break
     else
         echo "minio service not running. waiting to retry connection"
-        sleep 5
+        sleep 2
     fi
 
 done
