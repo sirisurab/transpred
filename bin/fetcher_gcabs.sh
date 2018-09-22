@@ -55,7 +55,10 @@ echo "spawned green cab data threads for ${msg[@]}"
 wait
 
 cd ..
-mc cp -r gcabs${year}${month_range}/ ${bucket}
+mc cp --recursive --insecure --debug gcabs${year}${month_range}/ ${bucket}
+
+wait
+
 echo "pushed green cab data to minio for ${msg[@]}"
 
 # block finished , remove from processing queue

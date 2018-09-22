@@ -41,7 +41,7 @@ echo "DEL $q2" | ${redis_cli}
 
 while true; do
 
-    if mc config host add tp http://minio:9000 minio minio123
+    if mc config host add --insecure --debug tp http://minio:9000 minio minio123
     then
         echo "mc connected to minio service"
         break
