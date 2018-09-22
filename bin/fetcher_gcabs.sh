@@ -21,7 +21,7 @@ q1="{g_cabs}:q"
 q2="{g_cabs}:p"
 
 # minio
-bucket='tp/gcabs'
+bucket='s3/sirisurab/tp/gcabs/'
 
 # check blocks (file block_queue in directory cabs)
 # pick next block to fetch (pop first line of block_queue)
@@ -54,7 +54,7 @@ echo "spawned green cab data threads for ${msg[@]}"
 wait
 
 cd ..
-mc cp --recursive --insecure --debug gcabs${year}${month_range}/ ${bucket}
+mc cp --recursive --debug gcabs${year}${month_range}/ ${bucket}
 
 wait
 
