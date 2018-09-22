@@ -29,7 +29,7 @@ q1="{g_cabs}:q"
 q2="{g_cabs}:p"
 
 # minio
-bucket='tp/g_cabs'
+bucket='tp/gcabs'
 export bucket
 
 # initialize blocks
