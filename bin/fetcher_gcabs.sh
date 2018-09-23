@@ -21,7 +21,7 @@ q1="{g_cabs}:q"
 q2="{g_cabs}:p"
 
 # minio
-bucket='gcabs/'
+bucket='tp/gcabs/'
 
 # check blocks (file block_queue in directory cabs)
 # pick next block to fetch (pop first line of block_queue)
@@ -53,25 +53,26 @@ echo "spawned green cab data threads for ${msg[@]}"
 
 wait
 
-#while true; do
+while true; do
 
-#    then
-#        echo "mc connected to minio service"
-#        break
-#    else
-#        echo "minio service not running. waiting to retry connection"
-#        sleep 2
-#    fi
+    if mc config host add --insecure --debug tp http://minio:9000 minio minio123
+    then
+        echo "mc connected to minio service"
+        break
+    else
+        echo "minio service not running. waiting to retry connection"
+        sleep 2
+    fi
 
-#done
+done
 
 # create minio bucket
 #mc mb --ignore-existing --debug ${bucket}
-mkdir -p /data/${bucket} && wait
+#mkdir -p /data/${bucket} && wait
 
 cd ..
-#mc cp --recursive --debug gcabs${year}${month_range}/ ${bucket}
-\cp -rf gcabs${year}${month_range}/* /data/${bucket}
+mc cp --recursive --debug gcabs${year}${month_range}/ ${bucket}
+#\cp -rf gcabs${year}${month_range}/* /data/${bucket}
 
 wait
 
