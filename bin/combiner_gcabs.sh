@@ -53,7 +53,7 @@ echo "DEL $q2" | ${redis_cli}
 
 # create minio bucket
 #mc mb --ignore-existing --debug ${bucket}
-mkdir -p /data/${bucket}
+mkdir -p /data/${bucket} && wait
 
 # add read-only permission to bucket
 #mc policy --debug download ${bucket}

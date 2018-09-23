@@ -3,15 +3,15 @@ version: '3.6'
 services:
 
 # redis standalone - uncomment
-  redis:
-    image: redis:alpine
-    command: redis-server /usr/local/redis.conf
-    configs:
-      - source: redis_config
-        target: /usr/local/redis.conf
-    hostname: redis
-    networks:
-      - backend
+#  redis:
+#    image: redis:alpine
+#    command: redis-server /usr/local/redis.conf
+#    configs:
+#      - source: redis_config
+#        target: /usr/local/redis.conf
+#    hostname: redis
+#    networks:
+#      - backend
 
 #  minio:
 #    image: minio/minio:RELEASE.2018-09-12T18-49-56Z
@@ -37,9 +37,9 @@ services:
       - sirisurab-tp:/data
     networks:
       - backend
-    depends_on:
+#    depends_on:
 #      - minio
-      - redis
+#      - redis
 
   g_cabs_fetcher:
     build: .
@@ -153,9 +153,9 @@ volumes:
     external: true
 
 
-configs:
-  redis_config:
-    file: ./config/redis.conf
+#configs:
+#  redis_config:
+#    file: ./config/redis.conf
 
 networks:
   backend:
