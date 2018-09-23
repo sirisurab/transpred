@@ -65,6 +65,10 @@ wait
 
 #done
 
+# create minio bucket
+#mc mb --ignore-existing --debug ${bucket}
+mkdir -p /data/${bucket}
+
 cd ..
 #mc cp --recursive --debug gcabs${year}${month_range}/ ${bucket}
 \cp -rf gcabs${year}${month_range}/* /data/${bucket}
