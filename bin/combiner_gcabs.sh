@@ -29,7 +29,7 @@ q1="{g_cabs}:q"
 q2="{g_cabs}:p"
 
 # minio
-bucket='tp/gcabs/'
+bucket='gcabs/'
 
 # initialize blocks
 # create empty file block_queue.txt in directory cabs
@@ -38,24 +38,25 @@ bucket='tp/gcabs/'
 echo "DEL $q1" | ${redis_cli}
 echo "DEL $q2" | ${redis_cli}
 
-while true; do
+#while true; do
 
-    if mc config host add --insecure --debug tp http://minio:9000 7IJ4DAYBU6H352EQBYZW M1yXcAzEkW1wkAoD7ylsXbnZqJ9zhGM/3mcLnsjq
-    then
-        echo "mc connected to minio service"
-        break
-    else
-        echo "minio service not running. waiting to retry connection"
-        sleep 2
-    fi
+#    if mc config host add --insecure --debug tp http://minio:9000 7IJ4DAYBU6H352EQBYZW M1yXcAzEkW1wkAoD7ylsXbnZqJ9zhGM/3mcLnsjq
+#    then
+#        echo "mc connected to minio service"
+#        break
+#    else
+#        echo "minio service not running. waiting to retry connection"
+#        sleep 2
+#    fi
 
-done
+#done
 
 # create minio bucket
-mc mb --ignore-existing --debug ${bucket}
+#mc mb --ignore-existing --debug ${bucket}
+mkdir -p /data/${bucket}
 
 # add read-only permission to bucket
-mc policy --debug download ${bucket}
+#mc policy --debug download ${bucket}
 
 # for each year in years
 # write 2 blocks (each in separate line)

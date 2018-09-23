@@ -33,10 +33,10 @@ services:
     container_name: g_cabs_combiner
     command: ./bin/combiner_gcabs.sh 2016 2017
     restart: on-failure
-#    volumes:
-#      - tp:/app
+    volumes:
+      - sirisurab-tp:/data
     networks:
-        - backend
+      - backend
     depends_on:
 #      - minio
       - redis
@@ -47,10 +47,10 @@ services:
     container_name: g_cabs_fetcher
     command: ./bin/fetcher_gcabs.sh
     restart: on-failure
-#    volumes:
-#      - tp:/app
+    volumes:
+      - sirisurab-tp:/data
     networks:
-        - backend
+      - backend
     depends_on:
       - g_cabs_combiner
     deploy:
@@ -145,10 +145,13 @@ services:
 #      mode: replicated
 #      replicas: 20
 
-#volumes:
+volumes:
 #  tp:
 #    driver: convoy
 #  minio:
+  sirisurab-tp:
+    external: true
+
 
 configs:
   redis_config:
