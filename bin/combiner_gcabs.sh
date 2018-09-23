@@ -49,7 +49,7 @@ while true; do
         sleep 2
     fi
 
-#done
+done
 
 # create minio bucket
 mc mb --ignore-existing --debug ${bucket}
