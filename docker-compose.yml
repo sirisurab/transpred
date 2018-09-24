@@ -30,8 +30,9 @@ services:
   g_cabs_combiner:
     build: .
     image: sirisurab/tp-app:latest
-    container_name: g_cabs_combiner
-    command: ./bin/combiner_gcabs.sh 2016 2017
+#    container_name: g_cabs_combiner
+#    command: ./bin/combiner_gcabs.sh 2016 2017
+    command: python ./src/task_creator.py dl_gcabs 2016 2017
     restart: on-failure
 #    volumes:
 #      - sirisurab-tp:/data
@@ -44,8 +45,9 @@ services:
   g_cabs_fetcher:
     build: .
     image: sirisurab/tp-app:latest
-    container_name: g_cabs_fetcher
-    command: ./bin/fetcher_gcabs.sh
+#    container_name: g_cabs_fetcher
+#    command: ./bin/fetcher_gcabs.sh
+    command: python ./src/task_performer.py dl_gcabs
     restart: on-failure
 #    volumes:
 #      - sirisurab-tp:/data

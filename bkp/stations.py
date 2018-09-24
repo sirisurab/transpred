@@ -1,19 +1,9 @@
-
-# coding: utf-8
-
-# In[2]:
-
-
 import pandas as pd
 import numpy as np
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import os
 root = 'data/'
-
-
-# In[3]:
-
 
 from geopandas import GeoDataFrame
 from shapely.geometry import Point
@@ -42,31 +32,16 @@ from shapely.geometry import Point
 
 file = root+'transit/Stations.csv'
 df_stations = pd.read_csv(file,usecols=['Station ID','GTFS Stop ID','Stop Name','Borough','GTFS Latitude','GTFS Longitude'])
-df_stations.info()
-df_stations.head()
-
-
-# In[5]:
 
 
 df_stations.columns = ['STATION_ID','STOP_ID','STOP_NAME','BOROUGH','LATITUDE','LONGITUDE']
-df_stations.info()
-df_stations.head()
 
-
-# #convert to geodataframe
-
-# In[6]:
-
+# convert to geodataframe
 
 geometry = [Point(xy) for xy in zip(df_stations.LATITUDE,df_stations.LONGITUDE)]
 df_stations = df_stations.drop(['LATITUDE','LONGITUDE'],axis=1)
 crs={'init':'epsg:4326'}
 geodf_stations = GeoDataFrame(df_stations,crs=crs,geometry=geometry)
-
-
-# In[7]:
-
 
 geodf_stations.info()
 geodf_stations.head()

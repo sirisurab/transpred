@@ -2,3 +2,5 @@ geopandas
 Rtree
 descartes
 bokeh
+wget
+minio
