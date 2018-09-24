@@ -3,3 +3,4 @@ fuzzywuzzy
 python-Levenshtein
 dask[dataframe]
 fastparquet
+redis
