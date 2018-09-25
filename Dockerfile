@@ -6,7 +6,7 @@ ARG SSH_PRIVATE_KEY
 ARG SSH_PASS_PHRASE
 RUN rm -Rf /app && mkdir /app && \
 mkdir -p $HOME/.ssh && echo "${SSH_PRIVATE_KEY}" > $HOME/.ssh/id_rsa && chmod -R 400 $HOME/.ssh/ && \
-eval $(ssh-agent -s) && ssh-add $HOME/.ssh/id_rsa && \
+#eval $(ssh-agent -s) && ssh-add $HOME/.ssh/id_rsa && \
 git clone "ssh://sirisurab@ssh.github.com:443/transpred.git" /app
 #unzip master.zip && \
 #mv /app/transpred-master/* /app && \
