@@ -10,8 +10,6 @@ echo "${SSH_PRIVATE_KEY}" > $HOME/.ssh/id_rsa && \
 echo "${SSH_PUB_KEY}" > $HOME/.ssh/id_rsa.pub && \
 chmod -R 400 $HOME/.ssh/ && \
 ssh-keyscan github.com > $HOME/.ssh/known_hosts && \
-#echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> $HOME/.ssh/config && \
-eval $(ssh-agent -s) && \
 git clone -v "ssh://git@github.com/sirisurab/transpred.git" /app
 #unzip master.zip && \
 #mv /app/transpred-master/* /app && \
