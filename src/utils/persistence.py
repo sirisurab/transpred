@@ -29,7 +29,7 @@ def copy_files(source_folder:str, dest_bucket:str) -> bool:
         return True
 
 
-def copy_file(source_folder:str, file: str, dest_bucket:str) -> bool:
+def copy_file(dest_bucket: str, file: str, source_folder: str) -> bool:
     mc = get_client()
     print('created minio client')
     try:

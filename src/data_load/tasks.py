@@ -39,17 +39,17 @@ def perform_cabs(b_task: bytes) -> bool:
     get_url = lambda month: "https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_"+year+"-"+prefix_zero(month)+".csv"
     urls: List[str] = list(map(get_url, months(quarter)))
     print('downloading from urls '+str(urls))
-    source_folder: str = './gcabs'+task+'/'
-    os.makedirs(source_folder, exist_ok=True)
-    print('created source folder '+source_folder)
+    #source_folder: str = './gcabs'+task+'/'
+    #os.makedirs(source_folder, exist_ok=True)
+    #print('created source folder '+source_folder)
     try:
         #download_from_urls(urls, source_folder)
         for url in urls:
             print('downloading file from '+url)
             #file: str = wget.download(url, out=source_folder)
-            file: str = download_from_url(url, source_folder)
-            print('copying file '+file+' from '+source_folder+' to gcabs')
-            status: bool = ps.copy_file(dest_bucket='gcabs', file=file, source_folder=source_folder)
+            file: str = download_from_url(url)
+            print('copying file '+file+' to bucket gcabs')
+            status: bool = ps.copy_file(dest_bucket='gcabs', file=file, source=os.path.dirname(__file__)+'/'+file)
 
     except Exception as err:
         raise err
@@ -74,9 +74,9 @@ def download_from_urls(urls: List[str], folder) -> bool:
 
 
 
-def download_from_url(url: str, folder) -> str:
+def download_from_url(url: str) -> str:
     try:
-        file: Tuple = ur.urlretrieve(url, folder)
+        file: Tuple = ur.urlretrieve(url)
         print('downloaded file '+file[0])
 
     except Exception as err:
