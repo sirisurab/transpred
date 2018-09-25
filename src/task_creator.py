@@ -11,27 +11,27 @@ from typing import List
 from data_load import tasks as dl_tasks
 from utils import messaging as msg
 from functools import partial
-import sys
-
+#import sys
+import os
 # splits job into tasks
 # splitting method depends on task_type
 # TODO add messaging error handling
 # TODO add make tasks error handling
-def create_tasks(task_type: str, *args) -> None:
-
+def create_tasks(task_type: str, years:str) -> None:
     # pattern match and dispatch
     # dl_transit -> dl.make_tasks_transit(*args)
     # dl_traffic -> dl.make_tasks_traffic(*args)
     # dl_cabs -> dl.make_tasks_cabs(*args)
     # above functions return task list
+    years_lst: List[str] = years.split()
     tasks: List[str]
     print('dispatching from create tasks')
     if task_type == 'dl_transit':
-        tasks = dl_tasks.make_transit(*args)
+        tasks = dl_tasks.make_transit(years_lst)
     elif task_type == 'dl_traffic':
-        tasks = dl_tasks.make_traffic(*args)
+        tasks = dl_tasks.make_traffic(years_lst)
     elif task_type == 'dl_cabs':
-        tasks = dl_tasks.make_cabs(*args)
+        tasks = dl_tasks.make_cabs(years_lst)
     else:
         tasks = []
 
@@ -45,10 +45,11 @@ def create_tasks(task_type: str, *args) -> None:
 
 
 if __name__=="__main__":
-    task_type:str = sys.argv[1]
-
+    #task_type:str = sys.argv[1]
+    task_type: str = os.environ('DATA')
+    years:str = os.environ('YEARS')
     print('calling create tasks for type '+task_type)
-    create_tasks(task_type, sys.argv[2:])
+    create_tasks(task_type, years)
 
 
 

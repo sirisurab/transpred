@@ -6,7 +6,7 @@
 from data_load import tasks as dl_tasks
 from utils import messaging as msg
 from error_handling import errors
-import sys
+import os
 
 #TODO add messaging error handling
 #TODO add perform task error handling
@@ -42,4 +42,5 @@ def perform_task(task_type: str) -> bool:
         return status
 
 if __name__=="__main__":
-    perform_task(sys.argv[1])
+    task_type: str = os.environ('DATA')
+    perform_task(task_type)

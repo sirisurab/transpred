@@ -7,18 +7,18 @@ from utils import persistence as ps
 import os
 
 #TODO
-def make_transit(*args) -> List[str]:
+def make_transit(years: List[str]) -> List[str]:
     return []
 
 #TODO
-def make_traffic(*args) -> List[str]:
+def make_traffic(years: List[str]) -> List[str]:
     return []
 
 #TODO
-def make_cabs(*args) -> List[str]:
-    print('constructing tasks for years '+str(args))
+def make_cabs(years: List[str]) -> List[str]:
+    print('constructing tasks for years '+str(years))
     tasks_for_year = lambda tasks, year: tasks + [year+"-"+str(quarter) for quarter in range(1, 4)]
-    return reduce(tasks_for_year, list(*args), [])
+    return reduce(tasks_for_year, years, [])
 
 #TODO
 def perform_transit(task: str) -> bool:
