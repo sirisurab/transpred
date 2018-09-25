@@ -3,7 +3,8 @@ FROM sirisurab/tp-app-pkgs AS app
 #RUN GIT_URL="https://github.com/sirisurab/transpred/archive/master.zip" && \
 #wget --no-check-certificate -O master.zip $GIT_URL && \
 RUN rm -Rf /app && mkdir /app && \
-git clone "git@github.com:sirisurab/transpred.git" /app
+
+git clone "ssh://sirisurab@ssh.github.com:443/transpred.git" /app
 #unzip master.zip && \
 #mv /app/transpred-master/* /app && \
 #chmod -R +x /app && \
