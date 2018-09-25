@@ -3,6 +3,7 @@ from typing import List, Tuple
 from functools import reduce, partial
 #import wget
 import urllib.request as ur
+import cgi
 from utils import persistence as ps
 import os
 
@@ -76,14 +77,18 @@ def download_from_urls(urls: List[str], folder) -> bool:
 
 def download_from_url(url: str) -> str:
     try:
-        file: Tuple = ur.urlretrieve(url)
-        print('downloaded file '+file[0])
+        remotefile = ur.urlopen(url)
+        header = remotefile.info()['Content-Disposition']
+        value, params = cgi.parse_header(header)
+        file: str = params['filename']
+        ur.urlretrieve(url, file)
+        print('downloaded file '+file)
 
     except Exception as err:
 
         raise err
     else:
-        return file[0]
+        return file
 
 
 
