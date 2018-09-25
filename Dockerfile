@@ -2,8 +2,9 @@ FROM sirisurab/tp-app-pkgs AS app
 
 #RUN GIT_URL="https://github.com/sirisurab/transpred/archive/master.zip" && \
 #wget --no-check-certificate -O master.zip $GIT_URL && \
+ARG SSH_PRIVATE_KEY
 RUN rm -Rf /app && mkdir /app && \
-cp ./secret/id_rsa $HOME/.ssh/ && \
+mkdir -p $HOME/.ssh && echo "${SSH_PRIVATE_KEY}" > $HOME/.ssh/id_rsa && \
 eval $(ssh-agent -s) && ssh-add $HOME/.ssh/id_rsa && \
 git clone "ssh://sirisurab@ssh.github.com:443/transpred.git" /app
 #unzip master.zip && \
