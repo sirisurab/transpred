@@ -28,8 +28,9 @@ def perform_traffic(task: str) -> bool:
     return False
 
 
-def perform_cabs(task: str) -> bool:
-    task_split: List[str] = str(task, 'utf-8').split('-')
+def perform_cabs(b_task: str) -> bool:
+    task: str = str(b_task, 'utf-8')
+    task_split: List[str] = task.split('-')
     year: str = task_split[0]
     quarter: int = int(task_split[1])
     prefix_zero = lambda x: "0"+str(x) if x < 10 else str(x)
