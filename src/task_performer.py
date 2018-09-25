@@ -7,15 +7,18 @@ from data_load import tasks as dl_tasks
 from utils import messaging as msg
 from error_handling import errors
 import sys
+import time
 
 #TODO add messaging error handling
 #TODO add perform task error handling
 def perform_task(task_type: str) -> bool:
     # fetch task from waiting queue and push to running queue
-    task: str = msg.pop_q1_push_q2(task_type+'waiting_q', task_type+'running_q')
-    if task == '':
-        print('task queue for '+task_type+' is empty')
-        return True
+    task: str = fetch_from_q(task_type)
+    if not task:
+        print('task queue for '+task_type+' is empty. Waiting to try again')
+        time.sleep(2)
+        fetch_from_q(task_type)
+        #return True
     try:
         # pattern match and dispatch
         # turnstile -> dl.perform_task_transit(task)
@@ -45,3 +48,7 @@ if __name__=="__main__":
     #task_type: str = os.environ('DATA')
     task_type: str = sys.argv[1]
     perform_task(task_type)
+
+
+def fetch_from_q(task_type: str) -> str:
+    return msg.pop_q1_push_q2(task_type+'waiting_q', task_type+'running_q')

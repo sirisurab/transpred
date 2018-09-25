@@ -11,6 +11,7 @@ def get_client():
 
 # push task to queue
 def push_to_q(msg: str, queue: str) -> None:
+    print('connecting to redis')
     r = get_client()
     r.lpush(queue, msg)
     print('pushed message '+msg+' to '+queue)
