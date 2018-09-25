@@ -30,4 +30,4 @@ WORKDIR /app
 # ENV NAME World
 #VOLUME /app
 #ENTRYPOINT ["/bin/bash"]
-CMD ["python"]
+ENTRYPOINT ["python"]

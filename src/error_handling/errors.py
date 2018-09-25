@@ -13,4 +13,5 @@ class TaskTypeError(Error):
     """Error for incorrect task type
     """
     def __init__(self, task_type: str) -> None:
-        super("Unrecognized task type "+task_type)
+        super()
+        self.message = task_type

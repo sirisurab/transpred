@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # prepare tasks for data loading(dl)
 from typing import List
 from functools import reduce, partial
@@ -7,18 +6,18 @@ from utils import persistence as ps
 import os
 
 #TODO
-def make_transit(years: List[str]) -> List[str]:
+def make_transit(*args) -> List[str]:
     return []
 
 #TODO
-def make_traffic(years: List[str]) -> List[str]:
+def make_traffic(*args) -> List[str]:
     return []
 
 #TODO
-def make_cabs(years: List[str]) -> List[str]:
-    print('constructing tasks for years '+str(years))
+def make_cabs(*args) -> List[str]:
+    print('constructing tasks for years '+str(args))
     tasks_for_year = lambda tasks, year: tasks + [year+"-"+str(quarter) for quarter in range(1, 4)]
-    return reduce(tasks_for_year, years, [])
+    return reduce(tasks_for_year, list(*args), [])
 
 #TODO
 def perform_transit(task: str) -> bool:
