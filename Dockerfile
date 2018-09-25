@@ -6,10 +6,9 @@ ARG SSH_PRIVATE_KEY
 ARG SSH_PASS_PHRASE
 RUN rm -Rf /app && mkdir /app && \
 mkdir -p $HOME/.ssh && echo "${SSH_PRIVATE_KEY}" > $HOME/.ssh/id_rsa && chmod -R 400 $HOME/.ssh/ && \
-#eval $(ssh-agent -s) && ssh-add $HOME/.ssh/id_rsa && \
 ssh-keyscan github.com > $HOME/.ssh/known_hosts && \
 #echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> $HOME/.ssh/config && \
-git clone "ssh://sirisurab@ssh.github.com:443/transpred.git" /app
+git clone "ssh://sirisurab@github.com/transpred.git" /app
 #unzip master.zip && \
 #mv /app/transpred-master/* /app && \
 #chmod -R +x /app && \
