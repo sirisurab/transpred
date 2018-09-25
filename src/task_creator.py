@@ -30,7 +30,7 @@ def create_tasks(task_type: str, *args) -> None:
         tasks = dl_tasks.make_transit(*args)
     elif task_type == 'dl_traffic':
         tasks = dl_tasks.make_traffic(*args)
-    elif task_type == 'dl_cabs':
+    elif task_type == 'dl_gcabs':
         tasks = dl_tasks.make_cabs(*args)
     else:
         tasks = []

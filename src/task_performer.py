@@ -27,7 +27,7 @@ def perform_task(task_type: str) -> bool:
             status = dl_tasks.perform_transit(task)
         elif task_type == 'dl_traffic':
             status = dl_tasks.perform_traffic(task)
-        elif task_type == 'dl_cabs':
+        elif task_type == 'dl_gcabs':
             status = dl_tasks.perform_cabs(task)
         else:
             raise errors.TaskTypeError(task_type)
