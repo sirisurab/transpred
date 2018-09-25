@@ -8,6 +8,7 @@ RUN rm -Rf /app && mkdir /app && \
 mkdir -p $HOME/.ssh && echo "${SSH_PRIVATE_KEY}" > $HOME/.ssh/id_rsa && chmod -R 400 $HOME/.ssh/ && \
 ssh-keyscan github.com > $HOME/.ssh/known_hosts && \
 #echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> $HOME/.ssh/config && \
+eval $(ssh-agent) && echo ssh-add $HOME/.ssh/id_rsa && \
 git clone "ssh://sirisurab@github.com/transpred.git" /app
 #unzip master.zip && \
 #mv /app/transpred-master/* /app && \
