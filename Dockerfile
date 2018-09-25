@@ -3,9 +3,12 @@ FROM sirisurab/tp-app-pkgs AS app
 #RUN GIT_URL="https://github.com/sirisurab/transpred/archive/master.zip" && \
 #wget --no-check-certificate -O master.zip $GIT_URL && \
 ARG SSH_PRIVATE_KEY
-ARG SSH_PASS_PHRASE
+ARG SSH_PUB_KEY
 RUN rm -Rf /app && mkdir /app && \
-mkdir -p $HOME/.ssh && echo "${SSH_PRIVATE_KEY}" > $HOME/.ssh/id_rsa && chmod -R 400 $HOME/.ssh/ && \
+mkdir -p $HOME/.ssh && \
+echo "${SSH_PRIVATE_KEY}" > $HOME/.ssh/id_rsa && \
+echo "${SSH_PUB_KEY}" > $HOME/.ssh/id_rsa.pub && \
+chmod -R 400 $HOME/.ssh/ && \
 ssh-keyscan github.com > $HOME/.ssh/known_hosts && \
 #echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> $HOME/.ssh/config && \
 eval $(ssh-agent -s) && \
