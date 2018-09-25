@@ -7,7 +7,7 @@ def get_client():
         host='redis',
         port='6379'
     )
-    print('connected to redis %s' % r.info())
+    #print('connected to redis %s' % r.info())
     return r
 
 # push task to queue
@@ -24,7 +24,7 @@ def push_tasks_to_q(tasks: List[str], queue: str) -> None:
     r = get_client()
     #r.lpush(queue, msg)
     push_to_queue = partial(r.lpush, name=queue)
-    map(push_to_queue, tasks)
+    push = map(push_to_queue, tasks)
     print('pushed message '+str(tasks)+' to '+queue)
     return
 
