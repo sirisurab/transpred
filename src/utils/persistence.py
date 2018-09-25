@@ -38,15 +38,19 @@ def copy_file(dest_bucket: str, file: str, source: str) -> bool:
         mc.make_bucket(dest_bucket)
         print('made bucket '+dest_bucket)
     except BucketAlreadyOwnedByYou as err:
+        print('bucket already owned by you '+dest_bucket)
         pass
     except BucketAlreadyExists as err:
+        print('bucket already exists '+dest_bucket)
         pass
     except ResponseError as err:
+        print('error creating bucket '+dest_bucket)
         raise err
 
     try:
-        mc.copy_object(bucket_name=dest_bucket, object_name=file, object_source=source)
-        print('copied file '+file+' from '+source+' to bucket '+dest_bucket)
+        #mc.copy_object(bucket_name=dest_bucket, object_name=file, object_source=source)
+        mc.fput_object(bucket_name=dest_bucket, object_name=file, file_path=source)
+        print('pushed file '+file+' from '+source+' to minio bucket '+dest_bucket)
     except ResponseError as err:
         raise err
     else:
