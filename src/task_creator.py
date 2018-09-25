@@ -40,7 +40,7 @@ def create_tasks(task_type: str, *args) -> None:
     print('pushing to waiting q tasks '+str(tasks))
     #push_to_waiting_q = partial(msg.push_to_q, queue=task_type+'waiting_q')
     #map(push_to_waiting_q, tasks)
-    msg.push_tasks_to_q(tasks)
+    msg.push_tasks_to_q(tasks, queue=task_type+'waiting_q')
 
     return
 
