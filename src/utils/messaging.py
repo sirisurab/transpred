@@ -25,7 +25,7 @@ def push_tasks_to_q(tasks: List[str], queue: str) -> None:
     #r.lpush(queue, msg)
     push_to_queue = partial(r.lpush, name=queue)
     map(push_to_queue, tasks)
-    print('pushed message '+msg+' to '+queue)
+    print('pushed message '+str(tasks)+' to '+queue)
     return
 
 
