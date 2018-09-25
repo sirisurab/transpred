@@ -44,11 +44,14 @@ def perform_task(task_type: str) -> bool:
         msg.del_from_q(task, task_type+'running_q')
         return status
 
+
+def fetch_from_q(task_type: str) -> str:
+    return msg.pop_q1_push_q2(task_type+'waiting_q', task_type+'running_q')
+
+
 if __name__=="__main__":
     #task_type: str = os.environ('DATA')
     task_type: str = sys.argv[1]
     perform_task(task_type)
 
 
-def fetch_from_q(task_type: str) -> str:
-    return msg.pop_q1_push_q2(task_type+'waiting_q', task_type+'running_q')

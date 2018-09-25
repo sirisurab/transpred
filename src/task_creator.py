@@ -38,8 +38,9 @@ def create_tasks(task_type: str, *args) -> None:
     # push tasks in task list
     # map msg.push_to_q(task_type+'waiting_q',task)
     print('pushing to waiting q tasks '+str(tasks))
-    push_to_waiting_q = partial(msg.push_to_q, queue=task_type+'waiting_q')
-    map(push_to_waiting_q, tasks)
+    #push_to_waiting_q = partial(msg.push_to_q, queue=task_type+'waiting_q')
+    #map(push_to_waiting_q, tasks)
+    msg.push_tasks_to_q(tasks)
 
     return
 

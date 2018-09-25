@@ -1,5 +1,6 @@
 import redis
-
+from typing import List
+from functools import partial
 
 def get_client():
     r = redis.Redis(
@@ -14,6 +15,16 @@ def push_to_q(msg: str, queue: str) -> None:
     print('connecting to redis')
     r = get_client()
     r.lpush(queue, msg)
+    print('pushed message '+msg+' to '+queue)
+    return
+
+# push multiple tasks to queue
+def push_tasks_to_q(tasks: List[str], queue: str) -> None:
+    print('connecting to redis')
+    r = get_client()
+    #r.lpush(queue, msg)
+    push_to_queue = partial(r.lpush, name=queue)
+    map(push_to_queue, tasks)
     print('pushed message '+msg+' to '+queue)
     return
 
