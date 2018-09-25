@@ -35,7 +35,7 @@ def perform_cabs(b_task: bytes) -> bool:
     quarter: int = int(task_split[1])
     prefix_zero = lambda x: "0"+str(x) if x < 10 else str(x)
     months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
-    get_url = lambda month: "https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_"+year+"-"+str(month)+".csv"
+    get_url = lambda month: "https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_"+year+"-"+prefix_zero(month)+".csv"
     urls: List[str] = list(map(get_url, months(quarter)))
     print('downloading from urls '+str(urls))
     source_folder: str = './gcabs'+task+'/'
