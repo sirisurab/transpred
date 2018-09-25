@@ -29,7 +29,7 @@ def perform_traffic(task: str) -> bool:
 
 
 def perform_cabs(task: str) -> bool:
-    task_split: List[str] = task.split('-')
+    task_split: List[str] = str(task, 'utf-8').split('-')
     year: str = task_split[0]
     quarter: int = int(task_split[1])
     prefix_zero = lambda x: "0"+str(x) if x < 10 else str(x)
