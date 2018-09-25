@@ -14,7 +14,7 @@ import time
 def perform_task(task_type: str) -> bool:
     # fetch task from waiting queue and push to running queue
     task: str = fetch_from_q(task_type)
-    if not task:
+    if not task or task == '':
         print('task queue for '+task_type+' is empty. Waiting to try again')
         time.sleep(2)
         fetch_from_q(task_type)
