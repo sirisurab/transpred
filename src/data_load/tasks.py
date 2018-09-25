@@ -1,7 +1,8 @@
 # prepare tasks for data loading(dl)
-from typing import List
+from typing import List, Tuple
 from functools import reduce, partial
-import wget
+#import wget
+import urllib.request as ur
 from utils import persistence as ps
 import os
 
@@ -45,7 +46,8 @@ def perform_cabs(b_task: bytes) -> bool:
         #download_from_urls(urls, source_folder)
         for url in urls:
             print('downloading file from '+url)
-            file: str = wget.download(url, out=source_folder)
+            #file: str = wget.download(url, out=source_folder)
+            file: str = download_from_url(url, source_folder)
             print('copying file '+file+' from '+source_folder+' to gcabs')
             status: bool = ps.copy_file(dest_bucket='gcabs', file=file, source_folder=source_folder)
 
@@ -62,12 +64,26 @@ def perform_cabs(b_task: bytes) -> bool:
 
 def download_from_urls(urls: List[str], folder) -> bool:
     try:
-        download=partial(wget.download, out=folder)
-        map(download, urls)
+        #download=partial(wget.download, out=folder)
+        #map(download, urls)
+        pass
     except Exception as err:
         raise err
     else:
         return True
+
+
+
+def download_from_url(url: str, folder) -> str:
+    try:
+        file: Tuple = ur.urlretrieve(url, folder)
+        print('downloaded file '+file[0])
+
+    except Exception as err:
+
+        raise err
+    else:
+        return file[0]
 
 
 
