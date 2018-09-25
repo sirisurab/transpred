@@ -2,10 +2,12 @@ import redis
 
 
 def get_client():
-    return redis.StrictRedis(
+    r = redis.Redis(
         host='redis',
         port='6379'
     )
+    print('connected to redis %s' % r.info())
+    return r
 
 # push task to queue
 def push_to_q(msg: str, queue: str) -> None:
