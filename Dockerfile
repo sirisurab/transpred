@@ -9,7 +9,7 @@ mkdir -p $HOME/.ssh && echo "${SSH_PRIVATE_KEY}" > $HOME/.ssh/id_rsa && chmod -R
 ssh-keyscan github.com > $HOME/.ssh/known_hosts && \
 #echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> $HOME/.ssh/config && \
 eval $(ssh-agent -s) && \
-git clone "ssh://git@github.com/sirisurab/transpred.git" /app
+git clone -v "ssh://git@github.com/sirisurab/transpred.git" /app
 #unzip master.zip && \
 #mv /app/transpred-master/* /app && \
 #chmod -R +x /app && \
