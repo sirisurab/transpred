@@ -13,13 +13,13 @@ import time
 #TODO add perform task error handling
 def perform_task(task_type: str) -> bool:
     # fetch task from waiting queue and push to running queue
-    task: str = fetch_from_q(task_type)
+    task: bytes = fetch_from_q(task_type)
     if task is None:
         print('task queue for '+task_type+' is empty. Waiting to try again')
         time.sleep(2)
         fetch_from_q(task_type)
         #return True
-    elif task == '':
+    elif task == b'':
         return True
     else:
         try:
@@ -48,7 +48,7 @@ def perform_task(task_type: str) -> bool:
             return status
 
 
-def fetch_from_q(task_type: str) -> str:
+def fetch_from_q(task_type: str) -> bytes:
     return msg.pop_q1_push_q2(task_type+'waiting_q', task_type+'running_q')
 
 

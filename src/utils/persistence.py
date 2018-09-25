@@ -28,3 +28,24 @@ def copy_files(source_folder:str, dest_bucket:str) -> bool:
     else:
         return True
 
+
+def copy_file(source_folder:str, file: str, dest_bucket:str) -> bool:
+    mc = get_client()
+    print('created minio client')
+    try:
+        mc.make_bucket(dest_bucket)
+        print('made bucket '+dest_bucket)
+    except BucketAlreadyOwnedByYou as err:
+        pass
+    except BucketAlreadyExists as err:
+        pass
+    except ResponseError as err:
+        raise err
+
+    try:
+        mc.copy_object(bucket_name=dest_bucket, object_name=file, object_source=source_folder)
+        print('copied file '+file+' from '+source_folder+' to bucket '+dest_bucket)
+    except ResponseError as err:
+        raise err
+    else:
+        return True

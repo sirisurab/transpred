@@ -20,15 +20,15 @@ def make_cabs(*args) -> List[str]:
     return reduce(tasks_for_year, list(*args), [])
 
 #TODO
-def perform_transit(task: str) -> bool:
+def perform_transit(task: bytes) -> bool:
     return False
 
 #TODO
-def perform_traffic(task: str) -> bool:
+def perform_traffic(task: bytes) -> bool:
     return False
 
 
-def perform_cabs(b_task: str) -> bool:
+def perform_cabs(b_task: bytes) -> bool:
     task: str = str(b_task, 'utf-8')
     task_split: List[str] = task.split('-')
     year: str = task_split[0]
@@ -42,17 +42,21 @@ def perform_cabs(b_task: str) -> bool:
     os.makedirs(source_folder, exist_ok=True)
     print('created source folder '+source_folder)
     try:
-        download_from_urls(urls, source_folder)
+        #download_from_urls(urls, source_folder)
+        for url in urls:
+            file: str = wget.download(url, out=source_folder)
+            print('copying file '+file+' from '+source_folder+' to gcabs')
+            status: bool = ps.copy_file(dest_bucket='gcabs', file=file, source_folder=source_folder)
+
     except Exception as err:
         raise err
+    #else:
+        #try:
+            #ps.copy_files(source_folder,'gcabs')
+        #except Exception as err:
+            #raise err
     else:
-        try:
-            print('copying from '+source_folder+' to gcabs')
-            ps.copy_files(source_folder,'gcabs')
-        except Exception as err:
-            raise err
-        else:
-            return True
+        return status
 
 
 def download_from_urls(urls: List[str], folder) -> bool:
