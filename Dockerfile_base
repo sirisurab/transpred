@@ -68,7 +68,7 @@ RUN ["/bin/bash","-c","source activate transpred"]
 COPY ./environment.yml /tmp/environment.yml
 RUN conda env update -n transpred -f /tmp/environment.yml
 RUN ["/bin/bash","-c","source activate transpred"]
-ENV PATH="/minio:/opt/conda/envs/transpred:${PATH}"
+ENV PATH="/minio:/opt/conda/envs/transpred/bin:${PATH}"
 # Install any needed packages specified in requirements_1.txt
 #COPY ./requirements_1.txt /app/requirements_1.txt
 #COPY ./requirements_2.txt /app/requirements_2.txt
