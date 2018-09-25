@@ -1,0 +1,16 @@
+name: transpred
+
+dependencies:
+  - pip:
+    - pandas
+    - fuzzywuzzy
+    - python-Levenshtein
+    - dask[dataframe]
+    - fastparquet
+    - redis
+    - geopandas
+    - Rtree
+    - descartes
+    - bokeh
+    - wget
+    - minio
