@@ -3,6 +3,8 @@
 # Use an official Python runtime as a parent image
 
 FROM continuumio/miniconda3 AS base
+#FROM python:latest AS base
+
 
 RUN mkdir app
 # this is for geopandas
@@ -17,9 +19,6 @@ cd spatialindex-src-1.8.5 && \
 make && \
 make install && \
 ldconfig
-
-
-
 
 FROM base AS beefy-base
 
@@ -43,25 +42,35 @@ apt-get -y install  libfreetype6-dev \
                     redis-tools && \
 mkdir /minio && \
 wget -P /minio/ https://dl.minio.io/client/mc/release/linux-amd64/mc && \
-chmod -R +x /minio && \
+chmod -R +x /minio
 # copy minio config file
 #mkdir /root/.mc && \
 #yes | cp -f /tmp/config.json /root/.mc/ && \
 # configure mc
 #/minio/mc config host add --insecure minio http://minio:9000 minio minio123 && \
 # for fastparquet
-pip install numpy
+#pip install numpy
 
 
-ENV PATH="/minio:${PATH}"
+
+#ENV PATH="/minio:${PATH}"
 
 
 # to be tagged as sirisurab/tp-app-pkgs
 
 FROM beefy-base AS app-pkgs
 
+#ADD environment.yml /tmp/environment.yml
+#RUN conda env create -f /tmp/environment.yml
+RUN conda create -y -n transpred python=3.6 pip setuptools && \
+echo "source activate transpred" > $HOME/.bashrc
+RUN ["/bin/bash","-c","source activate transpred"]
+COPY ./environment.yml /tmp/environment.yml
+RUN conda env update -n transpred -f /tmp/environment.yml
+RUN ["/bin/bash","-c","source activate transpred"]
+ENV PATH="/minio:/opt/conda/envs/transpred:${PATH}"
 # Install any needed packages specified in requirements_1.txt
-COPY ./requirements_1.txt /app/requirements_1.txt
-COPY ./requirements_2.txt /app/requirements_2.txt
-RUN pip install --trusted-host pypi.python.org -r /app/requirements_1.txt
-RUN pip install --trusted-host pypi.python.org -r /app/requirements_2.txt
+#COPY ./requirements_1.txt /app/requirements_1.txt
+#COPY ./requirements_2.txt /app/requirements_2.txt
+#RUN pip install --trusted-host pypi.python.org -r /app/requirements_1.txt
+#RUN pip install --trusted-host pypi.python.org -r /app/requirements_2.txt

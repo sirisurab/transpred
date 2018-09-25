@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # prepare tasks for data loading(dl)
 from typing import List
 from functools import reduce, partial
