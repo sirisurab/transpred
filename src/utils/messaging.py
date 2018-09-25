@@ -23,8 +23,10 @@ def push_tasks_to_q(tasks: List[str], queue: str) -> None:
     print('connecting to redis')
     r = get_client()
     #r.lpush(queue, msg)
-    push_to_queue = partial(r.lpush, name=queue)
-    push = map(push_to_queue, tasks)
+    for task in tasks:
+        r.lpush(queue, task)
+    #push_to_queue = partial(r.lpush, name=queue)
+    #push = map(push_to_queue, tasks)
     print('pushed message '+str(tasks)+' to '+queue)
     return
 
