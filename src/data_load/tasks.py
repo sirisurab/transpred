@@ -44,6 +44,7 @@ def perform_cabs(b_task: bytes) -> bool:
     try:
         #download_from_urls(urls, source_folder)
         for url in urls:
+            print('downloading file from '+url)
             file: str = wget.download(url, out=source_folder)
             print('copying file '+file+' from '+source_folder+' to gcabs')
             status: bool = ps.copy_file(dest_bucket='gcabs', file=file, source_folder=source_folder)

@@ -44,7 +44,7 @@ def del_from_q(msg: str, queue: str) -> None:
 def pop_q1_push_q2(pop_queue: str, push_queue: str) -> bytes:
     r = get_client()
     msg: bytes = r.rpoplpush(pop_queue, push_queue)
-    print('popped msg '+str(msg, 'utf-8')+' from '+pop_queue+' and pushed to '+push_queue)
+    print('popped msg '+str(msg)+' from '+pop_queue+' and pushed to '+push_queue)
     #if msg is None:
         #msg = ''
     return msg
