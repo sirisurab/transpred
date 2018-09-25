@@ -29,5 +29,5 @@ WORKDIR /app
 # Define environment variable
 # ENV NAME World
 #VOLUME /app
-ENTRYPOINT ["/bin/bash"]
-#ENTRYPOINT ["python"]
+#ENTRYPOINT ["/bin/bash"]
+CMD ["python"]
