@@ -4,17 +4,30 @@ from functools import reduce, partial
 from utils import persistence as ps, http
 import os
 import urllib.error as u_err
+import datetime as dt
+from error_handling import errors
+MIN_YEAR = 2010
+MAX_YEAR = 2018
 
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
-
 
 
 def make_transit(*args) -> List[str]:
     print('constructing transit tasks for years '+str(args))
     # each month is a task
-    tasks_for_year = lambda tasks, year: tasks + [year+"-"+str(month) for month in range(1, 13)]
+    tasks_for_year = lambda tasks, year: tasks + [validate_transit_year(year)[2:]+"-"+str(month) for month in range(1, 13)]
     return reduce(tasks_for_year, list(*args), [])
 
+
+def validate_transit_year(year: str):
+    try:
+        date = dt.date(year, 1, 1)
+        if not (date.year <= MAX_YEAR and date.year >=MIN_YEAR) :
+            raise Exception
+    except:
+        raise errors.InvalidYearError(year)
+    else:
+        return year
 
 #TODO
 def make_traffic(*args) -> List[str]:

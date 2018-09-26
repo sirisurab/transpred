@@ -1,6 +1,7 @@
 .git
 .idea
 secret
+build.sh
 data/cabs/*.csv
 data/cabs/*.parquet
 data/traffic/*.csv

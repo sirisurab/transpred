@@ -14,4 +14,12 @@ class TaskTypeError(Error):
     """
     def __init__(self, task_type: str) -> None:
         super()
-        self.message = task_type
+        self.message = "Invalid input task type "+task_type
+
+class InvalidYearError(Error):
+    """Error for invalid input for year
+    """
+
+    def __init__(self, year: str) -> None:
+        super()
+        self.message = "Invalid input year "+year
