@@ -41,6 +41,7 @@ def perform_transit(b_task: bytes) -> bool:
     source_folder: str = os.path.dirname(__file__)+'/transit/'
     os.makedirs(source_folder, exist_ok=True)
     print('created source folder '+source_folder)
+    status: bool = False
     try:
         for url in urls:
             print('downloading file from '+url)
@@ -59,7 +60,7 @@ def perform_transit(b_task: bytes) -> bool:
                 raise err
 
             print('copying file '+filename+' to bucket transit')
-            status: bool = ps.copy_file(dest_bucket='transit', file=filename, source=source_folder+filename)
+            status = ps.copy_file(dest_bucket='transit', file=filename, source=source_folder+filename)
 
     except Exception as err:
         raise err
@@ -85,12 +86,13 @@ def perform_cabs(b_task: bytes) -> bool:
     source_folder: str = os.path.dirname(__file__)+'/gcabs/'
     os.makedirs(source_folder, exist_ok=True)
     print('created source folder '+source_folder)
+    status: bool = False
     try:
         for url in urls:
             print('downloading file from '+url)
             filename: str = http.download_from_url(url, source_folder)
             print('copying file '+filename+' to bucket gcabs')
-            status: bool = ps.copy_file(dest_bucket='gcabs', file=filename, source=source_folder+filename)
+            status = ps.copy_file(dest_bucket='gcabs', file=filename, source=source_folder+filename)
 
     except Exception as err:
         raise err
