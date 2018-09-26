@@ -10,8 +10,6 @@ MIN_YEAR = 2010
 MAX_YEAR = 2018
 
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
-
-
 def make_transit(*args) -> List[str]:
     print('constructing transit tasks for years '+str(args))
     # each month is a task
@@ -85,10 +83,12 @@ def perform_transit(b_task: bytes) -> bool:
 
 def perform_traffic(b_task: bytes) -> bool:
     block_number: int = int(str(b_task, 'utf-8'))
-    chunk_size = 60000000
-    chunks_per_block = 5
-    max_bl_num = 20
     url: str = "https://data.cityofnewyork.us/api/views/i4gi-tjb9/rows.csv?accessType=DOWNLOAD&bom=true&query=select+*"
+    content_length: int = http.get_content_length(url)
+    total_blocks: int = 20
+    chunks_per_block = 5
+    chunk_size = content_length // (total_blocks*chunks_per_block)
+    print('content length is %(length)i and chunk size is %(cs)i' % {'length': content_length, 'cs': chunk_size})
     source_folder: str = os.path.dirname(__file__)+'/traffic/'
     os.makedirs(source_folder, exist_ok=True)
     print('created source folder '+source_folder)
@@ -96,7 +96,7 @@ def perform_traffic(b_task: bytes) -> bool:
     start_chunk: int = (block_number-1) * chunks_per_block + 1
     start_byte: int = (start_chunk-1) * chunk_size
     end_chunk: int = start_chunk+chunks_per_block+1
-    last_chunk_in_file = max_bl_num * chunks_per_block
+    last_chunk_in_file = total_blocks * chunks_per_block
     try:
         for i in range(start_chunk, end_chunk):
             end_byte: int = start_byte+chunk_size-1

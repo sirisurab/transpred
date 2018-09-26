@@ -1,5 +1,6 @@
 import urllib.request as ur
 import urllib.error as u_err
+import re
 
 class AppURLopener(ur.FancyURLopener):
     version = 'Mozilla/5.0'
@@ -41,5 +42,14 @@ def download_chunk_from_url(url: str, folder: str, byte_range: str, filename: st
         raise err
     else:
         return filename
+
+
+def get_content_length(url) -> int:
+    request = ur.Request(url)
+    response = ur.urlopen(request)
+    content_range = response.headers['content-range']
+    pattern = re.compile('bytes (\d+)-(\d+)/(\d+)')
+    (start, end, length) = pattern.search(content_range).groups()
+    return int(length)
 
 
