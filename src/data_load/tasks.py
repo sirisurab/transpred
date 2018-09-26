@@ -30,7 +30,7 @@ def validate_transit_year(year: str):
         return year
 
 def make_traffic() -> List[str]:
-    print('constructing transit tasks for years '+str(args))
+    print('constructing traffic tasks')
     # create 20 tasks
     tasks: List[str] = [str(task_no) for task_no in range(1, 21)]
     return tasks
