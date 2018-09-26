@@ -129,7 +129,7 @@ services:
   traffic_combiner:
     build: .
     image: sirisurab/tp-app:latest
-    container_name: traffic_combiner
+    restart: on-failure
     networks:
       - backend
     command: ./src/task_creator.py dl_traffic
@@ -144,7 +144,7 @@ services:
   traffic_fetcher:
     build: .
     image: sirisurab/tp-app:latest
-    container_name: traffic_fetcher
+    restart: on-failure
     networks:
       - backend
     command: ./src/task_performer.py dl_traffic
