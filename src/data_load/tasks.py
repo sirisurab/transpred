@@ -3,6 +3,7 @@ from typing import List, Tuple
 from functools import reduce, partial
 from utils import persistence as ps, http
 import os
+import urllib.error as u_err
 
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
 
@@ -43,7 +44,20 @@ def perform_transit(b_task: bytes) -> bool:
     try:
         for url in urls:
             print('downloading file from '+url)
-            filename: str = http.download_from_url_transit(url, source_folder)
+            try:
+                filename: str = http.download_from_url(url, source_folder)
+            except u_err.HTTPError as err:
+                # ignore bad urls
+                if err.code == 404:
+                    print('ignoring bad transit url ' + url)
+                    # do not attempt to copy file to minio
+                    continue
+                else:
+                    raise err
+
+            except Exception as err:
+                raise err
+
             print('copying file '+filename+' to bucket transit')
             status: bool = ps.copy_file(dest_bucket='transit', file=filename, source=source_folder+filename)
 
