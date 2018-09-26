@@ -22,6 +22,7 @@ def download_chunk_from_url(url: str, folder: str, byte_range: str, filename: st
         #ur.urlretrieve(url, folder+filename)
         request = ur.Request(url)
         request.headers['Range'] = byte_range
+        request.headers['User-Agent'] = 'Mozilla/5.0'
         response = ur.urlopen(request)
         with open(folder+filename, "wb") as f:
             f.write(response.read())
