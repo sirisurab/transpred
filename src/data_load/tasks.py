@@ -83,7 +83,8 @@ def perform_transit(b_task: bytes) -> bool:
 
 def perform_traffic(b_task: bytes) -> bool:
     block_number: int = int(str(b_task, 'utf-8'))
-    url: str = "https://data.cityofnewyork.us/api/views/i4gi-tjb9/rows.csv?accessType=DOWNLOAD&bom=true&query=select+*"
+    #url: str = "https://data.cityofnewyork.us/api/views/i4gi-tjb9/rows.csv?accessType=DOWNLOAD&bom=true&query=select+*"
+    url: str = "https://data.bloomington.in.gov/dataset/117733fb-31cb-480a-8b30-fbf425a690cd/resource/d5ba88f9-5798-46cd-888a-189eb59f7b46/download/traffic-counts2013-2015.csv"
     content_length: int = http.get_content_length(url)
     total_blocks: int = 20
     chunks_per_block = 5
