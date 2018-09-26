@@ -21,7 +21,7 @@ def make_transit(*args) -> List[str]:
 
 def validate_transit_year(year: str):
     try:
-        date = dt.date(year, 1, 1)
+        date = dt.date(int(year), 1, 1)
         if not (date.year <= MAX_YEAR and date.year >=MIN_YEAR) :
             raise Exception
     except:
