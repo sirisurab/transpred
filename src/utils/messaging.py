@@ -35,7 +35,7 @@ def push_tasks_to_q(tasks: List[str], queue: str) -> None:
 def del_from_q(msg: str, queue: str) -> None:
     r = get_client()
     r.lrem(queue, msg, 1)
-    print('deleted message '+msg+' from '+queue)
+    print('deleted message '+str(msg)+' from '+queue)
     return
 
 
