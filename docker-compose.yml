@@ -32,10 +32,7 @@ services:
     image: sirisurab/tp-app:latest
 #    container_name: g_cabs_combiner
 #    command: ./bin/combiner_gcabs.sh 2016 2017
-    command: ./src/task_creator.py dl_gcabs 2016 2017
-    environment:
-      - DATA=dl_gcabs
-      - YEARS=2016 2017
+    command: ./src/task_creator.py dl_gcabs 2016
     restart: on-failure
 #    volumes:
 #      - sirisurab-tp:/data
@@ -51,8 +48,6 @@ services:
 #    container_name: g_cabs_fetcher
 #    command: ./bin/fetcher_gcabs.sh
     command: ./src/task_performer.py dl_gcabs
-    environment:
-      - DATA=dl_gcabs
     restart: on-failure
 #    volumes:
 #      - sirisurab-tp:/data
@@ -62,7 +57,7 @@ services:
       - g_cabs_combiner
     deploy:
       mode: replicated
-      replicas: 8
+      replicas: 4
 
 #  y_cabs_combiner:
 #    build: .
@@ -90,32 +85,36 @@ services:
 #      mode: replicated
 #      replicas: 8
 
-#  turnstile_combiner:
-#    build: .
-#    image: sirisurab/tp-app:latest
+  turnstile_combiner:
+    build: .
+    image: sirisurab/tp-app:latest
 #    container_name: turnstile_combiner
-#    networks:
-#      - backend
+    command: ./src/task_creator.py dl_transit 2016
+    restart: on-failure
+    networks:
+      - backend
 #    command: ./bin/combiner_turnstile.sh 2016 2017
 #    volumes:
 #      - tp:/app
 #    depends_on:
 #      - redis
 
-#  turnstile_fetcher:
-#    build: .
-#    image: sirisurab/tp-app:latest
+  turnstile_fetcher:
+    build: .
+    image: sirisurab/tp-app:latest
 #    container_name: turnstile_fetcher
-#    networks:
-#      - backend
+    command: ./src/task_performer.py dl_transit
+    restart: on-failure
+    networks:
+      - backend
 #    command: ./bin/fetcher_turnstile.sh
 #    volumes:
 #      - tp:/app
-#    depends_on:
-#      - turnstile_combiner
-#    deploy:
-#      mode: replicated
-#      replicas: 24
+    depends_on:
+      - turnstile_combiner
+    deploy:
+      mode: replicated
+      replicas: 12
 
 #  stations_fetcher:
 #    build: .
