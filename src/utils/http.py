@@ -1,6 +1,8 @@
 import urllib.request as ur
 import urllib.error as u_err
 
+class AppURLopener(ur.FancyURLopener):
+    version = 'Mozilla/5.0'
 
 def download_from_url(url: str, folder: str) -> str:
     try:
@@ -20,12 +22,18 @@ def download_chunk_from_url(url: str, folder: str, byte_range: str, filename: st
     try:
         #filename: str = url.split('/')[-1]+str(chunk_number)
         #ur.urlretrieve(url, folder+filename)
-        request = ur.Request(url)
-        request.headers['Range'] = byte_range
-        request.headers['User-Agent'] = 'Mozilla/5.0'
-        response = ur.urlopen(request)
-        with open(folder+filename, "wb") as f:
-            f.write(response.read())
+        opener = ur.build_opener()
+        opener.addheaders = [('Range', byte_range)]
+        opener.addheaders = [('User-Agent', 'Mozilla/5.0')]
+        ur.install_opener(opener)
+        ur.urlretrieve(url, folder+filename)
+        #request = ur.Request(url)
+        #request.headers['Range'] = byte_range
+        #request.headers['User-Agent'] = 'Mozilla/5.0'
+        #response = ur.urlopen(request)
+        #response = opener.open(request)
+        #with open(folder+filename, "wb") as f:
+        #    f.write(response.read())
         print('downloaded file to '+folder+filename)
 
     except Exception as err:
