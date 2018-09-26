@@ -30,7 +30,6 @@ services:
   g_cabs_combiner:
     build: .
     image: sirisurab/tp-app:latest
-#    container_name: g_cabs_combiner
 #    command: ./bin/combiner_gcabs.sh 2016 2017
     command: ./src/task_creator.py dl_gcabs 2016
     restart: on-failure
@@ -41,11 +40,13 @@ services:
 #    depends_on:
 #      - minio
 #      - redis
+    deploy:
+      mode: replicated
+      replicas: 0
 
   g_cabs_fetcher:
     build: .
     image: sirisurab/tp-app:latest
-#    container_name: g_cabs_fetcher
 #    command: ./bin/fetcher_gcabs.sh
     command: ./src/task_performer.py dl_gcabs
     restart: on-failure
@@ -57,7 +58,7 @@ services:
       - g_cabs_combiner
     deploy:
       mode: replicated
-      replicas: 4
+      replicas: 0
 
 #  y_cabs_combiner:
 #    build: .
@@ -88,7 +89,6 @@ services:
   turnstile_combiner:
     build: .
     image: sirisurab/tp-app:latest
-#    container_name: turnstile_combiner
     command: ./src/task_creator.py dl_transit 2016
     restart: on-failure
     networks:
@@ -98,11 +98,13 @@ services:
 #      - tp:/app
 #    depends_on:
 #      - redis
+    deploy:
+      mode: replicated
+      replicas: 0
 
   turnstile_fetcher:
     build: .
     image: sirisurab/tp-app:latest
-#    container_name: turnstile_fetcher
     command: ./src/task_performer.py dl_transit
     restart: on-failure
     networks:
@@ -114,7 +116,7 @@ services:
       - turnstile_combiner
     deploy:
       mode: replicated
-      replicas: 12
+      replicas: 0
 
 #  stations_fetcher:
 #    build: .
@@ -124,32 +126,35 @@ services:
 #    volumes:
 #      - tp:/app
 
-#  traffic_combiner:
-#    build: .
-#    image: sirisurab/tp-app:latest
-#    container_name: traffic_combiner
-#    networks:
-#      - backend
-#    command: ./bin/combiner_traffic.sh 2016 2017
+  traffic_combiner:
+    build: .
+    image: sirisurab/tp-app:latest
+    container_name: traffic_combiner
+    networks:
+      - backend
+    command: ./src/task_creator.py dl_traffic
 #    volumes:
 #      - tp:/app
-#    depends_on:
-#      - redis
+    depends_on:
+      - redis
+    deploy:
+      mode: replicated
+      replicas: 1
 
-#  traffic_fetcher:
-#    build: .
-#    image: sirisurab/tp-app:latest
-#    container_name: traffic_fetcher
-#    networks:
-#      - backend
-#    command: ./bin/fetcher_traffic.sh
+  traffic_fetcher:
+    build: .
+    image: sirisurab/tp-app:latest
+    container_name: traffic_fetcher
+    networks:
+      - backend
+    command: ./src/task_performer.py dl_traffic
 #    volumes:
 #      - tp:/app
-#    depends_on:
-#      - traffic_combiner
-#    deploy:
-#      mode: replicated
-#      replicas: 20
+    depends_on:
+      - traffic_combiner
+    deploy:
+      mode: replicated
+      replicas: 20
 
 #volumes:
 #  tp:

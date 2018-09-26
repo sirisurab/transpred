@@ -29,9 +29,11 @@ def validate_transit_year(year: str):
     else:
         return year
 
-#TODO
-def make_traffic(*args) -> List[str]:
-    return []
+def make_traffic() -> List[str]:
+    print('constructing transit tasks for years '+str(args))
+    # create 20 tasks
+    tasks: List[str] = [str(task_no) for task_no in range(1, 21)]
+    return tasks
 
 
 
@@ -81,9 +83,38 @@ def perform_transit(b_task: bytes) -> bool:
         return status
 
 
-#TODO
 def perform_traffic(b_task: bytes) -> bool:
-    return False
+    block_number: int = int(str(b_task, 'utf-8'))
+    chunk_size = 60000000
+    chunks_per_block = 5
+    max_bl_num = 20
+    url: str = "https://data.cityofnewyork.us/api/views/i4gi-tjb9/rows.csv?accessType=DOWNLOAD&bom=true&query=select+*"
+    source_folder: str = os.path.dirname(__file__)+'/traffic/'
+    os.makedirs(source_folder, exist_ok=True)
+    print('created source folder '+source_folder)
+    status: bool = False
+    start_chunk: int = (block_number-1) * chunks_per_block + 1
+    start_byte: int = (start_chunk-1) * chunk_size
+    end_chunk: int = start_chunk+chunks_per_block+1
+    last_chunk_in_file = max_bl_num * chunks_per_block
+    try:
+        for i in range(start_chunk, end_chunk):
+            end_byte: int = start_byte+chunk_size-1
+            byte_range: str = 'bytes='
+            if not (end_chunk == last_chunk_in_file) :
+                byte_range = byte_range+'%(start)i-%(end)i' % {'start': start_byte, 'end': end_byte}
+            else:
+                byte_range = byte_range+'%(start)i-' % {'start': start_byte}
+            print('downloading file from '+url+' for byte range '+ byte_range)
+            filename: str = http.download_chunk_from_url(url=url, folder=source_folder, byte_range=byte_range, filename='traffic_speed.part'+str(i))
+            print('copying file '+filename+' to bucket traffic')
+            status = ps.copy_file(dest_bucket='traffic', file=filename, source=source_folder+filename)
+            start_byte = end_byte + 1
+
+    except Exception as err:
+        raise err
+    else:
+        return status
 
 
 def perform_cabs(b_task: bytes) -> bool:
