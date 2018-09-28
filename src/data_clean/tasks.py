@@ -17,14 +17,19 @@ prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
 
 
 def make_cabs(cab_type: str,*args) -> List[str]:
+    task_type: str = ''
     if cab_type == 'green':
         task_type = 'cl_gcabs'
     elif cab_type == 'yellow':
         task_type = 'cl_ycabs'
-    map: Dict = tasks.task_type_map[task_type]
-    out_bucket: str = map['out']
-    ps.create_bucket(out_bucket)
-    return dl_tasks.make_cabs(*args)
+
+    if not task_type == '':
+        map: Dict = tasks.task_type_map[task_type]
+        out_bucket: str = map['out']
+        ps.create_bucket(out_bucket)
+        return dl_tasks.make_cabs(*args)
+    else:
+        return []
 
 
 def make_transit(*args) -> List[str]:
