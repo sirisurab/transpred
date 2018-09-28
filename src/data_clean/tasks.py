@@ -5,6 +5,7 @@ from data_process import tasks
 from utils import persistence as ps
 from functools import reduce
 from data_load import tasks as dl_tasks
+from s3fs.core import S3FileSystem
 
 resample_map: Dict = {
                         'filter_by': {
@@ -78,11 +79,13 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
     index_col: str = task_type_map['index']['col']
     sorted: bool = task_type_map['index']['sorted']
     row_op: Callable = task_type_map['row_op']
+    s3 = ps.get_s3fs_client()
+    print('got s3fs client')
 
     try:
         for file in files:
-            df = pd.read_table('s3://'+in_bucket+'/'+file,
-                               sep=',',
+
+            df = pd.read_csv(s3.open('s3://'+in_bucket+'/'+file, 'rb'),
                                header=0,
                                usecols= lambda x: x.lower() in list(cols.keys()),
                                skipinitialspace=True,
@@ -110,7 +113,7 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
 
             # save in out bucket
             #s3_out_url: str = 's3://' + out_bucket
-            df.to_csv('s3://'+out_bucket+'/'+file)
+            df.to_csv(s3.open('s3://'+out_bucket+'/'+file, 'wb'))
 
     except Exception as err:
         print('error in perform_cabs %s' % str(err))

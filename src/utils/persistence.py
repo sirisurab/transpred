@@ -1,10 +1,14 @@
 from minio import Minio
 from typing import Dict, Union
 from minio.error import ResponseError, BucketAlreadyExists, BucketAlreadyOwnedByYou
+from s3fs.core import S3FileSystem
 KEY: str = 'minio'
 SECRET: str = 'minio123'
 ENDPOINT: str = 'minio:9000'
 USE_SSL: bool = False
+
+def get_s3fs_client():
+    return S3FileSystem(anon=True, client_kwargs={'endpoint_url': 'http://minio:9000'})
 
 def get_client():
     return Minio(ENDPOINT,
