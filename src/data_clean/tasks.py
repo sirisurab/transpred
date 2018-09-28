@@ -93,14 +93,16 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
                                )
 
             # rename columns
-            df = df.rename(columns=cols)
+            rdf = df.rename(columns=cols)
 
             if not sorted:
-                df = df.set_index(index_col).sort_index().reset_index()
+                sdf = rdf.set_index(index_col).sort_index().reset_index()
+            else:
+                sdf = df
 
 
             #map row-wise operations
-            df = df.apply(func=row_op, axis=1)
+            fdf = sdf.apply(func=row_op, axis=1).dropna()
 
 
             # specific processing for transit
@@ -108,12 +110,12 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
                 #df = remove_outliers(df, col='DELEXITS')
 
             # drop na values
-            df = df.dropna()
+            #df = df.dropna()
 
 
             # save in out bucket
             #s3_out_url: str = 's3://' + out_bucket
-            df.to_csv(s3.open('s3://'+out_bucket+'/'+file, 'wb'))
+            fdf.to_csv(s3.open('s3://'+out_bucket+'/'+file, 'wb'))
 
     except Exception as err:
         print('error in perform_cabs %s' % str(err))
