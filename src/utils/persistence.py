@@ -1,13 +1,28 @@
 from minio import Minio
+from typing import Dict, Union
 from minio.error import ResponseError, BucketAlreadyExists, BucketAlreadyOwnedByYou
-
+KEY: str = 'minio'
+SECRET: str = 'minio123'
+ENDPOINT: str = 'minio:9000'
+USE_SSL: bool = False
 
 def get_client():
-    return Minio('minio:9000',
-                      access_key='minio',
-                      secret_key='minio123',
-                      secure=False)
+    return Minio(ENDPOINT,
+                      access_key=KEY,
+                      secret_key=SECRET,
+                      secure=USE_SSL)
 
+def fetch_s3_options() -> Dict[str, Union[str, bool, Dict[str, str]]]:
+    return {
+        'anon': False,
+        'use_ssl': USE_SSL,
+        'key': KEY,
+        'secret': SECRET,
+        'client_kwargs':{
+            'region_name': 'us-east-1',
+            'endpoint_url': 'http://'+ENDPOINT
+        }
+    }
 
 def copy_files(source_folder:str, dest_bucket:str) -> bool:
     mc = get_client()
@@ -55,3 +70,21 @@ def copy_file(dest_bucket: str, file: str, source: str) -> bool:
         raise err
     else:
         return True
+
+
+def create_bucket(bucket: str) -> bool:
+    mc = get_client()
+    print('created minio client')
+    try:
+        mc.make_bucket(bucket)
+        print('made bucket '+bucket)
+    except BucketAlreadyOwnedByYou as err:
+        print('bucket already owned by you '+bucket)
+        pass
+    except BucketAlreadyExists as err:
+        print('bucket already exists '+bucket)
+        pass
+    except ResponseError as err:
+        print('error creating bucket '+bucket)
+        raise err
+    return True

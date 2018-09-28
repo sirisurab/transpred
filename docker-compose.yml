@@ -25,13 +25,27 @@ services:
 #      MINIO_SECRET_KEY:   minio123
 #    networks:
 #      - backend
+#  dscheduler:
+#    image: daskdev/dask
+#    ports:
+#      - '8786:8786'
+#      - '8787:8787'
+#    command: ['dask-scheduler']
+#    networks:
+#      - backend
+
+#  dworker:
+#    image: daskdev/dask
+#    command: ['dask-worker','scheduler:8786']
+#    networks:
+#      - backend
 
 
   g_cabs_combiner:
     build: .
     image: sirisurab/tp-app:latest
 #    command: ./bin/combiner_gcabs.sh 2016 2017
-    command: ./src/task_creator.py dl_gcabs 2016
+    command: ./src/task_creator.py cl_gcabs 2016
     restart: on-failure
 #    volumes:
 #      - sirisurab-tp:/data
@@ -42,7 +56,7 @@ services:
 #      - redis
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   g_cabs_fetcher:
     build: .
@@ -59,6 +73,23 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+
+  g_cabs_cleaner:
+    build: .
+    image: sirisurab/tp-app:latest
+    #    command: ./bin/fetcher_gcabs.sh
+    command: ./src/task_performer.py cl_gcabs
+    restart: on-failure
+    #    volumes:
+    #      - sirisurab-tp:/data
+    networks:
+    - backend
+    depends_on:
+    - dscheduler
+    - dworker
+    deploy:
+      mode: replicated
+      replicas: 4
 
 #  y_cabs_combiner:
 #    build: .
@@ -139,7 +170,7 @@ services:
       - redis
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
 
   traffic_fetcher:
     build: .
@@ -154,7 +185,7 @@ services:
       - traffic_combiner
     deploy:
       mode: replicated
-      replicas: 20
+      replicas: 0
 
 #volumes:
 #  tp:

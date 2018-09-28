@@ -4,6 +4,7 @@
 
 
 from data_load import tasks as dl_tasks
+from data_clean import tasks as dc_tasks
 from utils import messaging as msg
 from error_handling import errors
 import sys
@@ -34,7 +35,17 @@ def perform_task(task_type: str) -> bool:
             elif task_type == 'dl_traffic':
                 status = dl_tasks.perform_traffic(task)
             elif task_type == 'dl_gcabs':
-                status = dl_tasks.perform_cabs(task)
+                status = dl_tasks.perform_cabs('green', task)
+            elif task_type == 'dl_ycabs':
+                status = dl_tasks.perform_cabs('yellow', task)
+            if task_type == 'cl_transit':
+                status = dc_tasks.perform_transit(task)
+            elif task_type == 'cl_traffic':
+                status = dc_tasks.perform_traffic(task)
+            elif task_type == 'cl_gcabs':
+                status = dc_tasks.perform_cabs('green', task)
+            elif task_type == 'cl_ycabs':
+                status = dc_tasks.perform_cabs('yellow', task)
             else:
                 raise errors.TaskTypeError(task_type)
 

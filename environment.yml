@@ -6,6 +6,7 @@ dependencies:
     - fuzzywuzzy
     - python-Levenshtein
     - dask[dataframe]
+    - dask[distributed]
     - fastparquet
     - redis
     - geopandas

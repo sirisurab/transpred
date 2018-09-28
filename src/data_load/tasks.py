@@ -118,17 +118,23 @@ def perform_traffic(b_task: bytes) -> bool:
         return status
 
 
-def perform_cabs(b_task: bytes) -> bool:
+def perform_cabs(cab_type: str, b_task: bytes) -> bool:
+    if cab_type == 'green':
+        file_suffix = 'green'
+        bucket = 'gcabs'
+    elif cab_type == 'yellow':
+        file_suffix = 'yellow'
+        bucket = 'ycabs'
     task: str = str(b_task, 'utf-8')
     task_split: List[str] = task.split('-')
     year: str = task_split[0]
     quarter: int = int(task_split[1])
     prefix_zero = lambda x: "0"+str(x) if x < 10 else str(x)
     months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
-    get_url = lambda month: "https://s3.amazonaws.com/nyc-tlc/trip+data/green_tripdata_"+year+"-"+prefix_zero(month)+".csv"
+    get_url = lambda month: 'https://s3.amazonaws.com/nyc-tlc/trip+data/'+file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
     urls: List[str] = list(map(get_url, months(quarter)))
     print('downloading from urls '+str(urls))
-    source_folder: str = os.path.dirname(__file__)+'/gcabs/'
+    source_folder: str = os.path.dirname(__file__)+'/'+bucket+'/'
     os.makedirs(source_folder, exist_ok=True)
     print('created source folder '+source_folder)
     status: bool = False
@@ -136,8 +142,8 @@ def perform_cabs(b_task: bytes) -> bool:
         for url in urls:
             print('downloading file from '+url)
             filename: str = http.download_from_url(url, source_folder)
-            print('copying file '+filename+' to bucket gcabs')
-            status = ps.copy_file(dest_bucket='gcabs', file=filename, source=source_folder+filename)
+            print('copying file '+filename+' to bucket '+bucket)
+            status = ps.copy_file(dest_bucket=bucket, file=filename, source=source_folder+filename)
 
     except Exception as err:
         raise err
