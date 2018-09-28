@@ -30,21 +30,21 @@ def perform_task(task_type: str) -> bool:
             # cabs -> dl.perform_task_cabs(task)
             print('dispatching from perform tasks')
             status: bool
-            if task_type == 'dl_transit':
+            if task_type == 'dl-transit':
                 status = dl_tasks.perform_transit(task)
-            elif task_type == 'dl_traffic':
+            elif task_type == 'dl-traffic':
                 status = dl_tasks.perform_traffic(task)
-            elif task_type == 'dl_gcabs':
+            elif task_type == 'dl-gcabs':
                 status = dl_tasks.perform_cabs('green', task)
-            elif task_type == 'dl_ycabs':
+            elif task_type == 'dl-ycabs':
                 status = dl_tasks.perform_cabs('yellow', task)
-            elif task_type == 'cl_transit':
+            elif task_type == 'cl-transit':
                 status = dc_tasks.perform_transit(task)
-            elif task_type == 'cl_traffic':
+            elif task_type == 'cl-traffic':
                 status = dc_tasks.perform_traffic(task)
-            elif task_type == 'cl_gcabs':
+            elif task_type == 'cl-gcabs':
                 status = dc_tasks.perform_cabs('green', task)
-            elif task_type == 'cl_ycabs':
+            elif task_type == 'cl-ycabs':
                 status = dc_tasks.perform_cabs('yellow', task)
             else:
                 raise errors.TaskTypeError(task_type)

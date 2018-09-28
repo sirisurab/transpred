@@ -45,7 +45,7 @@ services:
     build: .
     image: sirisurab/tp-app:latest
 #    command: ./bin/combiner_gcabs.sh 2016 2017
-    command: ./src/task_creator.py cl_gcabs 2016
+    command: ./src/task_creator.py cl-gcabs 2016
     restart: on-failure
 #    volumes:
 #      - sirisurab-tp:/data
@@ -62,7 +62,7 @@ services:
     build: .
     image: sirisurab/tp-app:latest
 #    command: ./bin/fetcher_gcabs.sh
-    command: ./src/task_performer.py dl_gcabs
+    command: ./src/task_performer.py dl-gcabs
     restart: on-failure
 #    volumes:
 #      - sirisurab-tp:/data
@@ -78,7 +78,7 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     #    command: ./bin/fetcher_gcabs.sh
-    command: ./src/task_performer.py cl_gcabs
+    command: ./src/task_performer.py cl-gcabs
     restart: on-failure
     #    volumes:
     #      - sirisurab-tp:/data
@@ -120,7 +120,7 @@ services:
   turnstile_combiner:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_creator.py dl_transit 2016
+    command: ./src/task_creator.py dl-transit 2016
     restart: on-failure
     networks:
       - backend
@@ -136,7 +136,7 @@ services:
   turnstile_fetcher:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_performer.py dl_transit
+    command: ./src/task_performer.py dl-transit
     restart: on-failure
     networks:
       - backend
@@ -163,7 +163,7 @@ services:
     restart: on-failure
     networks:
       - backend
-    command: ./src/task_creator.py dl_traffic
+    command: ./src/task_creator.py dl-traffic
 #    volumes:
 #      - tp:/app
     depends_on:
@@ -178,7 +178,7 @@ services:
     restart: on-failure
     networks:
       - backend
-    command: ./src/task_performer.py dl_traffic
+    command: ./src/task_performer.py dl-traffic
 #    volumes:
 #      - tp:/app
     depends_on:

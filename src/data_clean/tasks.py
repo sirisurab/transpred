@@ -19,9 +19,9 @@ prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
 def make_cabs(cab_type: str,*args) -> List[str]:
     task_type: str = ''
     if cab_type == 'green':
-        task_type = 'cl_gcabs'
+        task_type = 'cl-gcabs'
     elif cab_type == 'yellow':
-        task_type = 'cl_ycabs'
+        task_type = 'cl-ycabs'
 
     if not task_type == '':
         map: Dict = tasks.task_type_map[task_type]
@@ -33,14 +33,14 @@ def make_cabs(cab_type: str,*args) -> List[str]:
 
 
 def make_transit(*args) -> List[str]:
-    map: Dict = tasks.task_type_map['cl_transit']
+    map: Dict = tasks.task_type_map['cl-transit']
     out_bucket: str = map['out']
     ps.create_bucket(out_bucket)
     return dl_tasks.make_transit(*args)
 
 
 def make_traffic(*args) -> List[str]:
-    map: Dict = tasks.task_type_map['cl_traffic']
+    map: Dict = tasks.task_type_map['cl-traffic']
     out_bucket: str = map['out']
     ps.create_bucket(out_bucket)
     return dl_tasks.make_traffic(*args)
@@ -55,10 +55,10 @@ def remove_outliers(df, col):
 def perform_cabs(cab_type: str, b_task: bytes) -> bool:
     if cab_type == 'green':
         file_suffix = 'green'
-        task_type = 'cl_gcabs'
+        task_type = 'cl-gcabs'
     elif cab_type == 'yellow':
         file_suffix = 'yellow'
-        task_type = 'cl_ycabs'
+        task_type = 'cl-ycabs'
 
     task: str = str(b_task, 'utf-8')
     task_split: List[str] = task.split('-')
@@ -102,7 +102,7 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
 
 
             # specific processing for transit
-            #if task_type == 'cl_transit':
+            #if task_type == 'cl-transit':
                 #df = remove_outliers(df, col='DELEXITS')
 
             # drop na values
@@ -132,7 +132,7 @@ def perform_transit(b_task: bytes) -> bool:
     print('processing files '+str(files))
 
 
-    map: Dict = tasks.task_type_map['cl_transit']
+    map: Dict = tasks.task_type_map['cl-transit']
     in_bucket: str = map['in']
     out_bucket: str = map['out']
     cols: Dict[str, str] = map['cols']

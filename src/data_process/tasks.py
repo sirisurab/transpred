@@ -2,9 +2,9 @@
 from typing import Dict
 from data_process import row_operations as row_ops
 task_type_map: Dict = {
-                  'cl_gcabs': {
+                  'cl-gcabs': {
                                 'in': 'gcabs',
-                                'out': 'cl_gcabs',
+                                'out': 'cl-gcabs',
                                 'cols': {
                                         'lpep_dropoff_datetime':'dropoff_datetime',
                                         'passenger_count':'passenger_count',
@@ -12,8 +12,8 @@ task_type_map: Dict = {
                                         },
                                 'row_op': row_ops.clean_cabs,
                                 'converters': {
-                                        'dropoff_datetime': row_ops.cl_cabs_dt,
-                                        'passenger_count': row_ops.cl_num
+                                        'dropoff_datetime': row_ops.clean_cabs_dt,
+                                        'passenger_count': row_ops.clean_num
                                         },
                                 'dtypes': {
                                         'dropoff_datetime': 'datetime64[ns]',
@@ -29,9 +29,9 @@ task_type_map: Dict = {
                                         },
                                 'aggr_func': ''
                                 },
-                  'cl_ycabs': {
+                  'cl-ycabs': {
                                 'in': 'ycabs',
-                                'out': 'cl_ycabs',
+                                'out': 'cl-ycabs',
                                 'cols': {
                                         'tpep_dropoff_datetime':'dropoff_datetime',
                                         'passenger_count':'passenger_count',
@@ -39,8 +39,8 @@ task_type_map: Dict = {
                                         },
                                 'row_op': row_ops.clean_cabs,
                                 'converters': {
-                                        'dropoff_datetime': row_ops.cl_cabs_dt,
-                                        'passenger_count': row_ops.cl_num
+                                        'dropoff_datetime': row_ops.clean_cabs_dt,
+                                        'passenger_count': row_ops.clean_num
                                         },
                                 'dtypes': {
                                         'dropoff_datetime': 'datetime64[ns]',
@@ -56,9 +56,9 @@ task_type_map: Dict = {
                                         },
                                 'aggr_func': ''
                                 },
-                  'cl_transit': {
+                  'cl-transit': {
                                 'in': 'transit',
-                                'out': 'cl_transit',
+                                'out': 'cl-transit',
                                 'cols': {
                                         'station':'station',
                                         'passenger_count':'passenger_count',
@@ -83,9 +83,9 @@ task_type_map: Dict = {
                                         },
                                 'aggr_func': ''
                                 },
-                  'cl_traffic': {
+                  'cl-traffic': {
                                 'in': 'gcabs',
-                                'out': 'cl_gcabs',
+                                'out': 'cl-gcabs',
                                 'row_op': row_ops.clean_traffic,
                                 'aggr_func': ''
                                 },

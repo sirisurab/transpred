@@ -20,28 +20,28 @@ import os
 # TODO add make tasks error handling
 def create_tasks(task_type: str, *args) -> None:
     # pattern match and dispatch
-    # dl_transit -> dl.make_tasks_transit(*args)
-    # dl_traffic -> dl.make_tasks_traffic(*args)
-    # dl_cabs -> dl.make_tasks_cabs(*args)
+    # dl-transit -> dl.make_tasks_transit(*args)
+    # dl-traffic -> dl.make_tasks_traffic(*args)
+    # dl-cabs -> dl.make_tasks_cabs(*args)
     # above functions return task list
     #years_lst: List[str] = years.split()
     tasks: List[str]
     print("dispatching from create tasks for %(task)r %(years)s" % {'task':task_type, 'years':args})
-    if task_type == 'dl_transit':
+    if task_type == 'dl-transit':
         tasks = dl_tasks.make_transit(*args)
-    elif task_type == 'dl_traffic':
+    elif task_type == 'dl-traffic':
         tasks = dl_tasks.make_traffic()
-    elif task_type == 'dl_gcabs':
+    elif task_type == 'dl-gcabs':
         tasks = dl_tasks.make_cabs(*args)
-    elif task_type == 'dl_ycabs':
+    elif task_type == 'dl-ycabs':
         tasks = dl_tasks.make_cabs(*args)
-    elif task_type == 'cl_transit':
+    elif task_type == 'cl-transit':
         tasks = dc_tasks.make_transit(*args)
-    elif task_type == 'cl_traffic':
+    elif task_type == 'cl-traffic':
         tasks = dc_tasks.make_traffic()
-    elif task_type == 'cl_gcabs':
+    elif task_type == 'cl-gcabs':
         tasks = dc_tasks.make_cabs('green',*args)
-    elif task_type == 'cl_ycabs':
+    elif task_type == 'cl-ycabs':
         tasks = dc_tasks.make_cabs('yellow',*args)
     else:
         tasks = []

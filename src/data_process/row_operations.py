@@ -10,12 +10,12 @@ def clean_cabs(row: pd.Series) -> pd.Series:
     #row['latitude'] = pd.to_numeric(row['latitude'], errors='coerce')
     return row
 
-def cl_cabs_dt(x):
+def clean_cabs_dt(x):
     return pd.to_datetime(x,
                      format="%Y-%m-%d %H:%M:%S",
                      errors='coerce')
 
-def cl_num(x):
+def clean_num(x):
     return pd.to_numeric(x, errors='coerce')
 
 

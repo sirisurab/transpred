@@ -176,7 +176,7 @@ def run_pipeline(task_type: str) -> bool:
             df[diff['new_col']] = df[diff['col']].diff()
 
         # specific processing for transit
-        if task_type == 'cl_transit':
+        if task_type == 'cl-transit':
             df = df.map_partitions(partial(remove_outliers, col='DELEXITS'), meta=dtypes)
 
         # drop na values
