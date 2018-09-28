@@ -40,9 +40,9 @@ def create_tasks(task_type: str, *args) -> None:
     elif task_type == 'cl_traffic':
         tasks = dc_tasks.make_traffic()
     elif task_type == 'cl_gcabs':
-        tasks = dc_tasks.make_cabs(*args)
+        tasks = dc_tasks.make_cabs('green',*args)
     elif task_type == 'cl_ycabs':
-        tasks = dc_tasks.make_cabs(*args)
+        tasks = dc_tasks.make_cabs('yellow',*args)
     else:
         tasks = []
 
