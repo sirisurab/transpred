@@ -69,16 +69,15 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
     files: List[str] = list(map(get_filename, months(quarter)))
     print('processing files '+str(files))
 
-
-    map: Dict = tasks.task_type_map[task_type]
-    in_bucket: str = map['in']
-    out_bucket: str = map['out']
-    cols: Dict[str, str] = map['cols']
-    converters: Dict[str, Callable] = map['converters']
-    dtypes: Dict[str, str] = map['dtypes']
-    index_col: str = map['index']['col']
-    sorted: bool = map['index']['sorted']
-    row_op: Callable = map['row_op']
+    task_type_map: Dict = tasks.task_type_map[task_type]
+    in_bucket: str = task_type_map['in']
+    out_bucket: str = task_type_map['out']
+    cols: Dict[str, str] = task_type_map['cols']
+    converters: Dict[str, Callable] = task_type_map['converters']
+    dtypes: Dict[str, str] = task_type_map['dtypes']
+    index_col: str = task_type_map['index']['col']
+    sorted: bool = task_type_map['index']['sorted']
+    row_op: Callable = task_type_map['row_op']
 
     try:
         for file in files:
@@ -131,16 +130,15 @@ def perform_transit(b_task: bytes) -> bool:
     files: List[str] = [file_part1 + prefix_zero(day) + file_part2 for day in range(1, 32)]
     print('processing files '+str(files))
 
-
-    map: Dict = tasks.task_type_map['cl-transit']
-    in_bucket: str = map['in']
-    out_bucket: str = map['out']
-    cols: Dict[str, str] = map['cols']
-    converters: Dict[str, Callable] = map['converters']
-    dtypes: Dict[str, str] = map['dtypes']
-    index_col: str = map['index']['col']
-    sorted: bool = map['index']['sorted']
-    row_op: Callable = map['row_op']
+    task_type_map: Dict = tasks.task_type_map['cl-transit']
+    in_bucket: str = task_type_map['in']
+    out_bucket: str = task_type_map['out']
+    cols: Dict[str, str] = task_type_map['cols']
+    converters: Dict[str, Callable] = task_type_map['converters']
+    dtypes: Dict[str, str] = task_type_map['dtypes']
+    index_col: str = task_type_map['index']['col']
+    sorted: bool = task_type_map['index']['sorted']
+    row_op: Callable = task_type_map['row_op']
 
     try:
         for file in files:
