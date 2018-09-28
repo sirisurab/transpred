@@ -38,7 +38,7 @@ def perform_task(task_type: str) -> bool:
                 status = dl_tasks.perform_cabs('green', task)
             elif task_type == 'dl_ycabs':
                 status = dl_tasks.perform_cabs('yellow', task)
-            if task_type == 'cl_transit':
+            elif task_type == 'cl_transit':
                 status = dc_tasks.perform_transit(task)
             elif task_type == 'cl_traffic':
                 status = dc_tasks.perform_traffic(task)
