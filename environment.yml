@@ -3,6 +3,7 @@ name: transpred
 dependencies:
   - pip:
     - pandas
+    - s3fs
     - fuzzywuzzy
     - python-Levenshtein
     - dask[dataframe]
