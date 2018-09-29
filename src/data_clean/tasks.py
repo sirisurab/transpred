@@ -90,7 +90,7 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
                                usecols= lambda x: x.lower() in list(cols.keys()),
                                skipinitialspace=True,
                                converters=converters,
-                               encoding='utf-8-sig'
+                               encoding='ansi'
                                )
 
             # rename columns
