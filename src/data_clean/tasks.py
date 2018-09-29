@@ -93,7 +93,7 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
                                )
 
             # rename columns
-            df.columns = df.columns.str.lower()
+            df.columns = map(str.lower, df.columns)
             df = df.rename(columns=cols)
 
             if not sorted:
