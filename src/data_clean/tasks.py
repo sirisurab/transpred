@@ -6,6 +6,7 @@ from utils import persistence as ps
 from functools import reduce
 from data_load import tasks as dl_tasks
 from s3fs.core import S3FileSystem
+import chardet
 
 resample_map: Dict = {
                         'filter_by': {
@@ -53,6 +54,13 @@ def remove_outliers(df, col):
     return df.loc[~discard]
 
 
+def find_encoding(file) -> str:
+    #file = open(file_name, 'rb').read()
+    result = chardet.detect(file.read())
+    char_enc = result['encoding']
+    return char_enc
+
+
 def perform_cabs(cab_type: str, b_task: bytes) -> bool:
     if cab_type == 'green':
         file_suffix = 'green'
@@ -84,13 +92,15 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
 
     try:
         for file in files:
-
-            df = pd.read_csv(s3.open('s3://'+in_bucket+'/'+file, 'r'),
+            file_obj = s3.open('s3://'+in_bucket+'/'+file, 'r')
+            encoding: str = find_encoding(file_obj)
+            print('file encoding is '+encoding)
+            df = pd.read_csv(file_obj,
                                header=0,
                                usecols= lambda x: x.lower() in list(cols.keys()),
                                skipinitialspace=True,
                                converters=converters,
-                               encoding='ansi'
+                               encoding=encoding
                                )
 
             # rename columns
