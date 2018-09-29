@@ -2,8 +2,8 @@ import pandas as pd
 
 def clean_cabs(row: pd.Series) -> pd.Series:
     print(' row index is %s' % str(row.index))
-    print(' row dropoff_datetime with loc index is %s' % str(row.loc['droppoff_datetime']))
-    row['dropoff_datetime'] = pd.to_datetime(row['dropoff_datetime'],
+    print(' row passenger_count with loc index is %s' % str(row.loc['passenger_count']))
+    #row['dropoff_datetime'] = pd.to_datetime(row['dropoff_datetime'],
                                              format="%Y-%m-%d %H:%M:%S",
                                              errors='coerce')
     row['passenger_count'] = pd.to_numeric(row['passenger_count'], errors='coerce')
