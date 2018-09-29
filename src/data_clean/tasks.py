@@ -94,12 +94,14 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
 
             # rename columns
             df.columns = map(str.lower, df.columns)
-            print(str(df.columns))
+            print('before rename '+str(df.columns))
 
             df = df.rename(columns=cols)
+            print('after rename '+str(df.columns))
 
             if not sorted:
                 df = df.set_index(index_col).sort_index().reset_index()
+                print('after sort '+str(df.columns))
 
 
             #map row-wise operations
