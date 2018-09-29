@@ -1,7 +1,7 @@
 import pandas as pd
 
 def clean_cabs(row: pd.Series) -> pd.Series:
-    print(' row is %s' % str(row))
+    #print(' row is %s' % str(row))
     row['dropoff_datetime'] = pd.to_datetime(row['dropoff_datetime'],
                                              format="%Y-%m-%d %H:%M:%S",
                                              errors='coerce')
