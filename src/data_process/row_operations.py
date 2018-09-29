@@ -1,7 +1,8 @@
 import pandas as pd
 
 def clean_cabs(row: pd.Series) -> pd.Series:
-    #print(' row is %s' % str(row))
+    print(' row index is %s' % str(row.index))
+    print(' row dropoff_datetime with loc index is %s' % str(row.loc['droppoff_datetime']))
     row['dropoff_datetime'] = pd.to_datetime(row['dropoff_datetime'],
                                              format="%Y-%m-%d %H:%M:%S",
                                              errors='coerce')
