@@ -87,7 +87,6 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
 
             df = pd.read_csv(s3.open('s3://'+in_bucket+'/'+file, 'r'),
                                header=0,
-                               sep='\t',
                                usecols= lambda x: x.lower() in list(cols.keys()),
                                skipinitialspace=True,
                                converters=converters,

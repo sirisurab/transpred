@@ -1,18 +1,18 @@
 name: transpred
 
 dependencies:
+  - pandas=0.23.0
   - pip:
-    - pandas
-    - s3fs
     - fuzzywuzzy
     - python-Levenshtein
+    - minio
+    - redis
+    - s3fs
     - dask[dataframe]
     - dask[distributed]
     - fastparquet
-    - redis
     - geopandas
     - Rtree
     - descartes
     - bokeh
     - wget
-    - minio

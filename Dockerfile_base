@@ -62,11 +62,13 @@ FROM beefy-base AS app-pkgs
 
 #ADD environment.yml /tmp/environment.yml
 #RUN conda env create -f /tmp/environment.yml
-RUN conda create -y -n transpred python=3.6 pip setuptools && \
-echo "source activate transpred" > $HOME/.bashrc
-RUN ["/bin/bash","-c","source activate transpred"]
+#RUN conda create -y -n transpred python=3.6 pip setuptools && \
+#echo "source activate transpred" > $HOME/.bashrc
+#RUN ["/bin/bash","-c","source activate transpred"]
 COPY ./environment.yml /tmp/environment.yml
-RUN conda env update -n transpred -f /tmp/environment.yml
+#RUN conda env update -n transpred -f /tmp/environment.yml
+RUN conda env create -f /tmp/environment.yml
+#echo "source activate transpred" > $HOME/.bashrc
 RUN ["/bin/bash","-c","source activate transpred"]
 ENV PATH="/minio:/opt/conda/envs/transpred/bin:${PATH}"
 # Install any needed packages specified in requirements_1.txt
