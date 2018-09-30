@@ -21,6 +21,9 @@ def clean_cabs_dt(x):
 def clean_num(x):
     return pd.to_numeric(x, errors='coerce')
 
+def clean_transit_date(date,time):
+    return pd.to_datetime(str(date)+str(time),format="%m/%d/%Y%H:%M:%S", errors='coerce')
+
 
 
 def clean_transit(row: pd.Series) -> pd.Series:

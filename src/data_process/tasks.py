@@ -15,6 +15,9 @@ task_type_map: Dict = {
                                         'dropoff_latitude':'dolatitude'
                                         },
                                 'row_op': row_ops.clean_cabs,
+                                'dates': {
+                                        'parse': False
+                                        },
                                 'converters': {
                                         'dodatetime': row_ops.clean_cabs_dt,
                                         'passengers': row_ops.clean_num,
@@ -46,6 +49,9 @@ task_type_map: Dict = {
                                         'dolocationid':'dolocationid'
                                         },
                                 'row_op': row_ops.clean_cabs,
+                                'dates': {
+                                        'parse': False
+                                        },
                                 'converters': {
                                         'dropoff_datetime': row_ops.clean_cabs_dt,
                                         'passenger_count': row_ops.clean_num
@@ -68,26 +74,38 @@ task_type_map: Dict = {
                                 'in': 'transit',
                                 'out': 'cl-transit',
                                 'cols': {
-                                        'station':'station',
-                                        'passenger_count':'passenger_count',
-                                        'dropoff_longitude':'longitude',
-                                        'dropoff_latitude':'latitude'
+                                        'station': 'station',
+                                        'date': 'date',
+                                        'time': 'time',
+                                        'datetime': 'datetime',
+                                        'entries': 'entries',
+                                        'exits': 'exits'
+                                        },
+                                'dates': {
+                                        'parse': True,
+                                        'in_cols': ['date', 'time'],
+                                        'out_col': 'datetime',
+                                        'parser': row_ops.clean_transit_date
+                                        },
+                                'converters': {
+                                        'entries': row_ops.clean_num,
+                                        'exits': row_ops.clean_num
                                         },
                                 'dtypes': {
-                                        'dropoff_datetime': 'datetime64[ns]',
-                                        'passenger_count': 'int64',
-                                        'longitude': 'float64',
-                                        'latitude': 'float64'
+                                        'station': 'object',
+                                        'datetime': 'datetime64[ns]',
+                                        'entries': 'int64',
+                                        'exits': 'int64'
                                         },
                                 'index': {
-                                        'col': 'dropoff_datetime',
-                                        'sorted': False
+                                        'col': 'datetime',
+                                        'sorted': True
                                         },
                                 'row_op': row_ops.clean_transit,
                                 'diff': {
                                         'compute': True,
-                                        'col': 'EXITS',
-                                        'new_col': 'DELEXITS'
+                                        'cols': ['exits', 'entries'],
+                                        'new_cols': ['delex', 'delent']
                                         },
                                 'aggr_func': ''
                                 },

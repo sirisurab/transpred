@@ -38,14 +38,8 @@ def perform_task(task_type: str) -> bool:
                 status = dl_tasks.perform_cabs('green', task)
             elif task_type == 'dl-ycabs':
                 status = dl_tasks.perform_cabs('yellow', task)
-            elif task_type == 'cl-transit':
-                status = dc_tasks.perform_transit(task)
-            elif task_type == 'cl-traffic':
-                status = dc_tasks.perform_traffic(task)
-            elif task_type == 'cl-gcabs':
-                status = dc_tasks.perform_cabs('green', task)
-            elif task_type == 'cl-ycabs':
-                status = dc_tasks.perform_cabs('yellow', task)
+            elif task_type in ['cl-transit', 'cl-traffic', 'cl-gcabs', 'cl-ycabs']:
+                status = dc_tasks.perform(task_type, task)
             else:
                 raise errors.TaskTypeError(task_type)
 

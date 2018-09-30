@@ -56,7 +56,7 @@ services:
 #      - redis
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
 
   g_cabs_fetcher:
     build: .
@@ -89,7 +89,7 @@ services:
     - dworker
     deploy:
       mode: replicated
-      replicas: 4
+      replicas: 0
 
 #  y_cabs_combiner:
 #    build: .
@@ -120,7 +120,7 @@ services:
   turnstile_combiner:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_creator.py dl-transit 2016
+    command: ./src/task_creator.py cl-transit 2016
     restart: on-failure
     networks:
       - backend
@@ -131,7 +131,7 @@ services:
 #      - redis
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   turnstile_fetcher:
     build: .
@@ -148,6 +148,23 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+
+  turnstile_cleaner:
+    build: .
+    image: sirisurab/tp-app:latest
+    #    command: ./bin/fetcher_gcabs.sh
+    command: ./src/task_performer.py cl-transit
+    restart: on-failure
+    #    volumes:
+    #      - sirisurab-tp:/data
+    networks:
+    - backend
+    depends_on:
+    - dscheduler
+    - dworker
+    deploy:
+      mode: replicated
+      replicas: 12
 
 #  stations_fetcher:
 #    build: .

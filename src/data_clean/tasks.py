@@ -1,5 +1,5 @@
 import sys
-from typing import Dict, List, Callable
+from typing import Dict, List, Callable, Union, Optional
 import pandas as pd
 from data_process import tasks
 from utils import persistence as ps
@@ -61,27 +61,50 @@ def find_encoding(file) -> str:
     return char_enc
 
 
-def perform_cabs(cab_type: str, b_task: bytes) -> bool:
-    if cab_type == 'green':
-        file_suffix = 'green'
-        task_type = 'cl-gcabs'
-    elif cab_type == 'yellow':
-        file_suffix = 'yellow'
-        task_type = 'cl-ycabs'
 
+def perform(task_type: str, b_task: bytes) -> bool:
     task: str = str(b_task, 'utf-8')
-    task_split: List[str] = task.split('-')
-    year: str = task_split[0]
-    quarter: int = int(task_split[1])
-    months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
-    get_filename = lambda month: file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
-    files: List[str] = list(map(get_filename, months(quarter)))
+    files: List[str]
+    task_split: List[str]
+    year: str
+    if task_type in ['cl-gcabs', 'cl-ycabs']:
+        if task_type == 'cl-gcabs':
+            file_suffix = 'green'
+        elif task_type == 'cl-ycabs':
+            file_suffix = 'yellow'
+
+        task_split = task.split('-')
+        year = task_split[0]
+        quarter: int = int(task_split[1])
+        months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
+        get_filename = lambda month: file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
+        files = list(map(get_filename, months(quarter)))
+
+    elif task_type == 'cl-transit':
+        task_split = task.split('-')
+        year = task_split[0]
+        month: int = int(task_split[1])
+        file_part1: str = 'turnstile_' + year + prefix_zero(month)
+        file_part2: str = ".txt"
+        files = [file_part1 + prefix_zero(day) + file_part2 for day in range(1, 32)]
+
     print('processing files '+str(files))
 
     task_type_map: Dict = tasks.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
     cols: Dict[str, str] = task_type_map['cols']
+    parse_dates: bool = task_type_map['dates']['parse']
+    in_date_cols: List[str] = task_type_map['dates']['in_cols']
+    out_date_col: str = task_type_map['dates']['out_cols']
+    dates: Union[bool, Dict[str, List[str]]]
+    date_parser: Optional[Callable]
+    if parse_dates:
+        dates = {out_date_col: in_date_cols}
+        date_parser=task_type_map['dates']['parser']
+    else:
+        dates = False
+        date_parser = None
     converters: Dict[str, Callable] = task_type_map['converters']
     dtypes: Dict[str, str] = task_type_map['dtypes']
     index_col: str = task_type_map['index']['col']
@@ -92,12 +115,20 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
 
     try:
         for file in files:
-            file_obj = s3.open('s3://'+in_bucket+'/'+file, 'r')
+
+            try:
+                file_obj = s3.open('s3://'+in_bucket+'/'+file, 'r')
+
+            except Exception:
+                # skip file not found (transit)
+                continue
             #encoding: str = find_encoding(file_obj)
             #print('file encoding is '+encoding)
             df = pd.read_csv(file_obj,
                                header=0,
-                               usecols= lambda x: x.lower() in list(cols.keys()),
+                               usecols= lambda x: x.strip.lower() in list(cols.keys()),
+                               parse_dates=dates,
+                               date_parser=date_parser,
                                skipinitialspace=True,
                                converters=converters,
                                encoding='utf-8'
