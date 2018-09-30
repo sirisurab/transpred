@@ -8,7 +8,7 @@ ENDPOINT: str = 'minio:9000'
 USE_SSL: bool = False
 
 def get_s3fs_client():
-    return S3FileSystem(anon=True, key=KEY, secret=SECRET, client_kwargs={'endpoint_url': 'http://'+ENDPOINT})
+    return S3FileSystem(key=KEY, secret=SECRET, client_kwargs={'endpoint_url': 'http://'+ENDPOINT})
 
 def get_client():
     return Minio(ENDPOINT,
