@@ -130,7 +130,7 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
 
             # save in out bucket
             #s3_out_url: str = 's3://' + out_bucket
-            df.to_csv(s3.open('s3://'+out_bucket+'/'+file, 'wb'))
+            df.to_csv(s3.open('s3://'+out_bucket+'/'+file, 'w'))
 
     except Exception as err:
         print('error in perform_cabs %s' % str(err))
