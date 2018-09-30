@@ -76,11 +76,51 @@ def copy_file(dest_bucket: str, file: str, source: str) -> bool:
         return True
 
 
+
 def create_bucket(bucket: str) -> bool:
     mc = get_client()
     print('created minio client')
     try:
         mc.make_bucket(bucket)
+
+        policy_read_write = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": ["s3:GetBucketLocation"],
+                    "Sid": "",
+                    "Resource": ["arn:aws:s3:::" + bucket],
+                    "Effect": "Allow",
+                    "Principal": {"AWS": "*"}
+                },
+                {
+                    "Action": ["s3:ListBucket"],
+                    "Sid": "",
+                    "Resource": ["arn:aws:s3:::" + bucket],
+                    "Effect": "Allow",
+                    "Principal": {"AWS": "*"}
+                },
+                {
+                    "Action": ["s3:ListBucketMultipartUploads"],
+                    "Sid": "",
+                    "Resource": ["arn:aws:s3:::" + bucket],
+                    "Effect": "Allow",
+                    "Principal": {"AWS": "*"}
+                },
+                {
+                    "Action": ["s3:ListMultipartUploadParts",
+                               "s3:GetObject",
+                               "s3:AbortMultipartUpload",
+                               "s3:DeleteObject",
+                               "s3:PutObject"],
+                    "Sid": "",
+                    "Resource": ["arn:aws:s3:::" + bucket+"/*"],
+                    "Effect": "Allow",
+                    "Principal": {"AWS": "*"}
+                }
+            ]
+        }
+        mc.set_bucket_policy(bucket, policy_read_write)
         print('made bucket '+bucket)
     except BucketAlreadyOwnedByYou as err:
         print('bucket already owned by you '+bucket)
@@ -92,3 +132,5 @@ def create_bucket(bucket: str) -> bool:
         print('error creating bucket '+bucket)
         raise err
     return True
+
+
