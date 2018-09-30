@@ -99,12 +99,15 @@ def perform(task_type: str, b_task: bytes) -> bool:
     out_date_col: str = task_type_map['dates']['out_col']
     dates: Union[bool, Dict[str, List[str]]]
     date_parser: Optional[Callable]
+    rename_cols: Dict[str, str]
     if parse_dates:
         dates = {out_date_col: in_date_cols}
         date_parser=task_type_map['dates']['parser']
+        rename_cols = {col: cols[col] for col in cols.keys() if col not in in_date_cols}
     else:
         dates = False
         date_parser = None
+        rename_cols = cols
     converters: Dict[str, Callable] = task_type_map['converters']
     dtypes: Dict[str, str] = task_type_map['dtypes']
     index_col: str = task_type_map['index']['col']
@@ -139,7 +142,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
             df.columns = map(str.strip, df.columns)
             print('before rename '+str(df.columns))
 
-            df = df.rename(columns=cols)
+            df = df.rename(columns=rename_cols)
             print('after rename '+str(df.columns))
 
             if not sorted:

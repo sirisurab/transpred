@@ -77,13 +77,12 @@ task_type_map: Dict = {
                                         'station': 'station',
                                         'date': 'date',
                                         'time': 'time',
-                                        'datetime': 'datetime',
                                         'entries': 'entries',
                                         'exits': 'exits'
                                         },
                                 'dates': {
                                         'parse': True,
-                                        'in_cols': [6, 7],
+                                        'in_cols': [1, 2],
                                         'out_col': 'datetime',
                                         'parser': row_ops.clean_transit_date
                                         },
