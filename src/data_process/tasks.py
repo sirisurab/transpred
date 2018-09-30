@@ -75,15 +75,15 @@ task_type_map: Dict = {
                                 'out': 'cl-transit',
                                 'cols': {
                                         'station': 'station',
-#                                        'date': 'date',
-#                                        'time': 'time',
+                                        'date': 'date',
+                                        'time': 'time',
                                         'datetime': 'datetime',
                                         'entries': 'entries',
                                         'exits': 'exits'
                                         },
                                 'dates': {
                                         'parse': True,
-                                        'in_cols': ['date', 'time'],
+                                        'in_cols': [6, 7],
                                         'out_col': 'datetime',
                                         'parser': row_ops.clean_transit_date
                                         },
