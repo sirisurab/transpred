@@ -4,11 +4,11 @@ def clean_cabs(row: pd.Series) -> pd.Series:
     print(' row index is %s' % str(row.index))
     print(' row passenger_count with loc index is %s' % str(row.loc['passenger_count']))
     print(' row index is %s' % str(row.index))
-    print(' row dropoff_datetime with loc index is %s' % str(row.loc['dropoff_datetime']))
-    row['dropoff_datetime'] = pd.to_datetime(row['dropoff_datetime'],
+    print(' row dodatetime with loc index is %s' % str(row.loc['dodatetime']))
+    row['dodatetime'] = pd.to_datetime(row['dodatetime'],
                                              format="%Y-%m-%d %H:%M:%S",
                                             errors='coerce')
-    row['passenger_count'] = pd.to_numeric(row['passenger_count'], errors='coerce')
+    row['passengers'] = pd.to_numeric(row['passengers'], errors='coerce')
     #row['longitude'] = pd.to_numeric(row['longitude'], errors='coerce')
     #row['latitude'] = pd.to_numeric(row['latitude'], errors='coerce')
     return row

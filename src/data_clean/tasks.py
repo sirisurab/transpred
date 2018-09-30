@@ -93,14 +93,14 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
     try:
         for file in files:
             file_obj = s3.open('s3://'+in_bucket+'/'+file, 'r')
-            encoding: str = find_encoding(file_obj)
-            print('file encoding is '+encoding)
+            #encoding: str = find_encoding(file_obj)
+            #print('file encoding is '+encoding)
             df = pd.read_csv(file_obj,
                                header=0,
                                usecols= lambda x: x.lower() in list(cols.keys()),
                                skipinitialspace=True,
                                converters=converters,
-                               encoding=encoding
+                               encoding='utf-8'
                                )
 
             # rename columns
@@ -117,7 +117,7 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
 
 
             #map row-wise operations
-            df = df.apply(func=row_op, axis=1).dropna()
+            #df = df.apply(func=row_op, axis=1).dropna()
 
 
             # specific processing for transit
@@ -125,7 +125,7 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
                 #df = remove_outliers(df, col='DELEXITS')
 
             # drop na values
-            #df = df.dropna()
+            df = df.dropna()
 
 
             # save in out bucket
