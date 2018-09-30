@@ -75,8 +75,8 @@ task_type_map: Dict = {
                                 'out': 'cl-transit',
                                 'cols': {
                                         'station': 'station',
-                                        'date': 'date',
-                                        'time': 'time',
+#                                        'date': 'date',
+#                                        'time': 'time',
                                         'datetime': 'datetime',
                                         'entries': 'entries',
                                         'exits': 'exits'
