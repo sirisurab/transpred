@@ -57,7 +57,7 @@ def remove_outliers(df, cols: List[str]):
 
 def perform(task_type: str, b_task: bytes) -> bool:
     task: str = str(b_task, 'utf-8')
-    files: List[str]
+    files: List[str] = []
     task_split: List[str]
     year: str
     if task_type in ['cl-gcabs', 'cl-ycabs']:
@@ -81,7 +81,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
         file_part2: str = ".txt"
         files = [file_part1 + prefix_zero(day) + file_part2 for day in range(1, 32)]
 
-    #print('processing files ' + str(files))
+    print('processing files ' + str(files))
 
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']

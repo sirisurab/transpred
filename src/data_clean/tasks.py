@@ -50,7 +50,7 @@ def remove_outliers(df, col):
 
 def perform(task_type: str, b_task: bytes) -> bool:
     task: str = str(b_task, 'utf-8')
-    files: List[str]
+    files: List[str] = []
     task_split: List[str]
     year: str
     if task_type in ['cl-gcabs', 'cl-ycabs']:
