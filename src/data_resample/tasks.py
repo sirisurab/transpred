@@ -83,8 +83,8 @@ def perform(task_type: str) -> bool:
                          encoding='utf-8'
                          )
 
-        df = df.set_index(df[index_col].astype('datetime64[ns]'), sorted=True)
-        dtypes = {col: dtypes[col] for col in dtypes.keys() if col != index_col}
+        #df = df.set_index(df[index_col].astype('datetime64[ns]'), sorted=True)
+        #dtypes = {col: dtypes[col] for col in dtypes.keys() if col != index_col}
 
         print('after set index ')
 
@@ -96,11 +96,11 @@ def perform(task_type: str) -> bool:
         # specific processing for transit
         if task_type == 'rs-transit':
             df = df.map_partitions(partial(remove_outliers, cols=diff['new_cols']),
-                                   meta=dd.utils.make_meta(dtypes, pd.DatetimeIndex()))
+                                   meta=dtypes)
 
         # filter
         if filter_by_key == 'weekday':
-            df = df.loc[df.index.weekday == filter_by_val]
+            df = df.loc[df[index_col].dt.weekday == filter_by_val]
 
         if group['compute']:
             grouper_cols = group['by_cols']
@@ -111,7 +111,7 @@ def perform(task_type: str) -> bool:
         # resample using frequency and aggregate function specified
         # df = compose(df.resample(resample_freq), aggr_func)
         df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] +
-                        grouper_cols).apply(aggr_func, meta=dd.utils.make_meta(dtypes, pd.DatetimeIndex()))
+                        grouper_cols).apply(aggr_func, meta=dtypes)
 
         df = df.reset_index()
 
