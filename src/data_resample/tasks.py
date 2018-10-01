@@ -79,12 +79,13 @@ def perform(task_type: str) -> bool:
                                storage_options=s3_options,
                                header=0,
                                skipinitialspace=True,
+                               dtypes=dtypes,
                                encoding='utf-8'
                                )
 
 
             df = df.set_index(index_col, sorted=True)
-            print('after set index ')
+            print('after set index '+df.index)
 
             if diff['compute']:
                 df[diff['new_cols']] = df[diff['cols']].diff()
