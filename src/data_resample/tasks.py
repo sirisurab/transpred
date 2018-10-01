@@ -48,10 +48,11 @@ def make_traffic(*args) -> List[str]:
 
 
 def remove_outliers(df, cols: List[str]):
-    intqrange: List[float] = [df[col].quantile(0.75) - df[col].quantile(0.25) for col in cols]
-    discard_map = lambda reduced_discard, enum_col: reduced_discard | (df[enum_col[1]] < 0) | (df[enum_col[1]] > 3 * intqrange[enum_col[0]])
-    discard = reduce(discard_map, enumerate(cols), [False for _ in range(df.size)])
-    return df.loc[~discard]
+    for col in cols:
+        intqrange: float = df[col].quantile(0.75) - df[col].quantile(0.25)
+        discard = (df[col] < 0) | (df[col] > 3 * intqrange)
+        df = df.loc[~discard]
+    return df
 
 
 
