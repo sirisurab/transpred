@@ -70,9 +70,10 @@ def add_cab_zone(df) -> pd.DataFrame:
                 print('taxi zones GeoDF columns '+str(taxi_zone_df.columns))
                 geometry: List[Point] = [Point(xy) for xy in zip(df.dolatitude, df.dolongitude)]
                 df = df.drop(['dolatitude', 'dolongitude'], axis=1)
-                crs = taxi_zone_df.crs
-                print('taxi zones shapefile crs '+str(crs))
-                #crs: Dict[str, str] = {'init': 'epsg:4326'}
+                crs: Dict[str, str] = {'init': 'epsg:4326'}
+                taxi_zone_df = taxi_zone_df.to_crs(crs)
+                #crs: Dict[str, str] = {'proj':'llc', 'datum':'NAD83', 'no_defs': True}
+                #print('taxi zones shapefile crs '+str(crs))
                 geodf: GeoDataFrame = GeoDataFrame(df, crs=crs, geometry=geometry)
                 #print('converted df to GeoDF '+str(geodf.head(1)))
                 print('converted df to GeoDF '+str(geodf.columns))
