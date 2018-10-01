@@ -60,10 +60,10 @@ def perform(task_type: str, b_task: bytes) -> bool:
     files: List[str] = []
     task_split: List[str]
     year: str
-    if task_type in ['cl-gcabs', 'cl-ycabs']:
-        if task_type == 'cl-gcabs':
+    if task_type in ['rs-gcabs', 'rs-ycabs']:
+        if task_type == 'rs-gcabs':
             file_suffix = 'green'
-        elif task_type == 'cl-ycabs':
+        elif task_type == 'rs-ycabs':
             file_suffix = 'yellow'
 
         task_split = task.split('-')
@@ -73,7 +73,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
         get_filename = lambda month: file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
         files = list(map(get_filename, months(quarter)))
 
-    elif task_type == 'cl-transit':
+    elif task_type == 'rs-transit':
         task_split = task.split('-')
         year = task_split[0]
         month: int = int(task_split[1])
