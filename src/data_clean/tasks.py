@@ -59,10 +59,12 @@ def add_cab_zone(df) -> pd.DataFrame:
         try:
             if ('dolatitude' in df.columns) and ('dolongitude' in df.columns):
                 # load taxi-zone shapefile
-                taxi_zone_file: str = '/tmp/taxi_zones.shp'
-                ps.get_file(bucket='others', filename='taxi_zones.shp', filepath=taxi_zone_file)
-                print('fetched taxi zones shape file')
-                taxi_zone_df: GeoDataFrame = read_file(taxi_zone_file)
+                taxi_zone_files: List[str] = ['taxi_zones.shp', 'taxi_zones.shx', 'taxi_zones.dbf', 'taxi_zones.shp.xml', 'taxi_zones.sbx', 'taxi_zones.sbn', 'taxi_zones.prj']
+                path_prefix: str = '/tmp/'
+                for file in taxi_zone_files:
+                    ps.get_file(bucket='others', filename=file, filepath=path_prefix+file)
+                    print('fetched taxi zones shape file %s' % file)
+                taxi_zone_df: GeoDataFrame = read_file(path_prefix+taxi_zone_files[0])
                 print('taxi zones GeoDF %s' % taxi_zone_df.head())
                 geometry: List[Point] = [Point(xy) for xy in zip(df.dolatitude, df.dolongitude)]
                 df = df.drop(['dolatitude', 'dolongitude'], axis=1)
