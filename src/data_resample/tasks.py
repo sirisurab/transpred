@@ -106,7 +106,7 @@ def perform(task_type: str) -> bool:
 
             # resample using frequency and aggregate function specified
             #df = compose(df.resample(resample_freq), aggr_func)
-            df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)]+grouper_cols).agg(aggr_func)
+            df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)]+grouper_cols, meta=dtypes).agg(aggr_func)
 
             df = df.unstack().reset_index()
 
