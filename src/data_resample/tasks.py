@@ -90,7 +90,7 @@ def perform(task_type: str) -> bool:
 
         if diff['compute']:
             df[diff['new_cols']] = df[diff['cols']].diff()
-            df = df.drop(columns=diff['cols'])
+            df = df.drop(diff['cols'], axis=1)
             diff_cols: Dict[str] = dict(zip(diff['cols'], diff['new_cols']))
             dtypes = {col if col not in diff['cols'] else diff_cols[col]: dtypes[col] for col in dtypes.keys()}
 
