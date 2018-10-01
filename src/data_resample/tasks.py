@@ -87,10 +87,14 @@ def perform(task_type: str) -> bool:
 
 
             df = df.set_index(index_col, sorted=True)
+            dtypes = {col: dtypes[col] for col in dtypes.keys() if col != index_col}
+
             print('after set index ')
 
             if diff['compute']:
                 df[diff['new_cols']] = df[diff['cols']].diff()
+                diff_cols: Dict[str] = dict(zip(diff['cols'], diff['new_cols']))
+                dtypes = {col if col not in diff['cols'] else diff_cols[col]: dtypes[col] for col in dtypes.keys()}
 
             # specific processing for transit
             if task_type == 'rs-transit':
@@ -102,6 +106,7 @@ def perform(task_type: str) -> bool:
 
             if group['compute']:
                 grouper_cols = group['by_cols']
+                dtypes = {col: dtypes[col] for col in dtypes.keys() if col not in grouper_cols}
             else:
                 grouper_cols = []
 
