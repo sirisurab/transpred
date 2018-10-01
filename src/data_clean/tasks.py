@@ -156,6 +156,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
             #print('file encoding is '+encoding)
             df = pd.read_csv(file_obj,
                                header=0,
+                               sep='\s+',
                                usecols= lambda x: x.strip().lower() in list(cols.keys()),
                                parse_dates=dates,
                                date_parser=date_parser,
