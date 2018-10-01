@@ -108,7 +108,7 @@ def perform(task_type: str) -> bool:
             #df = compose(df.resample(resample_freq), aggr_func)
             df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)]+grouper_cols).apply(aggr_func, meta=dtypes)
 
-            df = df.unstack().reset_index()
+            df = df.reset_index()
 
             # save in out bucket
             s3_out_url: str = 's3://' + out_bucket + '/turnstile-*.csv'
