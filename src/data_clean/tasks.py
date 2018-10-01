@@ -1,5 +1,6 @@
 import sys
 from typing import Dict, List, Callable, Union, Optional
+from minio import Object
 import pandas as pd
 from data_tools import task_map
 from utils import persistence as ps
@@ -62,16 +63,19 @@ def add_cab_zone(df) -> pd.DataFrame:
                 taxi_zone_files: List[str] = ['taxi_zones.shp', 'taxi_zones.shx', 'taxi_zones.dbf', 'taxi_zones.shp.xml', 'taxi_zones.sbx', 'taxi_zones.sbn', 'taxi_zones.prj']
                 path_prefix: str = '/tmp/'
                 for file in taxi_zone_files:
-                    ps.get_file(bucket='others', filename=file, filepath=path_prefix+file)
-                    print('fetched taxi zones shape file %s' % file)
+                    file_obj: Object = ps.get_file(bucket='others', filename=file, filepath=path_prefix+file)
+                    print('fetched taxi zones shape file %s' % str(file_obj))
                 taxi_zone_df: GeoDataFrame = read_file(path_prefix+taxi_zone_files[0])
-                print('taxi zones GeoDF '+str(taxi_zone_df.head(2)))
+                print('taxi zones GeoDF '+str(taxi_zone_df.head(1)))
+                print('taxi zones GeoDF columns '+str(taxi_zone_df.columns))
                 geometry: List[Point] = [Point(xy) for xy in zip(df.dolatitude, df.dolongitude)]
                 df = df.drop(['dolatitude', 'dolongitude'], axis=1)
-                crs: Dict[str, str] = taxi_zone_df.crs
+                crs = taxi_zone_df.crs
+                print('taxi zones shapefile crs '+str(crs))
                 #crs: Dict[str, str] = {'init': 'epsg:4326'}
                 geodf: GeoDataFrame = GeoDataFrame(df, crs=crs, geometry=geometry)
-                print('converted df to GeoDF '+str(geodf.head(2)))
+                print('converted df to GeoDF '+str(geodf.head(1)))
+                print('converted df to GeoDF '+str(geodf.columns))
                 geodf = sjoin(geodf, taxi_zone_df, how='left', op='within')
                 print('after spatial join with taxi zones '+str(geodf.head(1)))
                 #df = geodf[['dodatetime', 'LocationID', 'passengers']].rename({'LocationID':'dolocationid'})
