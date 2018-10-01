@@ -60,12 +60,12 @@ def perform(task_type: str) -> bool:
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
     #cols: Dict[str, str] = task_type_map['cols']
-    diff: Dict = map['diff']
-    group: Dict = map['group']
+    diff: Dict = task_type_map['diff']
+    group: Dict = task_type_map['group']
     filter_by_key: str = resample_map['filter_by']['key']
     filter_by_val: int = resample_map['filter_by']['value']
     resample_freq: str = resample_map['freq']
-    aggr_func: Callable = map['aggr_func']
+    aggr_func: Callable = task_type_map['aggr_func']
 
 
     dtypes: Dict[str, str] = task_type_map['dtypes']
