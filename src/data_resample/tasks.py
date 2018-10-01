@@ -55,7 +55,7 @@ def remove_outliers(df, cols: List[str]):
 
 
 
-def perform(task_type: str, b_task: bytes) -> bool:
+def perform(task_type: str) -> bool:
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
