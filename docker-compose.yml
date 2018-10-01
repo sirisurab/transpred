@@ -26,20 +26,20 @@ services:
 #    networks:
 #      - backend
 
-  dscheduler:
-    image: daskdev/dask
-    ports:
-      - '8786:8786'
-      - '8787:8787'
-    command: ['dask-scheduler']
-    networks:
-      - backend
+#  dscheduler:
+#    image: daskdev/dask
+#    ports:
+#      - '8786:8786'
+#      - '8787:8787'
+#    command: ['dask-scheduler']
+#    networks:
+#      - backend
 
-  dworker:
-    image: daskdev/dask
-    command: ['dask-worker','scheduler:8786']
-    networks:
-      - backend
+#  dworker:
+#    image: daskdev/dask
+#    command: ['dask-worker','scheduler:8786']
+#    networks:
+#      - backend
 
 
   g_cabs_creator:
