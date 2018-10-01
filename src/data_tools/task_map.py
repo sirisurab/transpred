@@ -131,11 +131,7 @@ task_type_map: Dict = {
                                         'entries': 'int64',
                                         'exits': 'int64'
                                         },
-                                'converters': {
-                                        'datetime': pd.to_datetime,
-                                        'entries': pd.to_numeric,
-                                        'exits': pd.to_numeric
-                                        },
+                                'date_cols': ['datetime'],
                                 'index': {
                                         'col': 'datetime',
                                         'sorted': True

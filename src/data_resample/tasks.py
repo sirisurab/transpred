@@ -60,7 +60,7 @@ def perform(task_type: str) -> bool:
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
     #cols: Dict[str, str] = task_type_map['cols']
-    converters: Dict [str, Callable] = task_type_map['converters']
+    date_cols: List[str] = task_type_map['date_cols']
     diff: Dict = task_type_map['diff']
     group: Dict = task_type_map['group']
     filter_by_key: str = resample_map['filter_by']['key']
@@ -80,7 +80,7 @@ def perform(task_type: str) -> bool:
                                storage_options=s3_options,
                                header=0,
                                skipinitialspace=True,
-                               converters=converters,
+                               parse_dates=date_cols,
                                encoding='utf-8'
                                )
 
