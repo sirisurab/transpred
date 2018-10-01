@@ -68,7 +68,8 @@ def add_cab_zone(df) -> pd.DataFrame:
                 print('taxi zones GeoDF %s' % str(taxi_zone_df.head(1)))
                 geometry: List[Point] = [Point(xy) for xy in zip(df.dolatitude, df.dolongitude)]
                 df = df.drop(['dolatitude', 'dolongitude'], axis=1)
-                crs: Dict[str, str] = {'init': 'epsg:4326'}
+                crs: Dict[str, str] = taxi_zone_df.crs
+                #crs: Dict[str, str] = {'init': 'epsg:4326'}
                 geodf: GeoDataFrame = GeoDataFrame(df, crs=crs, geometry=geometry)
                 print('converted df to GeoDF %s' % str(geodf.head(1)))
                 geodf = sjoin(geodf, taxi_zone_df, how='inner', op='within')
