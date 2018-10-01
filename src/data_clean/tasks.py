@@ -65,13 +65,13 @@ def add_cab_zone(df) -> pd.DataFrame:
                     ps.get_file(bucket='others', filename=file, filepath=path_prefix+file)
                     print('fetched taxi zones shape file %s' % file)
                 taxi_zone_df: GeoDataFrame = read_file(path_prefix+taxi_zone_files[0])
-                print('taxi zones GeoDF %s' % str(taxi_zone_df.head(1)))
+                print('taxi zones GeoDF %s' % str(taxi_zone_df[0:2]))
                 geometry: List[Point] = [Point(xy) for xy in zip(df.dolatitude, df.dolongitude)]
                 df = df.drop(['dolatitude', 'dolongitude'], axis=1)
                 crs: Dict[str, str] = taxi_zone_df.crs
                 #crs: Dict[str, str] = {'init': 'epsg:4326'}
                 geodf: GeoDataFrame = GeoDataFrame(df, crs=crs, geometry=geometry)
-                print('converted df to GeoDF %s' % str(geodf.head(1)))
+                print('converted df to GeoDF %s' % str(geodf[0:2]))
                 geodf = sjoin(geodf, taxi_zone_df, how='inner', op='within')
                 print('after spatial join with taxi zones %s' % str(geodf.head(1)))
                 df = geodf[['dodatetime', 'LocationID', 'passengers']].rename({'LocationID':'dolocationid'})
