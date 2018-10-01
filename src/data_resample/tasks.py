@@ -97,6 +97,7 @@ def perform(task_type: str) -> bool:
         # specific processing for transit
         if task_type == 'rs-transit':
             print('meta before removing outliers is '+str(dtypes))
+            print('columns before removing outliers is '+str(df.columns))
             df = df.map_partitions(partial(remove_outliers, cols=diff['new_cols']),
                                    meta=dtypes)
 
@@ -114,6 +115,7 @@ def perform(task_type: str) -> bool:
         # df = compose(df.resample(resample_freq), aggr_func)
         dtypes = {col: dtypes[col] for col in dtypes.keys() if col != index_col}
         print('meta before grouping is '+str(dtypes))
+        print('columns before grouping is '+str(df.columns))
         df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] +
                         grouper_cols).apply(aggr_func, meta=dtypes)
 
