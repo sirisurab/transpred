@@ -108,17 +108,17 @@ def perform(task_type: str) -> bool:
 
         if group['compute']:
             grouper_cols = group['by_cols']
-            dtypes = {col: dtypes[col] for col in dtypes.keys() if col not in grouper_cols}
+            #dtypes = {col: dtypes[col] for col in dtypes.keys() if col not in grouper_cols}
         else:
             grouper_cols = []
 
         # resample using frequency and aggregate function specified
         # df = compose(df.resample(resample_freq), aggr_func)
-        dtypes = {col: dtypes[col] for col in dtypes.keys() if col != index_col}
+        #dtypes = {col: dtypes[col] for col in dtypes.keys() if col != index_col}
         print('meta before grouping is '+str(dtypes))
         print('columns before grouping is '+str(df.columns))
         df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] +
-                        grouper_cols)[dtypes.keys()].apply(aggr_func, meta=dtypes)
+                        grouper_cols).apply(aggr_func, meta=dtypes)
 
         #df = df.reset_index()
 
