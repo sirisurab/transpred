@@ -2,7 +2,7 @@
 
 
 from typing import Dict
-from data_process import row_operations as row_ops
+from data_tools import row_operations as row_ops
 task_type_map: Dict = {
                   'cl-gcabs': {
                                 'in': 'gcabs',
@@ -34,11 +34,7 @@ task_type_map: Dict = {
                                 'index': {
                                         'col': 'dodatetime',
                                         'sorted': False
-                                        },
-                                'diff': {
-                                        'compute': False
-                                        },
-                                'aggr_func': ''
+                                        }
                                 },
                   'cl-ycabs': {
                                 'in': 'ycabs',
@@ -64,11 +60,7 @@ task_type_map: Dict = {
                                 'index': {
                                         'col': 'dropoff_datetime',
                                         'sorted': False
-                                        },
-                                'diff': {
-                                        'compute': False
-                                        },
-                                'aggr_func': ''
+                                        }
                                 },
                   'cl-transit': {
                                 'in': 'transit',
@@ -99,14 +91,7 @@ task_type_map: Dict = {
                                 'index': {
                                         'col': 'datetime',
                                         'sorted': True
-                                        },
-                                'row_op': row_ops.clean_transit,
-                                'diff': {
-                                        'compute': True,
-                                        'cols': ['exits', 'entries'],
-                                        'new_cols': ['delex', 'delent']
-                                        },
-                                'aggr_func': ''
+                                        }
                                 },
                   'cl-traffic': {
                                 'in': 'gcabs',
@@ -114,4 +99,51 @@ task_type_map: Dict = {
                                 'row_op': row_ops.clean_traffic,
                                 'aggr_func': ''
                                 },
+                  'rs-gcabs': {
+                                'in': 'cl-gcabs',
+                                'out': 'rs-gcabs',
+                                'dtypes': {
+                                        'dodatetime': 'datetime64[ns]',
+                                        'passengers': 'int64',
+                                        'dolocationid': 'object',
+                                        'dolongitude' : 'float64',
+                                        'dolatitude' : 'float64'
+                                        },
+                                'index': {
+                                        'col': 'dodatetime',
+                                        'sorted': True
+                                        },
+                                'diff': {
+                                        'compute': False
+                                        },
+                                'group': {
+                                        'compute': True,
+                                        'by_cols': ['dolocationid']
+                                },
+                                'aggr_func': sum
+                                },
+                  'rs-transit': {
+                                'in': 'cl-transit',
+                                'out': 'rs-transit',
+                                'dtypes': {
+                                        'station': 'object',
+                                        'datetime': 'datetime64[ns]',
+                                        'entries': 'int64',
+                                        'exits': 'int64'
+                                        },
+                                'index': {
+                                        'col': 'datetime',
+                                        'sorted': True
+                                        },
+                                'diff': {
+                                        'compute': True,
+                                        'cols': ['exits', 'entries'],
+                                        'new_cols': ['delex', 'delent']
+                                        },
+                                'group': {
+                                        'compute': True,
+                                        'by_cols': ['station']
+                                        },
+                                'aggr_func': sum
+                                }
                   }

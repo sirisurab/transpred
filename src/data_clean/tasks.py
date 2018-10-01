@@ -1,20 +1,13 @@
 import sys
 from typing import Dict, List, Callable, Union, Optional
 import pandas as pd
-from data_process import tasks
+from data_tools import task_map
 from utils import persistence as ps
 from functools import reduce
 from data_load import tasks as dl_tasks
 from s3fs.core import S3FileSystem
-import chardet
 
-resample_map: Dict = {
-                        'filter_by': {
-                            'key': 'weekday',
-                            'value': 2
-                        },
-                        'freq': '1M'
-                    }
+
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
 
 
@@ -26,7 +19,7 @@ def make_cabs(cab_type: str,*args) -> List[str]:
         task_type = 'cl-ycabs'
 
     if not task_type == '':
-        map: Dict = tasks.task_type_map[task_type]
+        map: Dict = task_map.task_type_map[task_type]
         out_bucket: str = map['out']
         ps.create_bucket(out_bucket)
         return dl_tasks.make_cabs(*args)
@@ -35,14 +28,14 @@ def make_cabs(cab_type: str,*args) -> List[str]:
 
 
 def make_transit(*args) -> List[str]:
-    map: Dict = tasks.task_type_map['cl-transit']
+    map: Dict = task_map.task_type_map['cl-transit']
     out_bucket: str = map['out']
     ps.create_bucket(out_bucket)
     return dl_tasks.make_transit(*args)
 
 
 def make_traffic(*args) -> List[str]:
-    map: Dict = tasks.task_type_map['cl-traffic']
+    map: Dict = task_map.task_type_map['cl-traffic']
     out_bucket: str = map['out']
     ps.create_bucket(out_bucket)
     return dl_tasks.make_traffic(*args)
@@ -52,13 +45,6 @@ def remove_outliers(df, col):
     intqrange: float = df[col].quantile(0.75) - df[col].quantile(0.25)
     discard = (df[col] < 0) | (df[col] > 3 * intqrange)
     return df.loc[~discard]
-
-
-def find_encoding(file) -> str:
-    #file = open(file_name, 'rb').read()
-    result = chardet.detect(file.read())
-    char_enc = result['encoding']
-    return char_enc
 
 
 
@@ -90,7 +76,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
 
     print('processing files '+str(files))
 
-    task_type_map: Dict = tasks.task_type_map[task_type]
+    task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
     cols: Dict[str, str] = task_type_map['cols']
@@ -184,7 +170,7 @@ def perform_transit(b_task: bytes) -> bool:
     files: List[str] = [file_part1 + prefix_zero(day) + file_part2 for day in range(1, 32)]
     print('processing files '+str(files))
 
-    task_type_map: Dict = tasks.task_type_map['cl-transit']
+    task_type_map: Dict = task_map.task_type_map['cl-transit']
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
     cols: Dict[str, str] = task_type_map['cols']
