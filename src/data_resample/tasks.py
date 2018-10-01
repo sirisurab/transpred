@@ -78,6 +78,7 @@ def perform(task_type: str) -> bool:
         df = dd.read_csv(urlpath=s3_in_url,
                          storage_options=s3_options,
                          header=0,
+                         usecols=dtypes.keys(),
                          skipinitialspace=True,
                          parse_dates=date_cols,
                          encoding='utf-8'
