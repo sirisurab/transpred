@@ -65,17 +65,15 @@ def add_cab_zone(df) -> pd.DataFrame:
                 for file in taxi_zone_files:
                     file_obj: Object = ps.get_file(bucket='others', filename=file, filepath=path_prefix+file)
                     #print('fetched taxi zones shape file %s' % str(file_obj))
-                taxi_zone_df: GeoDataFrame = read_file(path_prefix+taxi_zone_files[0])
-                #print('taxi zones GeoDF '+str(taxi_zone_df.head(1)))
-                print('taxi zones GeoDF columns '+str(taxi_zone_df.columns))
-                geometry: List[Point] = [Point(xy) for xy in zip(df.dolatitude, df.dolongitude)]
-                df = df.drop(['dolatitude', 'dolongitude'], axis=1)
                 crs: Dict[str, str] = {'init': 'epsg:4326'}
-                taxi_zone_df = taxi_zone_df.to_crs(crs)
-                #crs: Dict[str, str] = {'proj':'llc', 'datum':'NAD83', 'no_defs': True}
-                #print('taxi zones shapefile crs '+str(crs))
+                taxi_zone_df: GeoDataFrame = read_file(path_prefix+taxi_zone_files[0]).to_crs(crs)
+                taxi_zone_df = taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'], axis=1, inplace=True)
+                print('taxi zones GeoDF '+str(taxi_zone_df.head(1)))
+                print('taxi zones GeoDF columns '+str(taxi_zone_df.columns))
+                geometry: List[Point] = [Point(xy) for xy in zip(df['dolatitude'], df['dolongitude'])]
+                df = df.drop(['dolatitude', 'dolongitude'], axis=1)
                 geodf: GeoDataFrame = GeoDataFrame(df, crs=crs, geometry=geometry)
-                #print('converted df to GeoDF '+str(geodf.head(1)))
+                print('converted df to GeoDF '+str(geodf.head(1)))
                 print('converted df to GeoDF '+str(geodf.columns))
                 geodf = sjoin(geodf, taxi_zone_df, how='left', op='within')
                 print('after spatial join with taxi zones '+str(geodf.head(1)))
