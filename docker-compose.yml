@@ -45,7 +45,7 @@ services:
   g_cabs_creator:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_creator.py cl-gcabs 2016 2018
+    command: ./src/task_creator.py cl-gcabs 2016
     restart: on-failure
     networks:
       - backend
