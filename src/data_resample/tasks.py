@@ -75,7 +75,7 @@ def perform(task_type: str) -> bool:
     try:
 
             s3_in_url: str = 's3://' + in_bucket + '/*.*'
-            df = dd.read_csv(path=s3_in_url,
+            df = dd.read_csv(urlpath=s3_in_url,
                                storage_options=s3_options,
                                header=0,
                                skipinitialspace=True,
