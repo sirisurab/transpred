@@ -67,7 +67,7 @@ def add_cab_zone(df) -> pd.DataFrame:
                     #print('fetched taxi zones shape file %s' % str(file_obj))
                 crs: Dict[str, str] = {'init': 'epsg:4326'}
                 taxi_zone_df: GeoDataFrame = read_file(path_prefix+taxi_zone_files[0]).to_crs(crs)
-                taxi_zone_df = taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'], axis=1, inplace=True)
+                taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'], axis=1, inplace=True)
                 print('taxi zones GeoDF '+str(taxi_zone_df.head(1)))
                 print('taxi zones GeoDF columns '+str(taxi_zone_df.columns))
                 geometry: List[Point] = [Point(xy) for xy in zip(df['dolongitude'], df['dolatitude'])]
