@@ -102,7 +102,7 @@ def perform(task_type: str) -> bool:
 
             # filter
             if filter_by_key == 'weekday':
-                df = df.loc[df[index_col].dt.weekday == filter_by_val]
+                df = df.loc[df.index.weekday == filter_by_val]
 
             if group['compute']:
                 grouper_cols = group['by_cols']
