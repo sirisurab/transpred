@@ -2,6 +2,7 @@ from minio import Minio
 from typing import Dict, Union
 from minio.error import ResponseError, BucketAlreadyExists, BucketAlreadyOwnedByYou
 from s3fs.core import S3FileSystem
+from urllib3.response import HTTPResponse
 KEY: str = 'minio'
 SECRET: str = 'minio123'
 ENDPOINT: str = 'minio:9000'
@@ -134,3 +135,7 @@ def create_bucket(bucket: str) -> bool:
     return True
 
 
+def get_file(bucket: str, filename: str, filepath: str) -> HTTPResponse:
+    mc = get_client()
+    print('created minio client')
+    return mc.fget_object(bucket_name=bucket, object_name=filename, file_path=filepath)

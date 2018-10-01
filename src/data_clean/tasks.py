@@ -6,6 +6,9 @@ from utils import persistence as ps
 from functools import reduce
 from data_load import tasks as dl_tasks
 from s3fs.core import S3FileSystem
+from geopandas import GeoDataFrame, read_file, sjoin
+from shapely.geometry import Point
+from urllib3.response import HTTPResponse
 
 
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
@@ -46,6 +49,36 @@ def remove_outliers(df, col):
     discard = (df[col] < 0) | (df[col] > 3 * intqrange)
     return df.loc[~discard]
 
+def add_cab_zone(df) -> pd.DataFrame:
+
+    if 'dolocationid' in df.columns:
+        print('In data clean tasks for cabs. Field dolocationid already exists')
+        return df
+    else:
+        print('In data clean tasks for cabs. Field dolocationid not found')
+        try:
+            if ('dolatitude' in df.columns) and ('dolongitude' in df.columns):
+                # load taxi-zone shapefile
+                taxi_zone_file: str = '/tmp/taxi_zones.shp'
+                ps.get_file(bucket='others', filename='taxi_zones.shp', filepath=taxi_zone_file)
+                print('fetched taxi zones shape file')
+                taxi_zone_df: GeoDataFrame = read_file(taxi_zone_file)
+                print('taxi zones GeoDF %s' % taxi_zone_df.head())
+                geometry: List[Point] = [Point(xy) for xy in zip(df.dolatitude, df.dolongitude)]
+                df = df.drop(['dolatitude', 'dolongitude'], axis=1)
+                crs: Dict[str, str] = {'init': 'epsg:4326'}
+                geodf: GeoDataFrame = GeoDataFrame(df, crs=crs, geometry=geometry)
+                print('converted df to GeoDF %s' % geodf.head())
+                geodf = sjoin(geodf, taxi_zone_df, how='inner', op='intersects')
+                print('after spatial join with taxi zones %s' % geodf.head())
+                df = geodf.drop(['geometry'], axis=1)
+                print('converted back to dataframe %s' % df.head())
+                return df
+            else:
+                print('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')
+                raise KeyError('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')
+        except Exception as err:
+            raise err
 
 
 def perform(task_type: str, b_task: bytes) -> bool:
@@ -98,7 +131,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
     dtypes: Dict[str, str] = task_type_map['dtypes']
     index_col: str = task_type_map['index']['col']
     sorted: bool = task_type_map['index']['sorted']
-    row_op: Callable = task_type_map['row_op']
+    row_op: Dict[str, Callable] = task_type_map['row_op']
     s3 = ps.get_s3fs_client()
     print('got s3fs client')
 
@@ -137,7 +170,9 @@ def perform(task_type: str, b_task: bytes) -> bool:
 
 
             #map row-wise operations
-            #df = df.apply(func=row_op, axis=1).dropna()
+            if task_type in ['cl-gcabs','cl-ycabs']:
+                #df = df.apply(func=row_op['func'], axis=1)
+                df = add_cab_zone(df)
 
 
             # specific processing for transit

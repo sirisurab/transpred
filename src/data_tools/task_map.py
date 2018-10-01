@@ -14,7 +14,10 @@ task_type_map: Dict = {
                                         'dropoff_longitude':'dolongitude',
                                         'dropoff_latitude':'dolatitude'
                                         },
-                                'row_op': row_ops.clean_cabs,
+                                'row_op': {
+                                        'compute': True,
+                                        'func': row_ops.clean_cabs
+                                        },
                                 'dates': {
                                         'parse': False
                                         },
@@ -44,7 +47,10 @@ task_type_map: Dict = {
                                         'passenger_count':'passenger_count',
                                         'dolocationid':'dolocationid'
                                         },
-                                'row_op': row_ops.clean_cabs,
+                                'row_op': {
+                                        'compute': True,
+                                        'func': row_ops.clean_cabs
+                                        },
                                 'dates': {
                                         'parse': False
                                         },
@@ -82,6 +88,9 @@ task_type_map: Dict = {
                                         'entries': row_ops.clean_num,
                                         'exits': row_ops.clean_num
                                         },
+                                'row_op': {
+                                        'compute': False
+                                        },
                                 'dtypes': {
                                         'station': 'object',
                                         'datetime': 'datetime64[ns]',
@@ -109,6 +118,7 @@ task_type_map: Dict = {
                                         'dolongitude' : 'float64',
                                         'dolatitude' : 'float64'
                                         },
+                                'date_cols': ['datetime'],
                                 'index': {
                                         'col': 'dodatetime',
                                         'sorted': True
