@@ -96,7 +96,7 @@ def perform(task_type: str) -> bool:
         # specific processing for transit
         if task_type == 'rs-transit':
             df = df.map_partitions(partial(remove_outliers, cols=diff['new_cols']),
-                                   meta=dd.utils.make_meta(dtypes, pd.DatetimeIndex))
+                                   meta=dd.utils.make_meta(dtypes, pd.DatetimeIndex()))
 
         # filter
         if filter_by_key == 'weekday':
@@ -111,7 +111,7 @@ def perform(task_type: str) -> bool:
         # resample using frequency and aggregate function specified
         # df = compose(df.resample(resample_freq), aggr_func)
         df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] +
-                        grouper_cols).apply(aggr_func, meta=dd.utils.make_meta(dtypes, pd.DatetimeIndex))
+                        grouper_cols).apply(aggr_func, meta=dd.utils.make_meta(dtypes, pd.DatetimeIndex()))
 
         df = df.reset_index()
 
