@@ -68,18 +68,18 @@ def add_cab_zone(df) -> pd.DataFrame:
                 crs: Dict[str, str] = {'init': 'epsg:4326'}
                 taxi_zone_df: GeoDataFrame = read_file(path_prefix+taxi_zone_files[0]).to_crs(crs)
                 taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'], axis=1, inplace=True)
-                print('taxi zones GeoDF '+str(taxi_zone_df.head(1)))
-                print('taxi zones GeoDF columns '+str(taxi_zone_df.columns))
+                #print('taxi zones GeoDF '+str(taxi_zone_df.head(1)))
+                #print('taxi zones GeoDF columns '+str(taxi_zone_df.columns))
                 geometry: List[Point] = [Point(xy) for xy in zip(df['dolongitude'], df['dolatitude'])]
                 df = df.drop(['dolatitude', 'dolongitude'], axis=1)
                 geodf: GeoDataFrame = GeoDataFrame(df, crs=crs, geometry=geometry)
-                print('converted df to GeoDF '+str(geodf.head(1)))
-                print('converted df to GeoDF '+str(geodf.columns))
+                #print('converted df to GeoDF '+str(geodf.head(1)))
+                #print('converted df to GeoDF '+str(geodf.columns))
                 geodf = sjoin(geodf, taxi_zone_df, how='left', op='within')
-                print('after spatial join with taxi zones '+str(geodf.head(1)))
+                print('after spatial join with taxi zones ')
                 df = geodf[['dodatetime', 'LocationID', 'passengers']].rename(columns={'LocationID':'dolocationid'})
                 #df=geodf
-                print('converted back to dataframe '+str(df.head(1)))
+                #print('converted back to dataframe '+str(df.head(1)))
                 return df
             else:
                 print('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')

@@ -19,10 +19,12 @@ task_type_map: Dict = {
                                         'func': row_ops.clean_cabs
                                         },
                                 'dates': {
-                                        'parse': False
+                                        'parse': True,
+                                        'in_cols': [0],
+                                        'out_col': 'dodatetime',
+                                        'parser': row_ops.clean_cabs_dt
                                         },
                                 'converters': {
-                                        'dodatetime': row_ops.clean_cabs_dt,
                                         'passengers': row_ops.clean_num,
                                         'dolongitude': row_ops.clean_num,
                                         'dolatitude': row_ops.clean_num
