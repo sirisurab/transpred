@@ -173,15 +173,15 @@ def perform(task_type: str, b_task: bytes) -> bool:
             df = df.rename(columns=rename_cols)
             print('after rename '+str(df.columns))
 
+            # map row-wise operations
+            if task_type in ['cl-gcabs', 'cl-ycabs']:
+                # df = df.apply(func=row_op['func'], axis=1)
+                df = add_cab_zone(df)
+
             if not sorted:
                 df = df.set_index(index_col).sort_index().reset_index()
                 print('after sort '+str(df.columns))
 
-
-            #map row-wise operations
-            if task_type in ['cl-gcabs','cl-ycabs']:
-                #df = df.apply(func=row_op['func'], axis=1)
-                df = add_cab_zone(df)
 
 
             # specific processing for transit
