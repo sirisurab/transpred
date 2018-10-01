@@ -1,8 +1,8 @@
 # coding=utf-8
-
-
 from typing import Dict
 from data_tools import row_operations as row_ops
+import pandas as pd
+
 task_type_map: Dict = {
                   'cl-gcabs': {
                                 'in': 'gcabs',
@@ -130,6 +130,11 @@ task_type_map: Dict = {
                                         'datetime': 'datetime64[ns]',
                                         'entries': 'int64',
                                         'exits': 'int64'
+                                        },
+                                'converters': {
+                                        'datetime': pd.to_datetime,
+                                        'entries': pd.to_numeric,
+                                        'exits': pd.to_numeric
                                         },
                                 'index': {
                                         'col': 'datetime',
