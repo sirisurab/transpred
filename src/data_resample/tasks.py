@@ -141,7 +141,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
                 df[diff['new_cols']] = df[diff['cols']].diff()
                 df = df.drop(diff['cols'], axis=1)
                 diff_cols: Dict[str] = dict(zip(diff['cols'], diff['new_cols']))
-                dtypes = {col if col not in diff['cols'] else diff_cols[col]: dtypes[col] for col in dtypes.keys()}
+                #dtypes = {col if col not in diff['cols'] else diff_cols[col]: dtypes[col] for col in dtypes.keys()}
 
             # specific processing for transit
             if task_type == 'rs-transit':
@@ -156,17 +156,18 @@ def perform(task_type: str, b_task: bytes) -> bool:
 
             if group['compute']:
                 grouper_cols = group['by_cols']
-                dtypes = {col: dtypes[col] for col in dtypes.keys() if col not in grouper_cols}
+                #dtypes = {col: dtypes[col] for col in dtypes.keys() if col not in grouper_cols}
             else:
                 grouper_cols = []
 
             # resample using frequency and aggregate function specified
             # df = compose(df.resample(resample_freq), aggr_func)
-            dtypes = {col: dtypes[col] for col in dtypes.keys() if col != index_col}
+            #dtypes = {col: dtypes[col] for col in dtypes.keys() if col != index_col}
+            cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
             #print('meta before grouping is '+str(dtypes))
             #print('columns before grouping is '+str(df.columns))
             #df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols).apply(aggr_func, meta=dtypes)
-            df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[dtypes.keys()].apply(aggr_func)
+            df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
 
             #df = df.unstack().reset_index()
 
