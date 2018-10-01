@@ -114,14 +114,16 @@ def perform(task_type: str, b_task: bytes) -> bool:
     out_bucket: str = task_type_map['out']
     cols: Dict[str, str] = task_type_map['cols']
     parse_dates: bool = task_type_map['dates']['parse']
-    in_date_cols: List[str] = task_type_map['dates']['in_cols']
-    out_date_col: str = task_type_map['dates']['out_col']
+    in_date_cols: List[str]
+    out_date_col: str
     dates: Union[bool, Dict[str, List[str]]]
     date_parser: Optional[Callable]
     rename_cols: Dict[str, str]
     if parse_dates:
+        in_date_cols = task_type_map['dates']['in_cols']
+        out_date_col = task_type_map['dates']['out_col']
         dates = {out_date_col: in_date_cols}
-        date_parser=task_type_map['dates']['parser']
+        date_parser = task_type_map['dates']['parser']
         rename_cols = {col: cols[col] for col in cols.keys() if col not in in_date_cols}
     else:
         dates = False
