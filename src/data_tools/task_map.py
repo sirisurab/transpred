@@ -19,12 +19,10 @@ task_type_map: Dict = {
                                         'func': row_ops.clean_cabs
                                         },
                                 'dates': {
-                                        'parse': True,
-                                        'in_cols': ['Lpep_dropoff_datetime'],
-                                        'out_col': 'dodatetime',
-                                        'parser': row_ops.clean_cabs_dt
+                                        'parse': False
                                         },
                                 'converters': {
+                                        'dodatetime': row_ops.clean_cabs_dt,
                                         'passengers': row_ops.clean_num,
                                         'dolongitude': row_ops.clean_num,
                                         'dolatitude': row_ops.clean_num
