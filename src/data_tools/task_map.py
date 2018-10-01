@@ -145,6 +145,6 @@ task_type_map: Dict = {
                                         'compute': True,
                                         'by_cols': ['station']
                                         },
-                                'aggr_func': sum
+                                'aggr_func': 'sum'
                                 }
                   }

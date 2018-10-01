@@ -66,7 +66,7 @@ def perform(task_type: str) -> bool:
     filter_by_key: str = resample_map['filter_by']['key']
     filter_by_val: int = resample_map['filter_by']['value']
     resample_freq: str = resample_map['freq']
-    aggr_func: Callable = task_type_map['aggr_func']
+    aggr_func: str = task_type_map['aggr_func']
 
 
     dtypes: Dict[str, str] = task_type_map['dtypes']
@@ -106,7 +106,7 @@ def perform(task_type: str) -> bool:
 
             # resample using frequency and aggregate function specified
             #df = compose(df.resample(resample_freq), aggr_func)
-            df = compose(df.groupby([pd.Grouper(key=index_col, freq=resample_freq)]+grouper_cols), aggr_func)
+            df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)]+grouper_cols).agg(aggr_func)
 
             df = df.unstack().reset_index()
 
