@@ -5,6 +5,7 @@
 
 from data_load import tasks as dl_tasks
 from data_clean import tasks as dc_tasks
+from data_resample import tasks as rs_tasks
 from utils import messaging as msg
 from error_handling import errors
 import sys
@@ -40,6 +41,8 @@ def perform_task(task_type: str) -> bool:
                 status = dl_tasks.perform_cabs('yellow', task)
             elif task_type in ['cl-transit', 'cl-traffic', 'cl-gcabs', 'cl-ycabs']:
                 status = dc_tasks.perform(task_type, task)
+            elif task_type in ['rs-transit', 'rs-traffic', 'rs-gcabs', 'rs-ycabs']:
+                status = rs_tasks.perform(task_type, task)
             else:
                 raise errors.TaskTypeError(task_type)
 

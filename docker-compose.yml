@@ -108,13 +108,13 @@ services:
   turnstile_creator:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_creator.py cl-transit 2016
+    command: ./src/task_creator.py rs-transit 2016
     restart: on-failure
     networks:
       - backend
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   turnstile_loader:
     build: .
@@ -146,13 +146,15 @@ services:
   turnstile_resampler:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/dask_performer.py rs-transit
+    command: ./src/task_performer.py rs-transit
     restart: on-failure
     networks:
       - backend
     depends_on:
-      - dscheduler
-      - dworker
+      - turnstile_creator
+    deploy:
+      mode: replicated
+      replicas: 12
 
 #  stations_fetcher:
 #    build: .

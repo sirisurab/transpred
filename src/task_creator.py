@@ -10,6 +10,7 @@
 from typing import List
 from data_load import tasks as dl_tasks
 from data_clean import tasks as dc_tasks
+from data_resample import tasks as rs_tasks
 from utils import messaging as msg
 from functools import partial
 import sys
@@ -40,9 +41,17 @@ def create_tasks(task_type: str, *args) -> None:
     elif task_type == 'cl-traffic':
         tasks = dc_tasks.make_traffic()
     elif task_type == 'cl-gcabs':
-        tasks = dc_tasks.make_cabs('green',*args)
+        tasks = dc_tasks.make_cabs('green', *args)
     elif task_type == 'cl-ycabs':
-        tasks = dc_tasks.make_cabs('yellow',*args)
+        tasks = dc_tasks.make_cabs('yellow', *args)
+    elif task_type == 'rs-transit':
+        tasks = rs_tasks.make_transit(*args)
+    elif task_type == 'rs-traffic':
+        tasks = rs_tasks.make_traffic()
+    elif task_type == 'rs-gcabs':
+        tasks = rs_tasks.make_cabs('green', *args)
+    elif task_type == 'rs-ycabs':
+        tasks = rs_tasks.make_cabs('yellow', *args)
     else:
         tasks = []
 
