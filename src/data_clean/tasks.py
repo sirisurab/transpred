@@ -131,10 +131,11 @@ def perform(task_type: str, b_task: bytes) -> bool:
         out_date_col = task_type_map['dates']['out_col']
         if len(in_date_cols) > 1:
             dates = {out_date_col: in_date_cols}
+            rename_cols = {col: cols[col] for col in cols.keys() if col not in in_date_cols}
         else:
-            dates = {out_date_col: in_date_cols[0]}
+            dates = in_date_cols
+            rename_cols = cols
         date_parser = task_type_map['dates']['parser']
-        rename_cols = {col: cols[col] for col in cols.keys() if col not in in_date_cols}
     else:
         dates = False
         date_parser = None
