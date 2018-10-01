@@ -90,6 +90,7 @@ def perform(task_type: str) -> bool:
 
         if diff['compute']:
             df[diff['new_cols']] = df[diff['cols']].diff()
+            df = df.drop(columns=diff['cols'])
             diff_cols: Dict[str] = dict(zip(diff['cols'], diff['new_cols']))
             dtypes = {col if col not in diff['cols'] else diff_cols[col]: dtypes[col] for col in dtypes.keys()}
 
@@ -111,11 +112,12 @@ def perform(task_type: str) -> bool:
 
         # resample using frequency and aggregate function specified
         # df = compose(df.resample(resample_freq), aggr_func)
+        dtypes = {col: dtypes[col] for col in dtypes.keys() if col != index_col}
         print('meta before grouping is '+str(dtypes))
         df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] +
                         grouper_cols).apply(aggr_func, meta=dtypes)
 
-        df = df.reset_index()
+        #df = df.reset_index()
 
         # save in out bucket
         s3_out_url: str = 's3://' + out_bucket + '/turnstile-*.csv'
