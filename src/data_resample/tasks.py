@@ -118,7 +118,7 @@ def perform(task_type: str) -> bool:
         print('meta before grouping is '+str(dtypes))
         print('columns before grouping is '+str(df.columns))
         df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] +
-                        grouper_cols).apply(aggr_func, meta=dtypes)
+                        grouper_cols)[dtypes.keys()].apply(aggr_func, meta=dtypes)
 
         #df = df.reset_index()
 
