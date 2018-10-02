@@ -157,7 +157,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
             df = pd.read_csv(file_obj,
                                header=0,
                                sep=',',
-                               usecols= lambda x: x.strip().lower() in list(cols.keys()),
+                               usecols= lambda x: str(x).strip().lower() in list(cols.keys()),
                                index_col=False,
                                parse_dates=dates,
                                date_parser=date_parser,
