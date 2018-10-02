@@ -2,6 +2,7 @@
 from typing import Dict
 from data_tools import row_operations as row_ops
 import pandas as pd
+from numpy import int64, float64
 
 task_type_map: Dict = {
                   'cl-gcabs': {
@@ -162,6 +163,11 @@ task_type_map: Dict = {
                                 'index': {
                                         'col': 'datetime',
                                         'sorted': True
+                                        },
+                                'dtypes': {
+                                        'station': object,
+                                        'entries': int64,
+                                        'exits': int64
                                         }
                                 },
                   'rg-gcabs': {
@@ -171,6 +177,10 @@ task_type_map: Dict = {
                                 'index': {
                                         'col': 'dodatetime',
                                         'sorted': True
+                                        },
+                                'dtypes': {
+                                        'passengers': int64,
+                                        'dolocationid': int64
                                         }
                                 }
                   }

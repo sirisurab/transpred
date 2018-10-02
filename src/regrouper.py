@@ -1,7 +1,7 @@
 import pandas as pd
 import sys
 from data_tools import task_map
-from typing import List
+from typing import List, Dict
 from utils import persistence as ps
 from urllib3.response import HTTPResponse
 from s3fs import S3FileSystem as s3fs
@@ -14,11 +14,12 @@ def regroup(task_type: str) -> bool:
         in_bucket: str = task_map.task_type_map[task_type]['in']
         out_bucket: str = task_map.task_type_map[task_type]['out']
         split_by: List[str] = task_map.task_type_map[task_type]['split_by']
+        dtypes: Dict[str, str] = task_map.task_type_map[task_type]['dtypes']
         print('fetched in out and split_by for task_type %(task)s' % {'task': task_type})
 
         # read files from in bucket and concat into one df
         filestreams: List[HTTPResponse] = ps.get_all_filestreams(bucket=in_bucket)
-        df = pd.concat([pd.read_csv(stream, encoding='utf-8') for stream in filestreams], ignore_index=True)
+        df = pd.concat([pd.read_csv(stream, encoding='utf-8', dtype=dtypes) for stream in filestreams], ignore_index=True)
         print('read files from in bucket and concat-ted into one df')
 
         # group by split_by and write each group to a separate file
@@ -26,7 +27,13 @@ def regroup(task_type: str) -> bool:
         # create out bucket
         ps.create_bucket(out_bucket)
         for name, group in df.groupby(split_by):
-            filename: str = name
+            filename: str
+            if isinstance(name, int):
+                filename = str(name)
+            elif isinstance(name, float):
+                filename = str(int(name))
+            else:
+                filename = str(name).replace('/', ' ')
             group.to_csv(s3.open('s3://'+out_bucket+'/'+filename, 'w'))
             #print('wrote file %(file)s' % {'file': filename})
 
