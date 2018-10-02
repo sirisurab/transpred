@@ -203,7 +203,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
             if task_type in ['cl-gcabs', 'cl-ycabs'] and 'dolocationid' not in df.columns:
                 print('In data clean tasks for cabs. Field dolocationid not found')
                 # df = df.apply(func=row_op['func'], axis=1)
-                #df = add_cab_zone(df)
+                df = add_cab_zone(df)
 
             if not sorted:
                 df = df.set_index(index_col).sort_index().reset_index()
