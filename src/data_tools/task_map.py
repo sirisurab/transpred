@@ -114,11 +114,9 @@ task_type_map: Dict = {
                                 'dtypes': {
                                         'dodatetime': 'datetime64[ns]',
                                         'passengers': 'int64',
-                                        'dolocationid': 'object',
-                                        'dolongitude' : 'float64',
-                                        'dolatitude' : 'float64'
+                                        'dolocationid': 'int64'
                                         },
-                                'date_cols': ['datetime'],
+                                'date_cols': ['dodatetime'],
                                 'index': {
                                         'col': 'dodatetime',
                                         'sorted': True

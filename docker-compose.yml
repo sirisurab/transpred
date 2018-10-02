@@ -45,7 +45,7 @@ services:
   g_cabs_creator:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_creator.py cl-gcabs 2016
+    command: ./src/task_creator.py rs-gcabs 2016
     restart: on-failure
     networks:
       - backend
@@ -72,13 +72,25 @@ services:
     command: ./src/task_performer.py cl-gcabs
     restart: on-failure
     networks:
-    - backend
+      - backend
     depends_on:
-    - g_cabs_creator
+      - g_cabs_creator
     deploy:
       mode: replicated
-      replicas: 12
+      replicas: 0
 
+  g_cabs_resampler:
+      build: .
+      image: sirisurab/tp-app:latest
+      command: ./src/task_performer.py rs-gcabs
+      restart: on-failure
+      networks:
+        - backend
+      depends_on:
+        - g_cabs_creator
+      deploy:
+        mode: replicated
+        replicas: 12
 #  y_cabs_creator:
 #    build: .
 #    image: sirisurab/tp-app:latest
