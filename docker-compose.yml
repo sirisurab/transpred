@@ -101,7 +101,7 @@ services:
         - backend
       deploy:
         mode: replicated
-        replicas: 0
+        replicas: 1
 #  y_cabs_creator:
 #    build: .
 #    image: sirisurab/tp-app:latest

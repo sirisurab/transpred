@@ -28,7 +28,7 @@ def regroup(task_type: str) -> bool:
         for name, group in df.groupby(split_by):
             filename: str = name
             group.to_csv(s3.open('s3://'+out_bucket+'/'+filename, 'w'))
-            print('wrote file %(file)s' % {'file': filename})
+            #print('wrote file %(file)s' % {'file': filename})
 
     except Exception as err:
         print('Error: %(error)s in regrouper for task_type %(task)s' % {'error': err, 'task': task_type})

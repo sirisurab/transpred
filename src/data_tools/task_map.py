@@ -163,5 +163,14 @@ task_type_map: Dict = {
                                         'col': 'datetime',
                                         'sorted': True
                                         }
+                                },
+                  'rg-gcabs': {
+                                'in': 'rs-gcabs',
+                                'out': 'rg-gcabs',
+                                'split_by': ['dolocationid'],
+                                'index': {
+                                        'col': 'dodatetime',
+                                        'sorted': True
+                                        }
                                 }
                   }
