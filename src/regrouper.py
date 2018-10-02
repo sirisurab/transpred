@@ -37,7 +37,7 @@ def regroup(task_type: str) -> bool:
     return True
 
 
-if __name__ == 'main':
+if __name__ == '__main__':
     task_type: str = sys.argv[1]
     print('regrouping for task type %s' % task_type)
     status: bool = regroup(task_type)
