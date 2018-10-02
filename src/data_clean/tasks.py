@@ -10,6 +10,7 @@ from s3fs.core import S3FileSystem
 from geopandas import GeoDataFrame, read_file, sjoin
 from shapely.geometry import Point
 from urllib3.response import HTTPResponse
+from data_tools import row_operations as row_ops
 
 
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
@@ -88,28 +89,6 @@ def perform(task_type: str, b_task: bytes) -> bool:
     files: List[str] = []
     task_split: List[str]
     year: str
-    if task_type in ['cl-gcabs', 'cl-ycabs']:
-        if task_type == 'cl-gcabs':
-            file_suffix = 'green'
-        elif task_type == 'cl-ycabs':
-            file_suffix = 'yellow'
-
-        task_split = task.split('-')
-        year = task_split[0]
-        quarter: int = int(task_split[1])
-        months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
-        get_filename = lambda month: file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
-        files = list(map(get_filename, months(quarter)))
-
-    elif task_type == 'cl-transit':
-        task_split = task.split('-')
-        year = task_split[0]
-        month: int = int(task_split[1])
-        file_part1: str = 'turnstile_' + year + prefix_zero(month)
-        file_part2: str = ".txt"
-        files = [file_part1 + prefix_zero(day) + file_part2 for day in range(1, 32)]
-
-    print('processing files '+str(files))
 
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
@@ -140,6 +119,32 @@ def perform(task_type: str, b_task: bytes) -> bool:
     index_col: str = task_type_map['index']['col']
     sorted: bool = task_type_map['index']['sorted']
     row_op: Dict[str, Callable] = task_type_map['row_op']
+
+    if task_type in ['cl-gcabs', 'cl-ycabs']:
+        if task_type == 'cl-gcabs':
+            file_suffix = 'green'
+        elif task_type == 'cl-ycabs':
+            file_suffix = 'yellow'
+
+        task_split = task.split('-')
+        year = task_split[0]
+        quarter: int = int(task_split[1])
+        months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
+        get_filename = lambda month: file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
+        files = list(map(get_filename, months(quarter)))
+
+
+
+    elif task_type == 'cl-transit':
+        task_split = task.split('-')
+        year = task_split[0]
+        month: int = int(task_split[1])
+        file_part1: str = 'turnstile_' + year + prefix_zero(month)
+        file_part2: str = ".txt"
+        files = [file_part1 + prefix_zero(day) + file_part2 for day in range(1, 32)]
+
+    print('processing files '+str(files))
+
     s3 = ps.get_s3fs_client()
     print('got s3fs client')
 
@@ -154,17 +159,37 @@ def perform(task_type: str, b_task: bytes) -> bool:
                 continue
             #encoding: str = find_encoding(file_obj)
             #print('file encoding is '+encoding)
-            df = pd.read_csv(file_obj,
-                               header=0,
-                               sep=',',
-                               usecols= lambda x: str(x).strip().lower() in list(cols.keys()),
-                               index_col=False,
-                               parse_dates=dates,
-                               date_parser=date_parser,
-                               skipinitialspace=True,
-                               converters=converters,
-                               encoding='utf-8'
-                               )
+
+            # handle change in data format for cab data
+            if task_type in ['cl-gcabs', 'cl-ycabs'] and year > 2015 and quarter > 2:
+                df = pd.read_csv(file_obj,
+                                 header=None,
+                                 usecols=[2, 6, 7],
+                                 names=['dodatetime', 'dolocationid', 'passengers'],
+                                 parse_dates=dates,
+                                 date_parser=date_parser,
+                                 skipinitialspace=True,
+                                 skip_blank_lines=True,
+                                 low_memory=False,
+                                 converters={
+                                     'dodatetime': row_ops.clean_cabs_dt,
+                                     'passengers': row_ops.clean_num
+                                        },
+                                 encoding='utf-8'
+                                 )
+
+            else:
+                df = pd.read_csv(file_obj,
+                                   header=0,
+                                   usecols= lambda x: x.strip().lower() in list(cols.keys()),
+                                   parse_dates=dates,
+                                   date_parser=date_parser,
+                                   skipinitialspace=True,
+                                   skip_blank_lines=True,
+                                   low_memory=False,
+                                   converters=converters,
+                                   encoding='utf-8'
+                                   )
 
             # rename columns
             df.columns = map(str.lower, df.columns)
