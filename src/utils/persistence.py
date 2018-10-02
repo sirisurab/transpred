@@ -1,5 +1,5 @@
 from minio import Minio, Object
-from typing import Dict, Union
+from typing import Dict, Union, List
 from minio.error import ResponseError, BucketAlreadyExists, BucketAlreadyOwnedByYou
 from s3fs.core import S3FileSystem
 from urllib3.response import HTTPResponse
@@ -139,3 +139,15 @@ def get_file(bucket: str, filename: str, filepath: str) -> Object:
     mc = get_client()
     print('created minio client')
     return mc.fget_object(bucket_name=bucket, object_name=filename, file_path=filepath)
+
+
+def get_file_stream(bucket: str, filename: str) -> HTTPResponse:
+    mc = get_client()
+    print('created minio client')
+    return mc.get_object(bucket_name=bucket, object_name=filename)
+
+
+def get_all_filestreams(bucket: str) -> List[HTTPResponse]:
+    s3: S3FileSystem = get_s3fs_client()
+    filenames: List[str] = s3.glob(bucket+'/')
+    return [get_file_stream(bucket=bucket, filename=file) for file in filenames]

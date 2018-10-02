@@ -154,5 +154,14 @@ task_type_map: Dict = {
                                         'by_cols': ['station']
                                         },
                                 'aggr_func': sum
+                                },
+                  'rg-transit': {
+                                'in': 'rs-transit',
+                                'out': 'rg-transit',
+                                'split_by': ['station'],
+                                'index': {
+                                        'col': 'datetime',
+                                        'sorted': True
+                                        }
                                 }
                   }

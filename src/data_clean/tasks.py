@@ -97,7 +97,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
     parse_dates: bool = task_type_map['dates']['parse']
     in_date_cols: List[str]
     out_date_col: str
-    dates: Union[bool, Dict[str, List[str]]]
+    dates: Union[bool, Dict[str, List[str]], List[str]]
     date_parser: Optional[Callable]
     rename_cols: Dict[str, str]
     if parse_dates:

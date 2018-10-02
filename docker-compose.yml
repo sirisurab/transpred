@@ -51,7 +51,7 @@ services:
       - backend
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
 
   g_cabs_loader:
     build: .
@@ -90,7 +90,18 @@ services:
         - g_cabs_creator
       deploy:
         mode: replicated
-        replicas: 12
+        replicas: 0
+
+  g_cabs_regrouper:
+      build: .
+      image: sirisurab/tp-app:latest
+      command: ./src/regrouper.py rg-gcabs
+      restart: on-failure
+      networks:
+        - backend
+      deploy:
+        mode: replicated
+        replicas: 0
 #  y_cabs_creator:
 #    build: .
 #    image: sirisurab/tp-app:latest
@@ -167,6 +178,17 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+
+  turnstile_regrouper:
+    build: .
+    image: sirisurab/tp-app:latest
+    command: ./src/regrouper.py rg-transit
+    restart: on-failure
+    networks:
+      - backend
+    deploy:
+      mode: replicated
+      replicas: 1
 
 #  stations_fetcher:
 #    build: .
