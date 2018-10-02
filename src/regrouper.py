@@ -14,10 +14,12 @@ def regroup(task_type: str) -> bool:
         in_bucket: str = task_map.task_type_map[task_type]['in']
         out_bucket: str = task_map.task_type_map[task_type]['out']
         split_by: List[str] = task_map.task_type_map[task_type]['split_by']
+        print('fetched in out and split_by for task_type %(task)s' % {'task': task_type})
 
         # read files from in bucket and concat into one df
         filestreams: List[HTTPResponse] = ps.get_all_filestreams(bucket=in_bucket)
         df = pd.concat([pd.read_csv(stream, encoding='utf-8') for stream in filestreams], ignore_index=True)
+        print('read files from in bucket and concat-ted into one df')
 
         # group by split_by and write each group to a separate file
         s3: s3fs = ps.get_s3fs_client()
@@ -26,6 +28,7 @@ def regroup(task_type: str) -> bool:
         for name, group in df.groupby(split_by):
             filename: str = name
             group.to_csv(s3.open('s3://'+out_bucket+'/'+filename, 'w'))
+            print('wrote file %(file)s' % {'file': filename})
 
     except Exception as err:
         print('Error: %(error)s in regrouper for task_type %(task)s' % {'error': err, 'task': task_type})
