@@ -161,7 +161,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
             #print('file encoding is '+encoding)
 
             # handle change in data format for cab data
-            if task_type in ['cl-gcabs', 'cl-ycabs'] and year > 2015 and quarter > 2:
+            if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016','2017','2018'] and quarter > 2:
                 df = pd.read_csv(file_obj,
                                  header=None,
                                  usecols=[2, 6, 7],
