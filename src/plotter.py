@@ -88,11 +88,16 @@ def plot(*args) -> bool:
             plot_filename: str = ts_filename+'.html'
             tmp_filepath: str = '/tmp/'+plot_filename
             output_file(tmp_filepath)
-            p = figure(title='plot for station '+station, x_axis_label='datetime', y_axis_label='')
+            p = figure(title='plot for station '+station,
+                       x_axis_label='datetime', x_axis_type='datetime',
+                       y_axis_label='')
 
-            p.line(transit_df[ts_datecols[0]], transit_df['delex'], legend='transit exits', line_width=2)
-            p.line(transit_df[ts_datecols[0]], transit_df['delent'], legend='transit entries', line_width=2)
-            p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'], legend='cab droppoffs', line_width=2)
+            p.line(transit_df[ts_datecols[0]], transit_df['delex'],
+                   legend='transit exits', line_width=2, line_color='blue')
+            p.line(transit_df[ts_datecols[0]], transit_df['delent'],
+                   legend='transit entries', line_width=2, line_color='green')
+            p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'],
+                   legend='cab droppoffs', line_width=2, line_color='red')
 
             show(p)
 
