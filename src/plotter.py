@@ -90,9 +90,9 @@ def plot(*args) -> bool:
             output_file(tmp_filepath)
             p = figure(title='plot for station '+station, x_axis_label='datetime', y_axis_label='')
 
-            p.line(transit_df[ts_datecols[0]], transit_df['delex'], label='transit exits', line_width=2)
-            p.line(transit_df[ts_datecols[0]], transit_df['delent'], label='transit entries', line_width=2)
-            p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'], label='cab droppoffs', line_width=2)
+            p.line(transit_df[ts_datecols[0]], transit_df['delex'], legend='transit exits', line_width=2)
+            p.line(transit_df[ts_datecols[0]], transit_df['delent'], legend='transit entries', line_width=2)
+            p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'], legend='cab droppoffs', line_width=2)
 
             show(p)
 
