@@ -73,7 +73,7 @@ def plot(*args) -> bool:
                         #'dolocationid': 'int64',
                         'passengers': 'int64'
                     }
-                    gcabs_df = concat([read_csv(ps.get_file_stream(bucket=bucket, filename=locationid),
+                    gcabs_df = concat([read_csv(ps.get_file_stream(bucket=bucket, filename=str(locationid)),
                                                            usecols=cabs_datecols + list(dtypes.keys()),
                                                            parse_dates=cabs_datecols,
                                                            encoding='utf-8', dtype=dtypes)
