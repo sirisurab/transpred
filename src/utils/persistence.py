@@ -48,7 +48,7 @@ def copy_files(source_folder:str, dest_bucket:str) -> bool:
         print('all files in folder %(source)s are %(files)s' % {'source': source_folder, 'files': filenames})
         for file in filenames:
             mc.fput_object(bucket_name=dest_bucket,
-                           file_path=source_folder,
+                           file_path=file,
                            object_name=file.rsplit('/', 1)[1])
 
         print('copied from '+source_folder+' to bucket '+dest_bucket)
