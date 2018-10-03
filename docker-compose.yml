@@ -238,7 +238,7 @@ services:
   geo_merger:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/geo_merger.py 0.1
+    command: ./src/geo_merger.py 5
     restart: on-failure
     networks:
       - backend
