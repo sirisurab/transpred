@@ -43,20 +43,22 @@ def plot(*args) -> bool:
 
             # read transit data for station (rg-transit bucket)
             filestream = ps.get_file_stream(bucket=RGTRANSIT_BUCKET, filename=ts_filename)
+            ts_datecols = ['datetime']
             dtypes = {
-                                     'datetime': 'datetime64',
+                                     #'datetime': 'datetime64',
                                      #'station': 'object',
                                      'delex': 'int64',
                                      'delent': 'int64'
                                     }
-            transit_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(),
-                                             parse_dates=['datetime'],
+            transit_df: DataFrame = read_csv(filestream, usecols=ts_datecols + list(dtypes.keys()),
+                                             parse_dates=ts_datecols,
                                              encoding='utf-8', dtype=dtypes)
 
             #transit_df = transit_df.set_index('datetime').sort_index().reset_index()
 
             # read data from other in buckets
             gcabs_df: DataFrame
+            cabs_datecols = ['dodatetime']
             for bucket in in_buckets:
                 if bucket == 'rg-gcabs':
                     # determine relevant cabs files
@@ -67,19 +69,19 @@ def plot(*args) -> bool:
                     #for zone in dolocationids:
                     #filestream = ps.get_file_stream(bucket=bucket, filename=zone)
                     dtypes = {
-                        'dodatetime': 'datetime64',
+                        #'dodatetime': 'datetime64',
                         #'dolocationid': 'int64',
                         'passengers': 'int64'
                     }
                     gcabs_df = concat([read_csv(ps.get_file_stream(bucket=bucket, filename=locationid),
-                                                           usecols=dtypes.keys(),
-                                                           parse_dates=['dodatetime'],
+                                                           usecols=cabs_datecols + list(dtypes.keys()),
+                                                           parse_dates=cabs_datecols,
                                                            encoding='utf-8', dtype=dtypes)
                                                   for locationid in dolocationids],
                                                  ignore_index=True)
 
-                    gcabs_df = gcabs_df.groupby(['dodatetime']).apply('sum').\
-                        set_index('dodatetime').sort_index().reset_index()
+                    gcabs_df = gcabs_df.groupby(cabs_datecols).apply('sum').\
+                        set_index(cabs_datecols).sort_index().reset_index()
 
             # create plots
             plot_filepath: str = task+'/'+str(buffer)+'/'
@@ -88,9 +90,9 @@ def plot(*args) -> bool:
             output_file(tmp_filepath)
             p = figure(title='plot for station '+station, x_axis_label='datetime', y_axis_label='')
 
-            p.line(transit_df['datetime'], transit_df['delex'], label='transit exits', line_width=2)
-            p.line(transit_df['datetime'], transit_df['delent'], label='transit entries', line_width=2)
-            p.line(gcabs_df['dodatetime'], gcabs_df['passengers'], label='cab droppoffs', line_width=2)
+            p.line(transit_df[ts_datecols[0]], transit_df['delex'], label='transit exits', line_width=2)
+            p.line(transit_df[ts_datecols[0]], transit_df['delent'], label='transit entries', line_width=2)
+            p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'], label='cab droppoffs', line_width=2)
 
             show(p)
 
