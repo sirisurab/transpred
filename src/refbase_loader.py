@@ -13,7 +13,7 @@ REFBASE_BUCKET: str = 'ref-base'
 
 
 def load_ref_files(*args) -> bool:
-    for task in args:
+    for task in list(*args):
         print('loading ref files for %s' % task)
 
         if task in ['cabs', 'transit']:
@@ -39,7 +39,7 @@ def load_ref_files(*args) -> bool:
                                   axis=1, inplace=True)
                 taxi_zone_df.to_file(cabs_out_path+cabs_filename)
 
-                ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=out_path)
+                ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=cabs_out_path)
 
             elif task == 'transit':
                 # load station file
