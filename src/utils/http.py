@@ -1,6 +1,9 @@
 import urllib.request as ur
 import urllib.error as u_err
 import re
+from urllib3.response import HTTPResponse
+from urllib3 import PoolManager
+from typing import Tuple
 
 pattern = re.compile('bytes (\d+)-(\d+)/(\d+)')
 
@@ -17,6 +20,19 @@ def download_from_url(url: str, folder: str) -> str:
     else:
         return filename
 
+
+def get_stream_from_url(url: str) -> Tuple[str,HTTPResponse]:
+    try:
+        filename: str = url.split('/')[-1]
+        pool: PoolManager = PoolManager()
+        stream: HTTPResponse = pool.request('GET', url)
+        print('fetched stream for file %s' % filename)
+
+    except Exception as err:
+
+        raise err
+    else:
+        return filename, stream
 
 
 def download_chunk_from_url(url: str, folder: str, byte_range: str, filename: str) -> str:

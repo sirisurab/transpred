@@ -101,7 +101,7 @@ services:
         - backend
       deploy:
         mode: replicated
-        replicas: 1
+        replicas: 0
 #  y_cabs_creator:
 #    build: .
 #    image: sirisurab/tp-app:latest
@@ -188,7 +188,7 @@ services:
       - backend
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
 
 #  stations_fetcher:
 #    build: .
@@ -223,6 +223,17 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+
+  refbase_loader:
+    build: .
+    image: sirisurab/tp-app:latest
+    command: ./src/refbase_loader.py transit cabs
+    restart: on-failure
+    networks:
+      - backend
+    deploy:
+      mode: replicated
+      replicas: 1
 
 #volumes:
 #  tp:
