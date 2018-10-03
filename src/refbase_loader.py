@@ -78,6 +78,8 @@ def load_ref_files(*args) -> bool:
                 taxi_zone_df: GeoDataFrame = read_file(zip_path + cabs_filename).to_crs(crs)
                 taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'],
                                   axis=1, inplace=True)
+                taxi_zone_df.drop_duplicates(inplace=True)
+                taxi_zone_df.dropna(inplace=True)
                 os.makedirs(cabs_out_path, exist_ok=True)
                 taxi_zone_df.to_file(cabs_out_path+cabs_filename)
                 taxi_zone_files: List[str] = glob.glob(cabs_out_path+'*')
@@ -99,6 +101,9 @@ def load_ref_files(*args) -> bool:
                                             'Stop Name': 'stop_name', 'Borough': 'borough',
                                             'GTFS Latitude': 'latitude', 'GTFS Longitude': 'longitude'},
                                    inplace=True)
+
+                stations_df.drop_duplicates(inplace=True)
+                stations_df.dropna(inplace=True)
 
                 # add fuzzy station name from turnstile data
                 stations_df = add_fuzzy_station(df=stations_df)
