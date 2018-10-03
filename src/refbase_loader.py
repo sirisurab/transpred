@@ -8,6 +8,7 @@ from zipfile import ZipFile
 from geopandas import GeoDataFrame, read_file
 from shapely.geometry import Point
 import pandas as pd
+import os
 
 REFBASE_BUCKET: str = 'ref-base'
 
@@ -37,6 +38,7 @@ def load_ref_files(*args) -> bool:
                 taxi_zone_df: GeoDataFrame = read_file(zip_path + cabs_filename).to_crs(crs)
                 taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'],
                                   axis=1, inplace=True)
+                os.makedirs(cabs_out_path, exist_ok=True)
                 taxi_zone_df.to_file(cabs_out_path+cabs_filename)
 
                 ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=cabs_out_path)
@@ -58,6 +60,7 @@ def load_ref_files(*args) -> bool:
                 stations_df.drop(['latitude', 'longitude'], axis=1, inplace=True)
                 stations_geodf: GeoDataFrame = GeoDataFrame(stations_df, crs=crs, geometry=geometry)
                 stations_out_path: str = '/tmp/transit-ref-out/'
+                os.makedirs(stations_out_path, exist_ok=True)
                 stations_filename: str = 'stations.shp'
                 stations_geodf.to_file(stations_out_path+stations_filename)
 
