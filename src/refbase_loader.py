@@ -24,9 +24,9 @@ def load_ref_files(*args) -> bool:
             crs: Dict[str, str] = {'init': 'epsg:4326'}
             if task == 'cabs':
                 # load taxi zone files
-                taxi_zones_url: str = 'https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip'
+                taxi_zones_url: str = 'http://www.nyc.gov/html/exit-page.html?url=https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip'
                 taxi_zones_file: Tuple[str, HTTPResponse] = http.get_stream_from_url(taxi_zones_url)
-
+                print('zip file response status %s' % taxi_zones_file[1].status)
                 # unzip
                 zip_path: str = '/tmp/cabs-ref-in/'
                 zipfile: ZipFile = ZipFile(BytesIO(taxi_zones_file[1].read()))
