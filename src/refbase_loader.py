@@ -48,10 +48,7 @@ def add_fuzzy_station(df: pd.DataFrame, inplace: bool =False) -> pd.DataFrame:
                                         pd.DataFrame(stations_fuzzy)],
                                         axis=1, ignore_index=True).\
             rename(columns={0: 'turnstile_station', 1: 'fuzzy_ts_station'})
-        if inplace:
-            df.merge(st_df.dropna(), how='left', left_on='stop_name', right_on='fuzzy_ts_station', copy=False)
-        else:
-            df = pd.merge(df, st_df.dropna(), how='left', left_on='stop_name', right_on='fuzzy_ts_station', copy=False)
+        df = df.merge(st_df.dropna(), how='left', left_on='stop_name', right_on='fuzzy_ts_station', copy=False)
 
     return df.drop(columns=['fuzzy_ts_station'], inplace=inplace)
 
