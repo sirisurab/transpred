@@ -47,7 +47,7 @@ def add_fuzzy_station(df: pd.DataFrame) -> pd.DataFrame:
     st_df: pd.DataFrame = pd.concat([transit_df.reset_index(drop=True),
                                     pd.DataFrame(stations_fuzzy)],
                                     axis=1, ignore_index=True).\
-        rename(columns={0: 'turnstile_station', 1: 'fuzzy_ts_station'})
+        rename(columns={0: 'tsstation', 1: 'fuzzy_ts_station'})
     df = df.merge(st_df.dropna(), how='left', left_on='stop_name', right_on='fuzzy_ts_station', copy=False)
 
     return df.drop(columns=['fuzzy_ts_station'])
