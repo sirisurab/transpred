@@ -1,7 +1,6 @@
 # coding=utf-8
 from typing import Dict
 from data_tools import row_operations as row_ops
-import pandas as pd
 from numpy import int64, float64
 
 task_type_map: Dict = {
@@ -44,9 +43,11 @@ task_type_map: Dict = {
                                 'in': 'ycabs',
                                 'out': 'cl-ycabs',
                                 'cols': {
-                                        'tpep_dropoff_datetime':'dropoff_datetime',
-                                        'passenger_count':'passenger_count',
-                                        'dolocationid':'dolocationid'
+                                        'tpep_dropoff_datetime':'dodatetime',
+                                        'passenger_count':'passengers',
+                                        'dolocationid':'dolocationid',
+                                        'dropoff_longitude':'dolongitude',
+                                        'dropoff_latitude':'dolatitude'
                                         },
                                 'row_op': {
                                         'compute': True,
@@ -56,16 +57,20 @@ task_type_map: Dict = {
                                         'parse': False
                                         },
                                 'converters': {
-                                        'dropoff_datetime': row_ops.clean_cabs_dt,
-                                        'passenger_count': row_ops.clean_num
+                                        'dodatetime': row_ops.clean_cabs_dt,
+                                        'passengers': row_ops.clean_num,
+                                        'dolongitude': row_ops.clean_num,
+                                        'dolatitude': row_ops.clean_num
                                         },
                                 'dtypes': {
-                                        'dropoff_datetime': 'datetime64[ns]',
-                                        'passenger_count': 'int64',
-                                        'dolocationid': 'object'
+                                        'dodatetime': 'datetime64[ns]',
+                                        'passengers': 'int64',
+                                        'dolocationid': 'object',
+                                        'dolongitude' : 'float64',
+                                        'dolatitude' : 'float64'
                                         },
                                 'index': {
-                                        'col': 'dropoff_datetime',
+                                        'col': 'dodatetime',
                                         'sorted': False
                                         }
                                 },

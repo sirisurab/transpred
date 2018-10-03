@@ -2,44 +2,44 @@ version: '3.6'
 
 services:
 
-# redis standalone - uncomment
-#  redis:
-#    image: redis:alpine
-#    command: redis-server /usr/local/redis.conf
-#    configs:
-#      - source: redis_config
-#        target: /usr/local/redis.conf
-#    hostname: redis
-#    networks:
-#      - backend
+  # redis standalone - uncomment
+  #  redis:
+  #    image: redis:alpine
+  #    command: redis-server /usr/local/redis.conf
+  #    configs:
+  #      - source: redis_config
+  #        target: /usr/local/redis.conf
+  #    hostname: redis
+  #    networks:
+  #      - backend
 
-#  minio:
-#    image: minio/minio:RELEASE.2018-09-12T18-49-56Z
-#    volumes:
-#      - minio:/data
-#    ports:
-#      - "9000"
-#    command: server /data
-#    environment:
-#      MINIO_ACCESS_KEY:  minio
-#      MINIO_SECRET_KEY:   minio123
-#    networks:
-#      - backend
+  #  minio:
+  #    image: minio/minio:RELEASE.2018-09-12T18-49-56Z
+  #    volumes:
+  #      - minio:/data
+  #    ports:
+  #      - "9000"
+  #    command: server /data
+  #    environment:
+  #      MINIO_ACCESS_KEY:  minio
+  #      MINIO_SECRET_KEY:   minio123
+  #    networks:
+  #      - backend
 
-#  dscheduler:
-#    image: daskdev/dask
-#    ports:
-#      - '8786:8786'
-#      - '8787:8787'
-#    command: ['dask-scheduler']
-#    networks:
-#      - backend
+  #  dscheduler:
+  #    image: daskdev/dask
+  #    ports:
+  #      - '8786:8786'
+  #      - '8787:8787'
+  #    command: ['dask-scheduler']
+  #    networks:
+  #      - backend
 
-#  dworker:
-#    image: daskdev/dask
-#    command: ['dask-worker','scheduler:8786']
-#    networks:
-#      - backend
+  #  dworker:
+  #    image: daskdev/dask
+  #    command: ['dask-worker','scheduler:8786']
+  #    networks:
+  #      - backend
 
 
   g_cabs_creator:
@@ -48,7 +48,7 @@ services:
     command: ./src/task_creator.py cl-gcabs 2016
     restart: on-failure
     networks:
-      - backend
+    - backend
     deploy:
       mode: replicated
       replicas: 0
@@ -59,9 +59,9 @@ services:
     command: ./src/task_performer.py dl-gcabs
     restart: on-failure
     networks:
-      - backend
+    - backend
     depends_on:
-      - g_cabs_creator
+    - g_cabs_creator
     deploy:
       mode: replicated
       replicas: 0
@@ -72,61 +72,73 @@ services:
     command: ./src/task_performer.py cl-gcabs
     restart: on-failure
     networks:
-      - backend
+    - backend
     depends_on:
-      - g_cabs_creator
+    - g_cabs_creator
     deploy:
       mode: replicated
       replicas: 0
 
   g_cabs_resampler:
-      build: .
-      image: sirisurab/tp-app:latest
-      command: ./src/task_performer.py rs-gcabs
-      restart: on-failure
-      networks:
-        - backend
-      depends_on:
-        - g_cabs_creator
-      deploy:
-        mode: replicated
-        replicas: 0
+    build: .
+    image: sirisurab/tp-app:latest
+    command: ./src/task_performer.py rs-gcabs
+    restart: on-failure
+    networks:
+    - backend
+    depends_on:
+    - g_cabs_creator
+    deploy:
+      mode: replicated
+      replicas: 0
 
   g_cabs_regrouper:
-      build: .
-      image: sirisurab/tp-app:latest
-      command: ./src/regrouper.py rg-gcabs
-      restart: on-failure
-      networks:
-        - backend
-      deploy:
-        mode: replicated
-        replicas: 0
-#  y_cabs_creator:
-#    build: .
-#    image: sirisurab/tp-app:latest
-#    container_name: y_cabs_combiner
-#    networks:
-#      - backend
-#    command: ./bin/combiner_ycabs.sh 2016 2017
-#    volumes:
-#      - tp:/app
-#    depends_on:
-#      - redis
+    build: .
+    image: sirisurab/tp-app:latest
+    command: ./src/regrouper.py rg-gcabs
+    restart: on-failure
+    networks:
+    - backend
+    deploy:
+      mode: replicated
+      replicas: 0
 
-#  y_cabs_loader:
-#    build: .
-#    container_name: y_cabs_fetcher
-#    networks:
-#      - backend
-#    command: ./bin/fetcher_ycabs.sh
-#    volumes:
-#      - tp:/app
-#    depends_on:
-#      - y_cabs_creator
-#    deploy:
-#      mode: replicated
-#      replicas: 8
+  y_cabs_creator:
+    build: .
+    image: sirisurab/tp-app:latest
+    command: ./src/task_creator.py dl-ycabs 2016
+    restart: on-failure
+    networks:
+    - backend
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  y_cabs_loader:
+    build: .
+    image: sirisurab/tp-app:latest
+    command: ./src/task_performer.py dl-ycabs
+    restart: on-failure
+    networks:
+    - backend
+    depends_on:
+    - y_cabs_creator
+    deploy:
+      mode: replicated
+      replicas: 12
+
+  y_cabs_cleaner:
+    build: .
+    image: sirisurab/tp-app:latest
+    command: ./src/task_performer.py cl-ycabs
+    restart: on-failure
+    networks:
+    - backend
+    depends_on:
+    - y_cabs_creator
+    deploy:
+      mode: replicated
+      replicas: 0
 
   turnstile_creator:
     build: .
@@ -134,7 +146,7 @@ services:
     command: ./src/task_creator.py rs-transit 2016
     restart: on-failure
     networks:
-      - backend
+    - backend
     deploy:
       mode: replicated
       replicas: 0
@@ -145,9 +157,9 @@ services:
     command: ./src/task_performer.py dl-transit
     restart: on-failure
     networks:
-      - backend
+    - backend
     depends_on:
-      - turnstile_creator
+    - turnstile_creator
     deploy:
       mode: replicated
       replicas: 0
@@ -172,9 +184,9 @@ services:
     command: ./src/task_performer.py rs-transit
     restart: on-failure
     networks:
-      - backend
+    - backend
     depends_on:
-      - turnstile_creator
+    - turnstile_creator
     deploy:
       mode: replicated
       replicas: 0
@@ -185,28 +197,20 @@ services:
     command: ./src/regrouper.py rg-transit
     restart: on-failure
     networks:
-      - backend
+    - backend
     deploy:
       mode: replicated
       replicas: 0
-
-#  stations_fetcher:
-#    build: .
-#    image: sirisurab/tp-app:latest
-#    container_name: stations_fetcher
-#    command: ./bin/stations.sh
-#    volumes:
-#      - tp:/app
 
   traffic_creator:
     build: .
     image: sirisurab/tp-app:latest
     restart: on-failure
     networks:
-      - backend
+    - backend
     command: ./src/task_creator.py dl-traffic
     depends_on:
-      - redis
+    - redis
     deploy:
       mode: replicated
       replicas: 0
@@ -216,10 +220,10 @@ services:
     image: sirisurab/tp-app:latest
     restart: on-failure
     networks:
-      - backend
+    - backend
     command: ./src/task_performer.py dl-traffic
     depends_on:
-      - traffic_creator
+    - traffic_creator
     deploy:
       mode: replicated
       replicas: 0
@@ -230,7 +234,7 @@ services:
     command: ./src/refbase_loader.py transit cabs
     restart: on-failure
     networks:
-      - backend
+    - backend
     deploy:
       mode: replicated
       replicas: 0
@@ -241,7 +245,7 @@ services:
     command: ./src/geo_merger.py 5
     restart: on-failure
     networks:
-      - backend
+    - backend
     deploy:
       mode: replicated
       replicas: 0
@@ -252,27 +256,16 @@ services:
     command: ./src/plotter.py pl-1M-16-17 5 'ASTORIA BLVD' '5 AV/59 ST' 'TIMES SQ-42 ST' '14 ST-UNION SQ'
     restart: on-failure
     networks:
-      - backend
+    - backend
     deploy:
       mode: replicated
-      replicas: 1
-
-#volumes:
-#  tp:
-#    driver: convoy
-#  minio:
-#  sirisurab-tp:
-#    external: true
-
-
-#configs:
-#  redis_config:
-#    file: ./config/redis.conf
+      replicas: 0
 
 networks:
   backend:
     external:
       name: backend
+
 # redis cluster - uncomment
 #    external:
 # redis standalone - uncomment

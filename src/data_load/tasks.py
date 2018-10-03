@@ -119,6 +119,7 @@ def perform_traffic(b_task: bytes) -> bool:
 
 
 def perform_cabs(cab_type: str, b_task: bytes) -> bool:
+    bucket: str
     if cab_type == 'green':
         file_suffix = 'green'
         bucket = 'gcabs'
