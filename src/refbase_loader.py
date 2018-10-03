@@ -9,6 +9,7 @@ from geopandas import GeoDataFrame, read_file
 from shapely.geometry import Point
 import pandas as pd
 import os
+from io import BytesIO
 
 REFBASE_BUCKET: str = 'ref-base'
 
@@ -28,7 +29,7 @@ def load_ref_files(*args) -> bool:
 
                 # unzip
                 zip_path: str = '/tmp/cabs-ref-in/'
-                zipfile: ZipFile = ZipFile(taxi_zones_file[1])
+                zipfile: ZipFile = ZipFile(BytesIO(taxi_zones_file[1]))
                 zipfile.extractall(zip_path)
                 zipfile.close()
 
@@ -46,7 +47,6 @@ def load_ref_files(*args) -> bool:
             elif task == 'transit':
                 # load station file
                 stations_url: str = 'http://web.mta.info/developers/data/nyct/subway/Stations.csv'
-                #stations_file: Tuple[str, HTTPResponse] = http.get_stream_from_url(stations_url)
                 usecols: List[str] = ['Station ID', 'GTFS Stop ID', 'Stop Name', 'Borough',
                                       'GTFS Latitude', 'GTFS Longitude']
                 stations_df: pd.DataFrame = pd.read_csv(stations_url, header=0, usecols=usecols,
