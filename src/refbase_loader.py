@@ -3,7 +3,7 @@ from error_handling import errors
 from utils import persistence as ps
 from utils import http
 from urllib3.response import HTTPResponse
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Callable
 from zipfile import ZipFile
 from geopandas import GeoDataFrame, read_file
 from shapely.geometry import Point
@@ -11,8 +11,48 @@ import pandas as pd
 import os
 from io import BytesIO
 import glob
+from fuzzywuzzy import process, fuzz
+from numpy import nan
 
 REFBASE_BUCKET: str = 'ref-base'
+TRANSIT_BUCKET: str = 'transit'
+
+
+def add_fuzzy_station(df: pd.DataFrame) -> pd.DataFrame:
+    col_func: Callable = lambda x: x.strip().lower() in ['station']
+    s3 = ps.get_s3fs_client()
+    # get any one raw turnstile file from transit bucket
+    file: str = ps.get_all_filenames(bucket=TRANSIT_BUCKET)[0]
+    file_obj = s3.open('s3://' + TRANSIT_BUCKET + '/' + file, 'r')
+    transit_df = pd.read_csv(file, header=0, encoding='utf-8',
+                             usecols=col_func, skipinitialspace=True,
+                             low_memory=False, squeeze=True)
+    transit_df.rename(columns=lambda x: x.strip().lower(), inplace=True)
+    transit_df.drop_duplicates(inplace=True)
+    transit_df.dropna(inplace=True)
+
+    stations_fuzzy: List = []
+    for station in transit_df:
+        station_fuzz_1 = process.extractOne(station, df.stop_name, scorer=fuzz.ratio)
+        station_fuzz_2 = process.extractOne(station, df.stop_name, scorer=fuzz.partial_ratio)
+        station_fuzz_3 = process.extractOne(station, df.stop_name, scorer=fuzz.token_sort_ratio)
+        stations = {station_fuzz_1[0]: station_fuzz_1[1], station_fuzz_2[0]: station_fuzz_2[1],
+                    station_fuzz_3[0]: station_fuzz_3[1]}
+        station_max = max(stations.keys(), key=lambda key: stations[key])
+        if stations[station_max] > 88:
+            stations_fuzzy.append(station_max)
+        else:
+            stations_fuzzy.append(nan)
+
+        st_df: pd.DataFrame = pd.concat([transit_df.reset_index(drop=True),
+                                        pd.DataFrame(stations_fuzzy)],
+                                        axis=1, ignore_index=True).\
+            rename(columns={0: 'turnstile_station', 1: 'fuzzy_ts_station'})
+
+        df = pd.merge(df, st_df.dropna(), how='left', left_on='stop_name', right_on='fuzzy_ts_station')
+        df = df.drop(columns=['fuzzy_ts_station'])
+
+    return df
 
 
 def load_ref_files(*args) -> bool:
@@ -61,6 +101,9 @@ def load_ref_files(*args) -> bool:
                                             'Stop Name': 'stop_name', 'Borough': 'borough',
                                             'GTFS Latitude': 'latitude', 'GTFS Longitude': 'longitude'},
                                    inplace=True)
+
+                # add fuzzy station name from turnstile data
+                stations_df = add_fuzzy_station(stations_df)
 
                 geometry: List[Point] = [Point(xy) for xy in zip(stations_df.longitude, stations_df.latitude)]
                 stations_df.drop(['latitude', 'longitude'], axis=1, inplace=True)

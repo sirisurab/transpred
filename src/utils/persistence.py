@@ -155,7 +155,15 @@ def get_file_stream(bucket: str, filename: str) -> HTTPResponse:
 
 
 def get_all_filestreams(bucket: str) -> List[HTTPResponse]:
-    s3: S3FileSystem = get_s3fs_client()
-    filenames: List[str] = s3.glob(bucket+'/*')
+    #s3: S3FileSystem = get_s3fs_client()
+    #filenames: List[str] = s3.glob(bucket+'/*')
+    filenames: List[str] = get_all_filenames(bucket, '/')
     print('all files in bucket %(bucket)s are %(files)s' % {'bucket': bucket, 'files': filenames})
     return [get_file_stream(bucket=bucket, filename=file.rsplit('/', 1)[1]) for file in filenames]
+
+
+def get_all_filenames(bucket: str, path: str='/') -> List[str]:
+    s3: S3FileSystem = get_s3fs_client()
+    if not path.rsplit('/', 1)[1] == '':
+        path = path + '/'
+    return s3.glob(bucket+path+'*')
