@@ -80,7 +80,7 @@ def plot(*args) -> bool:
                                                   for locationid in dolocationids],
                                                  ignore_index=True)
 
-                    gcabs_df = gcabs_df.groupby(cabs_datecols).apply('sum').\
+                    gcabs_df = gcabs_df.groupby(cabs_datecols).apply(sum).\
                         set_index(cabs_datecols).sort_index().reset_index()
 
             # create plots
