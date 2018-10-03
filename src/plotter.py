@@ -34,6 +34,12 @@ def plot(*args) -> bool:
     }
     geomerged_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
 
+    # for plotting
+    plot_filepath: str = task + '/' + str(buffer) + '/'
+    plot_filename: str = 'EDA.html'
+    tmp_filepath: str = '/tmp/' + plot_filename
+    output_file(tmp_filepath)
+
     for station in inputs[2:]:
         try:
             # determine filename of transit data for
@@ -84,10 +90,7 @@ def plot(*args) -> bool:
                         sort_index().reset_index()
 
             # create plots
-            plot_filepath: str = task+'/'+str(buffer)+'/'
-            plot_filename: str = ts_filename+'.html'
-            tmp_filepath: str = '/tmp/'+plot_filename
-            output_file(tmp_filepath)
+
             p = figure(title='plot for station '+station,
                        x_axis_label='datetime', x_axis_type='datetime',
                        y_axis_label='')
@@ -101,13 +104,13 @@ def plot(*args) -> bool:
 
             show(p)
 
-            # save plots in out bucket
-            ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=tmp_filepath)
-
         except Exception as err:
             print('Error in plotting task %(task)s for station %(station)s'
                   % {'task': task, 'station': station})
             raise err
+
+    # save plots in out bucket
+    ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=tmp_filepath)
 
     return True
 
