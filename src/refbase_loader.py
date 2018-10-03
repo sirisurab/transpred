@@ -26,19 +26,18 @@ def load_ref_files(*args) -> bool:
             if task == 'cabs':
                 # load taxi zone files
                 taxi_zones_url: str = 'https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip'
-                #taxi_zones_file: Tuple = http.get_stream_from_url(taxi_zones_url)
-                #print('zip file response status %s' % taxi_zones_file[1].status)
+                taxi_zones_file: Tuple = http.get_stream_from_url(taxi_zones_url)
+                print('zip file response status %s' % taxi_zones_file[1].status)
                 # unzip
-                #zip_path: str = '/tmp/cabs-ref-in/'
-                #zipfile: ZipFile = ZipFile(BytesIO(taxi_zones_file[1].read()))
-                #zipfile.extractall(zip_path)
-                #zipfile.close()
+                zip_path: str = '/tmp/cabs-ref-in/'
+                zipfile: ZipFile = ZipFile(BytesIO(taxi_zones_file[1].read()))
+                zipfile.extractall(zip_path)
+                zipfile.close()
 
                 # process taxi shapefile
                 cabs_out_path: str = '/tmp/cabs-ref-out/'
                 cabs_filename: str = 'taxi_zones.shp'
-                #taxi_zone_df: GeoDataFrame = read_file(zip_path + cabs_filename).to_crs(crs)
-                taxi_zone_df: GeoDataFrame = read_file('zip+'+taxi_zones_url).to_crs(crs)
+                taxi_zone_df: GeoDataFrame = read_file(zip_path + cabs_filename).to_crs(crs)
                 taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'],
                                   axis=1, inplace=True)
                 os.makedirs(cabs_out_path, exist_ok=True)
