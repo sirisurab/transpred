@@ -1,6 +1,6 @@
 import pandas as pd
 import sys
-from data_tools import task_map
+from data_tools import task_map, file_io
 from typing import List, Dict
 from utils import persistence as ps
 from urllib3.response import HTTPResponse
@@ -23,9 +23,9 @@ def regroup(task_type: str) -> bool:
         print('read files from in bucket and concat-ted into one df')
 
         # group by split_by and write each group to a separate file
-        s3: s3fs = ps.get_s3fs_client()
+        #s3: s3fs = ps.get_s3fs_client()
         # create out bucket
-        ps.create_bucket(out_bucket)
+        #ps.create_bucket(out_bucket)
         for name, group in df.groupby(split_by):
             filename: str
             if isinstance(name, int):
@@ -34,7 +34,8 @@ def regroup(task_type: str) -> bool:
                 filename = str(int(name))
             else:
                 filename = str(name).replace('/', ' ')
-            group.to_csv(s3.open('s3://'+out_bucket+'/'+filename, 'w'))
+            #group.to_csv(s3.open('s3://'+out_bucket+'/'+filename, 'w'))
+            file_io.write_csv(df=group, bucket=out_bucket, filename=filename)
             #print('wrote file %(file)s' % {'file': filename})
 
     except Exception as err:

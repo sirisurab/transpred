@@ -11,12 +11,13 @@ from geopandas import GeoDataFrame, read_file, sjoin
 from shapely.geometry import Point
 from urllib3.response import HTTPResponse
 from data_tools import row_operations as row_ops
+from data_tools import file_io
 
 
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
 
 
-def make_cabs(cab_type: str,*args) -> List[str]:
+def make_cabs(cab_type: str, *args) -> List[str]:
     task_type: str = ''
     if cab_type == 'green':
         task_type = 'cl-gcabs'
@@ -56,17 +57,15 @@ def add_cab_zone(df) -> pd.DataFrame:
     try:
         if ('dolatitude' in df.columns) and ('dolongitude' in df.columns):
             # load taxi-zone shapefile
-            #taxi_zone_files: List[str] = ['taxi_zones.shp', 'taxi_zones.shx', 'taxi_zones.dbf', 'taxi_zones.shp.xml', 'taxi_zones.sbx', 'taxi_zones.sbn', 'taxi_zones.prj']
-            path_prefix: str = '/tmp/'
-            filename: str = 'taxi_zones.zip'
-            #for file in taxi_zone_files:
-            file_obj: Object = ps.get_file(bucket='ref-base', filename=filename, filepath=path_prefix+filename)
-            print('fetched taxi zones shape file %s' % str(file_obj))
-            taxi_zone_df: GeoDataFrame = read_file('/taxi_zones.shp', vfs='zip://'+path_prefix+filename)
-            #taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'], axis=1, inplace=True)
-            #print('taxi zones GeoDF '+str(taxi_zone_df.head(1)))
-            #print('taxi zones GeoDF columns '+str(taxi_zone_df.columns))
-
+            #path_prefix: str = '/tmp/'
+            #file_obj: Object = ps.get_file(bucket='ref-base', filename=filename, filepath=path_prefix+filename)
+            #print('fetched taxi zones shape file %s' % str(file_obj))
+            #taxi_zone_df: GeoDataFrame = read_file('/taxi_zones.shp', vfs='zip://'+path_prefix+filename)
+            zipname: str = 'taxi_zones.zip'
+            filename: str = 'taxi_zones.shp'
+            taxi_zone_df: GeoDataFrame = file_io.fetch_geodf_from_zip(filename=filename,
+                                                                      zipname=zipname,
+                                                                      bucket='ref-base')
             geometry: List[Point] = [Point(xy) for xy in zip(df['dolongitude'], df['dolatitude'])]
             df = df.drop(['dolatitude', 'dolongitude'], axis=1)
             crs: Dict[str, str] = {'init': 'epsg:4326'}
@@ -220,7 +219,8 @@ def perform(task_type: str, b_task: bytes) -> bool:
 
             # save in out bucket
             #s3_out_url: str = 's3://' + out_bucket
-            df.to_csv(s3.open('s3://'+out_bucket+'/'+file, 'w'))
+            #df.to_csv(s3.open('s3://'+out_bucket+'/'+file, 'w'))
+            file_io.write_csv(df=df, bucket=out_bucket, filename=file)
             print('wrote file to output bucket '+str(file))
 
     except Exception as err:
