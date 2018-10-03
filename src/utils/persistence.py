@@ -44,11 +44,11 @@ def copy_files(source_folder:str, dest_bucket:str) -> bool:
         raise err
 
     try:
-        filenames: List[str] = glob.glob(source_folder + '/*')
-        print('all files in bucket %(source)s are %(files)s' % {'source': source_folder, 'files': filenames})
+        filenames: List[str] = glob.glob(source_folder + '*')
+        print('all files in folder %(source)s are %(files)s' % {'source': source_folder, 'files': filenames})
         for file in filenames:
-            mc.copy_object(bucket_name=dest_bucket,
-                           object_source=source_folder,
+            mc.fput_object(bucket_name=dest_bucket,
+                           file_path=source_folder,
                            object_name=file.rsplit('/', 1)[1])
 
         print('copied from '+source_folder+' to bucket '+dest_bucket)
