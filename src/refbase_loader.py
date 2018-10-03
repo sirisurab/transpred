@@ -45,7 +45,7 @@ def load_ref_files(*args) -> bool:
                 taxi_zone_files: List[str] = glob.glob(cabs_out_path+'*')
                 with ZipFile('/tmp/taxi_zones.zip', 'w') as zipfile:
                     for file in taxi_zone_files:
-                        zipfile.write(file)
+                        zipfile.write(file.rsplit('/', 1)[1])
                 #ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=cabs_out_path)
                 ps.copy_file(dest_bucket=REFBASE_BUCKET, source='/tmp/taxi_zones.zip', file='taxi_zones.zip')
 
@@ -71,7 +71,7 @@ def load_ref_files(*args) -> bool:
                 station_files: List[str] = glob.glob(stations_out_path+'*')
                 with ZipFile('/tmp/stations.zip', 'w') as zipfile:
                     for file in station_files:
-                        zipfile.write(file)
+                        zipfile.write(file.rsplit('/', 1)[1])
                 #ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=stations_out_path)
                 ps.copy_file(dest_bucket=REFBASE_BUCKET, source='/tmp/stations.zip', file='stations.zip')
 

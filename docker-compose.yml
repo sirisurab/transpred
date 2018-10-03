@@ -51,7 +51,7 @@ services:
       - backend
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
 
   g_cabs_loader:
     build: .
@@ -77,7 +77,7 @@ services:
       - g_cabs_creator
     deploy:
       mode: replicated
-      replicas: 12
+      replicas: 0
 
   g_cabs_resampler:
       build: .
@@ -233,7 +233,7 @@ services:
       - backend
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
 #volumes:
 #  tp:
