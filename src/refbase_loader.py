@@ -18,7 +18,7 @@ REFBASE_BUCKET: str = 'ref-base'
 TRANSIT_BUCKET: str = 'transit'
 
 
-def add_fuzzy_station(df: pd.DataFrame) -> pd.DataFrame:
+def add_fuzzy_station(df: pd.DataFrame, inplace: bool =False) -> pd.DataFrame:
     col_func: Callable = lambda x: x.strip().lower() in ['station']
     s3 = ps.get_s3fs_client()
     # get any one raw turnstile file from transit bucket
@@ -48,11 +48,12 @@ def add_fuzzy_station(df: pd.DataFrame) -> pd.DataFrame:
                                         pd.DataFrame(stations_fuzzy)],
                                         axis=1, ignore_index=True).\
             rename(columns={0: 'turnstile_station', 1: 'fuzzy_ts_station'})
+        if inplace:
+            df.merge(st_df.dropna(), how='left', left_on='stop_name', right_on='fuzzy_ts_station', copy=False)
+        else:
+            df = pd.merge(df, st_df.dropna(), how='left', left_on='stop_name', right_on='fuzzy_ts_station', copy=False)
 
-        df = pd.merge(df, st_df.dropna(), how='left', left_on='stop_name', right_on='fuzzy_ts_station')
-        df = df.drop(columns=['fuzzy_ts_station'])
-
-    return df
+    return df.drop(columns=['fuzzy_ts_station'], inplace=inplace)
 
 
 def load_ref_files(*args) -> bool:
@@ -103,7 +104,7 @@ def load_ref_files(*args) -> bool:
                                    inplace=True)
 
                 # add fuzzy station name from turnstile data
-                stations_df = add_fuzzy_station(stations_df)
+                add_fuzzy_station(df=stations_df, inplace=True)
 
                 geometry: List[Point] = [Point(xy) for xy in zip(stations_df.longitude, stations_df.latitude)]
                 stations_df.drop(['latitude', 'longitude'], axis=1, inplace=True)
