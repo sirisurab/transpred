@@ -85,7 +85,7 @@ def plot(*args) -> bool:
 
             # create plots
             plot_filepath: str = task+'/'+str(buffer)+'/'
-            plot_filename: str = station+'.html'
+            plot_filename: str = ts_filename+'.html'
             tmp_filepath: str = '/tmp/'+plot_filename
             output_file(tmp_filepath)
             p = figure(title='plot for station '+station, x_axis_label='datetime', y_axis_label='')
