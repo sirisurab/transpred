@@ -29,7 +29,7 @@ def load_ref_files(*args) -> bool:
 
                 # unzip
                 zip_path: str = '/tmp/cabs-ref-in/'
-                zipfile: ZipFile = ZipFile(BytesIO(taxi_zones_file[1]))
+                zipfile: ZipFile = ZipFile(BytesIO(taxi_zones_file[1].read()))
                 zipfile.extractall(zip_path)
                 zipfile.close()
 
