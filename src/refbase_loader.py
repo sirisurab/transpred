@@ -44,9 +44,9 @@ def load_ref_files(*args) -> bool:
                 os.makedirs(cabs_out_path, exist_ok=True)
                 taxi_zone_df.to_file(cabs_out_path+cabs_filename)
                 taxi_zone_files: List[str] = glob.glob(cabs_out_path+'*')
-                with ZipFile('/tmp/taxi_zones.zip', 'w') as zip:
+                with ZipFile('/tmp/taxi_zones.zip', 'w') as zipfile:
                     for file in taxi_zone_files:
-                        zip.write(file)
+                        zipfile.write(file)
                 #ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=cabs_out_path)
                 ps.copy_file(dest_bucket=REFBASE_BUCKET, source='/tmp/taxi_zones.zip', file='taxi_zones.zip')
 
@@ -70,9 +70,9 @@ def load_ref_files(*args) -> bool:
                 stations_filename: str = 'stations.shp'
                 stations_geodf.to_file(stations_out_path+stations_filename)
                 station_files: List[str] = glob.glob(stations_out_path+'*')
-                with ZipFile('/tmp/stations.zip', 'w') as zip:
+                with ZipFile('/tmp/stations.zip', 'w') as zipfile:
                     for file in station_files:
-                        zip.write(file)
+                        zipfile.write(file)
                 #ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=stations_out_path)
                 ps.copy_file(dest_bucket=REFBASE_BUCKET, source='/tmp/stations.zip', file='stations.zip')
 
