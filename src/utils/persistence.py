@@ -3,6 +3,7 @@ from typing import Dict, Union, List
 from minio.error import ResponseError, BucketAlreadyExists, BucketAlreadyOwnedByYou
 from s3fs.core import S3FileSystem
 from urllib3.response import HTTPResponse
+import glob
 KEY: str = 'minio'
 SECRET: str = 'minio123'
 ENDPOINT: str = 'minio:9000'
@@ -43,7 +44,13 @@ def copy_files(source_folder:str, dest_bucket:str) -> bool:
         raise err
 
     try:
-        mc.copy_object(bucket_name=dest_bucket, object_source=source_folder)
+        filenames: List[str] = glob.glob(source_folder + '/*')
+        print('all files in bucket %(source)s are %(files)s' % {'source': source_folder, 'files': filenames})
+        for file in filenames:
+            mc.copy_object(bucket_name=dest_bucket,
+                           object_source=source_folder,
+                           object_name=file.rsplit('/', 1)[1])
+
         print('copied from '+source_folder+' to bucket '+dest_bucket)
     except ResponseError as err:
         raise err

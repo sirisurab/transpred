@@ -33,13 +33,13 @@ def load_ref_files(*args) -> bool:
                 zipfile.close()
 
                 # process taxi shapefile
-                cabs_out_path: str = '/tmp/cabs-ref-out/'
+                cabs_out_path: str = '/tmp/cabs-ref-out'
                 cabs_filename: str = 'taxi_zones.shp'
                 taxi_zone_df: GeoDataFrame = read_file(zip_path + cabs_filename).to_crs(crs)
                 taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'],
                                   axis=1, inplace=True)
                 os.makedirs(cabs_out_path, exist_ok=True)
-                taxi_zone_df.to_file(cabs_out_path+cabs_filename)
+                taxi_zone_df.to_file(cabs_out_path+'/'+cabs_filename)
 
                 ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=cabs_out_path)
 
@@ -59,10 +59,10 @@ def load_ref_files(*args) -> bool:
                 geometry: List[Point] = [Point(xy) for xy in zip(stations_df.longitude, stations_df.latitude)]
                 stations_df.drop(['latitude', 'longitude'], axis=1, inplace=True)
                 stations_geodf: GeoDataFrame = GeoDataFrame(stations_df, crs=crs, geometry=geometry)
-                stations_out_path: str = '/tmp/transit-ref-out/'
+                stations_out_path: str = '/tmp/transit-ref-out'
                 os.makedirs(stations_out_path, exist_ok=True)
                 stations_filename: str = 'stations.shp'
-                stations_geodf.to_file(stations_out_path+stations_filename)
+                stations_geodf.to_file(stations_out_path+'/'+stations_filename)
 
                 ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=stations_out_path)
 
