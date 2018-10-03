@@ -55,7 +55,9 @@ def geo_merge(buffer_radius: float) -> bool:
 if __name__ == '__main__':
     print('performing geographic data-merges for buffer radius %s' % sys.argv[1])
     try:
-        status: bool = geo_merge(buffer_radius=float(sys.argv[1]))
+        buffer_radius_miles: float = float(sys.argv[1])
     except TypeError as err:
         print('incorrect type for buffer radius input to geo_merger.py, '
               'expecting a floating point value but received %s' % sys.argv[1])
+    else:
+        status: bool = geo_merge(buffer_radius=buffer_radius_miles)
