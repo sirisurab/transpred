@@ -49,11 +49,13 @@ def load_ref_files(*args) -> bool:
                                       'GTFS Latitude', 'GTFS Longitude']
                 stations_df: pd.DataFrame = pd.read_csv(stations_url, header=0, usecols=usecols,
                                                         encoding='utf-8')
-                stations_df.rename(columns=['STATION_ID', 'STOP_ID', 'STOP_NAME', 'BOROUGH',
-                                            'LATITUDE', 'LONGITUDE'], inplace=True)
+                stations_df.rename(columns={'Station ID': 'station_id', 'GTFS Stop ID': 'stop_id',
+                                            'Stop Name': 'stop_name', 'Borough': 'borough',
+                                            'GTFS Latitude': 'latitude', 'GTFS Longitude': 'longitude'},
+                                   inplace=True)
 
-                geometry: List[Point] = [Point(xy) for xy in zip(stations_df.LONGITUDE, stations_df.LATITUDE)]
-                stations_df.drop(['LATITUDE', 'LONGITUDE'], axis=1, inplace=True)
+                geometry: List[Point] = [Point(xy) for xy in zip(stations_df.longitude, stations_df.latitude)]
+                stations_df.drop(['latitude', 'longitude'], axis=1, inplace=True)
                 stations_geodf: GeoDataFrame = GeoDataFrame(stations_df, crs=crs, geometry=geometry)
                 stations_out_path: str = '/tmp/transit-ref-out/'
                 stations_filename: str = 'stations.shp'
