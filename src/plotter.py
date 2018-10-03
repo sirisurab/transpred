@@ -66,7 +66,7 @@ def plot(*args) -> bool:
 
                     #for zone in dolocationids:
                     #filestream = ps.get_file_stream(bucket=bucket, filename=zone)
-                    dtypes: Dict[str, str] = {
+                    dtypes = {
                         'dodatetime': 'datetime64',
                         #'dolocationid': 'int64',
                         'passengers': 'int64'
