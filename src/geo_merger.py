@@ -39,7 +39,8 @@ def geo_merge(buffer_radius: float) -> bool:
         stations_df = sjoin(stations_df, taxi_zone_df, how='left', op='intersects')
 
         # write joined file (as csv without geometry columns) to geo-merged bucket
-        df: DataFrame = stations_df[['station_id', 'stop_id', 'stop_name', 'borough', 'dolocationid']]
+        df: DataFrame = stations_df[['station_id', 'stop_id', 'stop_name', 'borough', 'LocationID']]
+        df.rename(columns={'LocationID': 'dolocationid'}, inplace=True)
         geomerged_file: str = 'geomerged_'+str(buffer_radius)+'.csv'
         status: bool = file_io.write_csv(df=df, bucket=GEOMERGED_BUCKET, filename=geomerged_file)
 
