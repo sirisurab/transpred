@@ -182,5 +182,10 @@ task_type_map: Dict = {
                                         'passengers': int64,
                                         'dolocationid': int64
                                         }
+                                },
+                  'pl-1M-16-17':      {
+                                'in': ['rg-gcabs'],
+                                'freq': '1M',
+                                'range': ['2016', '2017']
                                 }
                   }
