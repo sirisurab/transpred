@@ -21,18 +21,20 @@ def download_from_url(url: str, folder: str) -> str:
         return filename
 
 
-def get_stream_from_url(url: str) -> Tuple[str,HTTPResponse]:
+def get_stream_from_url(url: str) -> Tuple:
     try:
         filename: str = url.split('/')[-1]
-        pool: PoolManager = PoolManager()
-        stream: HTTPResponse = pool.request('GET', url)
+        #pool: PoolManager = PoolManager()
+        #stream: HTTPResponse = pool.request('GET', url)
+        request = ur.Request(url)
+        response = ur.urlopen(request)
         print('fetched stream for file %s' % filename)
 
     except Exception as err:
 
         raise err
     else:
-        return filename, stream
+        return filename, response
 
 
 def download_chunk_from_url(url: str, folder: str, byte_range: str, filename: str) -> str:
