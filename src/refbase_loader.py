@@ -44,10 +44,10 @@ def load_ref_files(*args) -> bool:
             elif task == 'transit':
                 # load station file
                 stations_url: str = 'http://web.mta.info/developers/data/nyct/subway/Stations.csv'
-                stations_file: Tuple[str, HTTPResponse] = http.get_stream_from_url(stations_url)
+                #stations_file: Tuple[str, HTTPResponse] = http.get_stream_from_url(stations_url)
                 usecols: List[str] = ['Station ID', 'GTFS Stop ID', 'Stop Name', 'Borough',
                                       'GTFS Latitude', 'GTFS Longitude']
-                stations_df: pd.DataFrame = pd.read_csv(stations_file[1], header=0, usecols=usecols,
+                stations_df: pd.DataFrame = pd.read_csv(stations_url, header=0, usecols=usecols,
                                                         encoding='utf-8')
                 stations_df.rename(columns=['STATION_ID', 'STOP_ID', 'STOP_NAME', 'BOROUGH',
                                             'LATITUDE', 'LONGITUDE'], inplace=True)
