@@ -4,7 +4,7 @@ from geopandas import GeoDataFrame, sjoin
 from pandas import DataFrame
 from math import sin, pi
 
-GEOMERGED_BUCKET: str = 'geo-merged'
+GEOMERGED_PATH: str = 'geo-merged/'
 REFBASE_BUCKET: str = 'ref-base'
 NYC_LATITUDE: float = 40.7128
 
@@ -41,8 +41,8 @@ def geo_merge(buffer_radius: float) -> bool:
         # write joined file (as csv without geometry columns) to geo-merged bucket
         df: DataFrame = stations_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'LocationID']]
         df.rename(columns={'LocationID': 'dolocationid'}, inplace=True)
-        geomerged_file: str = 'geomerged_'+str(buffer_radius)+'.csv'
-        status: bool = file_io.write_csv(df=df, bucket=GEOMERGED_BUCKET, filename=geomerged_file)
+        geomerged_file: str = GEOMERGED_PATH+str(buffer_radius)+'.csv'
+        status: bool = file_io.write_csv(df=df, bucket=REFBASE_BUCKET, filename=geomerged_file)
 
     except Exception as err:
         print('Error in geo_merge %(radius)s' % {'radius': str(buffer_radius)})
