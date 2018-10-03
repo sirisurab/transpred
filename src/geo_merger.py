@@ -17,8 +17,8 @@ def geo_merge(buffer_radius: float) -> bool:
                                                                   zipname=st_zipname,
                                                                   bucket=REFBASE_BUCKET)
         # add circular buffer around each station
-        stations_df['buffer'] = stations_df.geometry.buffer(buffer_radius)
-        stations_df.rename(columns={'geometry': 'point'}, inplace=True).set_geometry('buffer', inplace=True)
+        stations_df['circle'] = stations_df.geometry.buffer(buffer_radius)
+        stations_df.rename(columns={'geometry': 'point'}, inplace=True).set_geometry('circle', inplace=True)
 
         # load taxi_zones data
         tz_zipname: str = 'taxi_zones.zip'
@@ -32,7 +32,7 @@ def geo_merge(buffer_radius: float) -> bool:
 
         # write joined file (as csv without geometry columns) to geo-merged bucket
         df: DataFrame = stations_df[['station_id', 'stop_id', 'stop_name', 'borough', 'dolocationid']]
-        geomerged_file: str = 'geomerged_'+buffer_radius+'.csv'
+        geomerged_file: str = 'geomerged_'+str(buffer_radius)+'.csv'
         status: bool = file_io.write_csv(df=df, bucket=GEOMERGED_BUCKET, filename=geomerged_file)
 
     except Exception as err:
