@@ -32,7 +32,7 @@ def plot(*args) -> bool:
         'tsstation': 'object',
         'dolocationid': 'int64'
     }
-    geomerged_df: DataFrame = read_csv(filestream, usecols=dtypes.keys, encoding='utf-8', dtype=dtypes)
+    geomerged_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
 
     for station in inputs[2:]:
         try:
@@ -49,7 +49,7 @@ def plot(*args) -> bool:
                                      'delex': 'int64',
                                      'delent': 'int64'
                                     }
-            transit_df: DataFrame = read_csv(filestream, usecols=dtypes.keys,
+            transit_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(),
                                              parse_dates=['datetime'],
                                              encoding='utf-8', dtype=dtypes)
 
@@ -72,7 +72,7 @@ def plot(*args) -> bool:
                         'passengers': 'int64'
                     }
                     gcabs_df = concat([read_csv(ps.get_file_stream(bucket=bucket, filename=locationid),
-                                                           usecols=dtypes.keys,
+                                                           usecols=dtypes.keys(),
                                                            parse_dates=['dodatetime'],
                                                            encoding='utf-8', dtype=dtypes)
                                                   for locationid in dolocationids],

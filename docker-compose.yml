@@ -252,7 +252,7 @@ services:
     command: ./src/plotter.py pl-1M-16-17 5 'ASTORIA BLVD' '5 AV/59 ST' 'TIMES SQ-42 ST' '14 ST-UNION SQ'
     restart: on-failure
     networks:
-    - backend
+      - backend
     deploy:
       mode: replicated
       replicas: 1
