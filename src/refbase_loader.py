@@ -10,6 +10,7 @@ from shapely.geometry import Point
 import pandas as pd
 import os
 from io import BytesIO
+import glob
 
 REFBASE_BUCKET: str = 'ref-base'
 
@@ -25,24 +26,29 @@ def load_ref_files(*args) -> bool:
             if task == 'cabs':
                 # load taxi zone files
                 taxi_zones_url: str = 'https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip'
-                taxi_zones_file: Tuple = http.get_stream_from_url(taxi_zones_url)
+                #taxi_zones_file: Tuple = http.get_stream_from_url(taxi_zones_url)
                 #print('zip file response status %s' % taxi_zones_file[1].status)
                 # unzip
-                zip_path: str = '/tmp/cabs-ref-in/'
-                zipfile: ZipFile = ZipFile(BytesIO(taxi_zones_file[1].read()))
-                zipfile.extractall(zip_path)
-                zipfile.close()
+                #zip_path: str = '/tmp/cabs-ref-in/'
+                #zipfile: ZipFile = ZipFile(BytesIO(taxi_zones_file[1].read()))
+                #zipfile.extractall(zip_path)
+                #zipfile.close()
 
                 # process taxi shapefile
                 cabs_out_path: str = '/tmp/cabs-ref-out/'
                 cabs_filename: str = 'taxi_zones.shp'
-                taxi_zone_df: GeoDataFrame = read_file(zip_path + cabs_filename).to_crs(crs)
+                #taxi_zone_df: GeoDataFrame = read_file(zip_path + cabs_filename).to_crs(crs)
+                taxi_zone_df: GeoDataFrame = read_file('zip+'+taxi_zones_url).to_crs(crs)
                 taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'],
                                   axis=1, inplace=True)
                 os.makedirs(cabs_out_path, exist_ok=True)
                 taxi_zone_df.to_file(cabs_out_path+cabs_filename)
-
-                ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=cabs_out_path)
+                taxi_zone_files: List[str] = glob.glob(cabs_out_path+'*')
+                with ZipFile('/tmp/taxi_zones.zip', 'w') as zip:
+                    for file in taxi_zone_files:
+                        zip.write(file)
+                #ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=cabs_out_path)
+                ps.copy_file(dest_bucket=REFBASE_BUCKET, source='/tmp/taxi_zones.zip', file='taxi_zones.zip')
 
             elif task == 'transit':
                 # load station file
@@ -63,8 +69,12 @@ def load_ref_files(*args) -> bool:
                 os.makedirs(stations_out_path, exist_ok=True)
                 stations_filename: str = 'stations.shp'
                 stations_geodf.to_file(stations_out_path+stations_filename)
-
-                ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=stations_out_path)
+                station_files: List[str] = glob.glob(stations_out_path+'*')
+                with ZipFile('/tmp/stations.zip', 'w') as zip:
+                    for file in station_files:
+                        zip.write(file)
+                #ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=stations_out_path)
+                ps.copy_file(dest_bucket=REFBASE_BUCKET, source='/tmp/stations.zip', file='stations.zip')
 
         else:
             print('unrecognized ref-base load task %s' % task)
