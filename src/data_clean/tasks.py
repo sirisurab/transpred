@@ -62,7 +62,7 @@ def add_cab_zone(df) -> pd.DataFrame:
             #for file in taxi_zone_files:
             file_obj: Object = ps.get_file(bucket='ref-base', filename=filename, filepath=path_prefix+filename)
             print('fetched taxi zones shape file %s' % str(file_obj))
-            taxi_zone_df: GeoDataFrame = read_file('taxi_zones.shp', vfs='zip://'+path_prefix+filename)
+            taxi_zone_df: GeoDataFrame = read_file('/taxi_zones.shp', vfs='zip://'+path_prefix+filename)
             #taxi_zone_df.drop(['Shape_Area', 'Shape_Leng', 'OBJECTID', 'borough', 'zone'], axis=1, inplace=True)
             #print('taxi zones GeoDF '+str(taxi_zone_df.head(1)))
             #print('taxi zones GeoDF columns '+str(taxi_zone_df.columns))
