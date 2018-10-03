@@ -24,7 +24,7 @@ def add_fuzzy_station(df: pd.DataFrame) -> pd.DataFrame:
     # get any one raw turnstile file from transit bucket
     file: str = ps.get_all_filenames(bucket=TRANSIT_BUCKET)[0]
     file_obj = s3.open('s3://' + TRANSIT_BUCKET + '/' + file, 'r')
-    transit_df = pd.read_csv(file, header=0, encoding='utf-8',
+    transit_df = pd.read_csv(file_obj, header=0, encoding='utf-8',
                              usecols=col_func, skipinitialspace=True,
                              low_memory=False, squeeze=True)
     transit_df.rename(columns=lambda x: x.strip().lower(), inplace=True)
