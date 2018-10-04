@@ -57,20 +57,10 @@ def remove_outliers(df, col):
     discard = (df[col] < 0) | (df[col] > 3 * intqrange)
     return df.loc[~discard]
 
-def add_cab_zone(df) -> DataFrame:
+def add_cab_zone(df: DataFrame, taxi_zone_df: GeoDataFrame) -> DataFrame:
 
     try:
         if ('dolatitude' in df.columns) and ('dolongitude' in df.columns):
-            # load taxi-zone shapefile
-            #path_prefix: str = '/tmp/'
-            #file_obj: Object = ps.get_file(bucket='ref-base', filename=filename, filepath=path_prefix+filename)
-            #print('fetched taxi zones shape file %s' % str(file_obj))
-            #taxi_zone_df: GeoDataFrame = read_file('/taxi_zones.shp', vfs='zip://'+path_prefix+filename)
-            zipname: str = 'taxi_zones.zip'
-            filename: str = 'taxi_zones.shp'
-            taxi_zone_df: GeoDataFrame = file_io.fetch_geodf_from_zip(filename=filename,
-                                                                      zipname=zipname,
-                                                                      bucket='ref-base')
             geometry: List[Point] = [Point(xy) for xy in zip(df['dolongitude'], df['dolatitude'])]
             df = df.drop(['dolatitude', 'dolongitude'], axis=1)
             crs: Dict[str, str] = {'init': 'epsg:4326'}
@@ -85,6 +75,21 @@ def add_cab_zone(df) -> DataFrame:
             raise KeyError('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')
     except Exception as err:
         raise err
+
+def fetch_cab_zones() -> GeoDataFrame:
+
+    # load taxi-zone shapefile
+    #path_prefix: str = '/tmp/'
+    #file_obj: Object = ps.get_file(bucket='ref-base', filename=filename, filepath=path_prefix+filename)
+    #print('fetched taxi zones shape file %s' % str(file_obj))
+    #taxi_zone_df: GeoDataFrame = read_file('/taxi_zones.shp', vfs='zip://'+path_prefix+filename)
+    zipname: str = 'taxi_zones.zip'
+    filename: str = 'taxi_zones.shp'
+    taxi_zone_df: GeoDataFrame = file_io.fetch_geodf_from_zip(filename=filename,
+                                                              zipname=zipname,
+                                                              bucket='ref-base')
+    return taxi_zone_df
+
 
 
 def perform(task_type: str, b_task: bytes) -> bool:
@@ -155,6 +160,12 @@ def perform(task_type: str, b_task: bytes) -> bool:
     s3 = ps.get_s3fs_client()
     print('got s3fs client')
 
+    # fetch cab zones
+    taxi_zones_df: GeoDataFrame
+    if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016', '2017', '2018'] \
+            and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and bimonth > 3)):
+        taxi_zones_df = fetch_cab_zones()
+
     try:
         for file in files:
 
@@ -211,7 +222,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
             if task_type in ['cl-gcabs', 'cl-ycabs'] and 'dolocationid' not in df.columns:
                 print('In data clean tasks for cabs. Field dolocationid not found')
                 # df = df.apply(func=row_op['func'], axis=1)
-                df = add_cab_zone(df)
+                df = add_cab_zone(df, taxi_zones_df)
 
             if not sorted:
                 df = df.set_index(index_col).sort_index().reset_index()
@@ -308,6 +319,12 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
     s3 = ps.get_s3fs_client()
     print('got s3fs client')
 
+    # fetch cab zones
+    taxi_zones_df: GeoDataFrame
+    if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016', '2017', '2018'] \
+            and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and bimonth > 3)):
+        taxi_zones_df = fetch_cab_zones()
+
     try:
         for file in files:
 
@@ -367,7 +384,7 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
                 if task_type in ['cl-gcabs', 'cl-ycabs'] and 'dolocationid' not in df.columns:
                     print('In data clean tasks for cabs. Field dolocationid not found')
                     # df = df.apply(func=row_op['func'], axis=1)
-                    df = add_cab_zone(df)
+                    df = add_cab_zone(df, taxi_zones_df)
 
                 if not sorted:
                     df = df.set_index(index_col).sort_index().reset_index()
