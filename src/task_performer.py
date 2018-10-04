@@ -36,8 +36,10 @@ def perform_task(task_type: str) -> bool:
             status = dl_tasks.perform_cabs('green', task)
         elif task_type == 'dl-ycabs':
             status = dl_tasks.perform_cabs('yellow', task)
-        elif task_type in ['cl-transit', 'cl-traffic', 'cl-gcabs', 'cl-ycabs']:
+        elif task_type in ['cl-transit', 'cl-traffic', 'cl-gcabs']:
             status = dc_tasks.perform(task_type, task)
+        elif task_type in ['cl-ycabs']:
+            status = dc_tasks.perform_large(task_type, task, chunksize=500)
         elif task_type in ['rs-transit', 'rs-traffic', 'rs-gcabs', 'rs-ycabs']:
             status = rs_tasks.perform(task_type, task)
         else:
