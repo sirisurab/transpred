@@ -140,10 +140,12 @@ def perform(task_type: str, b_task: bytes) -> bool:
             files = list(map(get_filename, months(quarter)))
         elif task_type == 'cl-ycabs':
             file_suffix = 'yellow'
-            bimonth = int(task_split[1])
-            months = lambda bimonth: range((bimonth - 1) * 2 + 1, (bimonth - 1) * 2 + 3)
-            get_filename = lambda month: file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
-            files = list(map(get_filename, months(bimonth)))
+            #bimonth = int(task_split[1])
+            #months = lambda bimonth: range((bimonth - 1) * 2 + 1, (bimonth - 1) * 2 + 3)
+            #get_filename = lambda month: file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
+            #files = list(map(get_filename, months(bimonth)))
+            month = int(task_split[1])
+            files = [file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv']
 
 
 
@@ -299,10 +301,12 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
             files = list(map(get_filename, months(quarter)))
         elif task_type == 'cl-ycabs':
             file_suffix = 'yellow'
-            bimonth = int(task_split[1])
-            months = lambda bimonth: range((bimonth - 1) * 2 + 1, (bimonth - 1) * 2 + 3)
-            get_filename = lambda month: file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
-            files = list(map(get_filename, months(bimonth)))
+            #bimonth = int(task_split[1])
+            #months = lambda bimonth: range((bimonth - 1) * 2 + 1, (bimonth - 1) * 2 + 3)
+            #get_filename = lambda month: file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
+            #files = list(map(get_filename, months(bimonth)))
+            month = int(task_split[1])
+            files = [file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv']
 
 
 
