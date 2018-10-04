@@ -128,7 +128,8 @@ def perform(task_type: str, b_task: bytes) -> bool:
     sorted: bool = task_type_map['index']['sorted']
     row_op: Dict[str, Callable] = task_type_map['row_op']
     quarter: int
-    bimonth: int
+    #bimonth: int
+    month: int
     if task_type in ['cl-gcabs', 'cl-ycabs']:
         task_split = task.split('-')
         year = task_split[0]
@@ -152,7 +153,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
     elif task_type == 'cl-transit':
         task_split = task.split('-')
         year = task_split[0]
-        month: int = int(task_split[1])
+        month = int(task_split[1])
         file_part1: str = 'turnstile_' + year + prefix_zero(month)
         file_part2: str = ".txt"
         files = [file_part1 + prefix_zero(day) + file_part2 for day in range(1, 32)]
@@ -165,7 +166,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
     # fetch cab zones
     taxi_zones_df: GeoDataFrame
     if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016', '2017', '2018'] \
-            and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and bimonth > 3)):
+            and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and month > 5)):
         taxi_zones_df = fetch_cab_zones()
 
     try:
@@ -182,7 +183,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
 
             # handle change in data format for cab data
             if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016','2017','2018'] \
-                and ( (task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and bimonth > 3) ):
+                and ( (task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and month > 5) ):
                 df = read_csv(file_obj,
                                  header=None,
                                  usecols=[2, 6, 7],
@@ -289,7 +290,8 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
     sorted: bool = task_type_map['index']['sorted']
     row_op: Dict[str, Callable] = task_type_map['row_op']
     quarter: int
-    bimonth: int
+    #bimonth: int
+    month: int
     if task_type in ['cl-gcabs', 'cl-ycabs']:
         task_split = task.split('-')
         year = task_split[0]
@@ -313,7 +315,7 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
     elif task_type == 'cl-transit':
         task_split = task.split('-')
         year = task_split[0]
-        month: int = int(task_split[1])
+        month = int(task_split[1])
         file_part1: str = 'turnstile_' + year + prefix_zero(month)
         file_part2: str = ".txt"
         files = [file_part1 + prefix_zero(day) + file_part2 for day in range(1, 32)]
@@ -326,7 +328,7 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
     # fetch cab zones
     taxi_zones_df: GeoDataFrame
     if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016', '2017', '2018'] \
-            and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and bimonth > 3)):
+            and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and month > 5)):
         taxi_zones_df = fetch_cab_zones()
 
     try:
@@ -343,7 +345,7 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
             tf_reader: TextFileReader
             # handle change in data format for cab data
             if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016', '2017', '2018'] \
-                    and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and bimonth > 3)):
+                    and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and month > 5)):
                 tf_reader = read_csv(file_obj,
                                  header=None,
                                  usecols=[2, 6, 7],
