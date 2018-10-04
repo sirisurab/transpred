@@ -34,6 +34,8 @@ def make_cabs(cab_type: str, *args) -> List[str]:
         elif cab_type == 'yellow':
             return dl_tasks.make_ycabs(*args)
         #return dl_tasks.make_cabs(*args)
+        else:
+            return []
     else:
         return []
 
@@ -164,7 +166,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
     print('got s3fs client')
 
     # fetch cab zones
-    taxi_zones_df: GeoDataFrame
+    taxi_zones_df: GeoDataFrame = GeoDataFrame()
     if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016', '2017', '2018'] \
             and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and month > 5)):
         taxi_zones_df = fetch_cab_zones()
@@ -326,7 +328,7 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
     print('got s3fs client')
 
     # fetch cab zones
-    taxi_zones_df: GeoDataFrame
+    taxi_zones_df: GeoDataFrame = GeoDataFrame()
     if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016', '2017', '2018'] \
             and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and month > 5)):
         taxi_zones_df = fetch_cab_zones()
