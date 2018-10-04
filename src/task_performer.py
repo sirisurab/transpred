@@ -16,13 +16,13 @@ import time
 def perform_task(task_type: str) -> bool:
     # fetch task from waiting queue and push to running queue
     task: bytes = fetch_from_q(task_type)
-    if task is None:
+    if task is None or task == b'':
         print('task queue for '+task_type+' is empty. Waiting to try again')
         time.sleep(2)
         fetch_from_q(task_type)
         #return True
-    elif task == b'':
-        return True
+    #elif task == b'':
+    #    return True
     else:
         try:
             # pattern match and dispatch

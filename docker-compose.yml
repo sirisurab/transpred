@@ -125,7 +125,7 @@ services:
     - y_cabs_creator
     deploy:
       mode: replicated
-      replicas: 12
+      replicas: 8
 
   y_cabs_cleaner:
     build: .
