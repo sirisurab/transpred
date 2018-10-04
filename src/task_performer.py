@@ -16,44 +16,44 @@ import time
 def perform_task(task_type: str) -> bool:
     # fetch task from waiting queue and push to running queue
     task: bytes = fetch_from_q(task_type)
-    if task is None or task == b'':
+    while task is None or task == b'':
         print('task queue for '+task_type+' is empty. Waiting to try again')
         time.sleep(2)
-        fetch_from_q(task_type)
+        task = fetch_from_q(task_type)
         #return True
     #elif task == b'':
     #    return True
-    else:
-        try:
-            # pattern match and dispatch
-            # turnstile -> dl.perform_task_transit(task)
-            # traffic -> dl.perform_task_traffic(task)
-            # cabs -> dl.perform_task_cabs(task)
-            print('dispatching from perform tasks')
-            status: bool
-            if task_type == 'dl-transit':
-                status = dl_tasks.perform_transit(task)
-            elif task_type == 'dl-traffic':
-                status = dl_tasks.perform_traffic(task)
-            elif task_type == 'dl-gcabs':
-                status = dl_tasks.perform_cabs('green', task)
-            elif task_type == 'dl-ycabs':
-                status = dl_tasks.perform_cabs('yellow', task)
-            elif task_type in ['cl-transit', 'cl-traffic', 'cl-gcabs', 'cl-ycabs']:
-                status = dc_tasks.perform(task_type, task)
-            elif task_type in ['rs-transit', 'rs-traffic', 'rs-gcabs', 'rs-ycabs']:
-                status = rs_tasks.perform(task_type, task)
-            else:
-                raise errors.TaskTypeError(task_type)
 
-        except errors.TaskTypeError as error:
-            error.log()
-            raise
-
+    try:
+        # pattern match and dispatch
+        # turnstile -> dl.perform_task_transit(task)
+        # traffic -> dl.perform_task_traffic(task)
+        # cabs -> dl.perform_task_cabs(task)
+        print('dispatching from perform tasks')
+        status: bool
+        if task_type == 'dl-transit':
+            status = dl_tasks.perform_transit(task)
+        elif task_type == 'dl-traffic':
+            status = dl_tasks.perform_traffic(task)
+        elif task_type == 'dl-gcabs':
+            status = dl_tasks.perform_cabs('green', task)
+        elif task_type == 'dl-ycabs':
+            status = dl_tasks.perform_cabs('yellow', task)
+        elif task_type in ['cl-transit', 'cl-traffic', 'cl-gcabs', 'cl-ycabs']:
+            status = dc_tasks.perform(task_type, task)
+        elif task_type in ['rs-transit', 'rs-traffic', 'rs-gcabs', 'rs-ycabs']:
+            status = rs_tasks.perform(task_type, task)
         else:
-            # remove task from running queue
-            msg.del_from_q(task, task_type+'running_q')
-            return status
+            raise errors.TaskTypeError(task_type)
+
+    except errors.TaskTypeError as error:
+        error.log()
+        raise
+
+    else:
+        # remove task from running queue
+        msg.del_from_q(task, task_type+'running_q')
+        return status
 
 
 def fetch_from_q(task_type: str) -> bytes:

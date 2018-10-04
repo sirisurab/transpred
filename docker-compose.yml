@@ -106,7 +106,7 @@ services:
   y_cabs_creator:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_creator.py dl-ycabs 2016
+    command: ./src/task_creator.py cl-ycabs 2016
     restart: on-failure
     networks:
     - backend
@@ -125,7 +125,7 @@ services:
     - y_cabs_creator
     deploy:
       mode: replicated
-      replicas: 8
+      replicas: 0
 
   y_cabs_cleaner:
     build: .
@@ -138,7 +138,7 @@ services:
     - y_cabs_creator
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 4
 
   turnstile_creator:
     build: .
