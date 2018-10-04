@@ -33,9 +33,9 @@ def create_tasks(task_type: str, *args) -> None:
     elif task_type == 'dl-traffic':
         tasks = dl_tasks.make_traffic()
     elif task_type == 'dl-gcabs':
-        tasks = dl_tasks.make_cabs(*args)
+        tasks = dl_tasks.make_gcabs(*args)
     elif task_type == 'dl-ycabs':
-        tasks = dl_tasks.make_cabs(*args)
+        tasks = dl_tasks.make_ycabs(*args)
     elif task_type == 'cl-transit':
         tasks = dc_tasks.make_transit(*args)
     elif task_type == 'cl-traffic':

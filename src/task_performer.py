@@ -20,9 +20,6 @@ def perform_task(task_type: str) -> bool:
         print('task queue for '+task_type+' is empty. Waiting to try again')
         time.sleep(2)
         task = fetch_from_q(task_type)
-        #return True
-    #elif task == b'':
-    #    return True
 
     try:
         # pattern match and dispatch

@@ -28,7 +28,11 @@ def make_cabs(cab_type: str, *args) -> List[str]:
         map: Dict = task_map.task_type_map[task_type]
         out_bucket: str = map['out']
         ps.create_bucket(out_bucket)
-        return dl_tasks.make_cabs(*args)
+        if cab_type == 'green':
+            return dl_tasks.make_gcabs(*args)
+        elif cab_type == 'yellow':
+            return dl_tasks.make_ycabs(*args)
+        #return dl_tasks.make_cabs(*args)
     else:
         return []
 
@@ -117,19 +121,23 @@ def perform(task_type: str, b_task: bytes) -> bool:
     index_col: str = task_type_map['index']['col']
     sorted: bool = task_type_map['index']['sorted']
     row_op: Dict[str, Callable] = task_type_map['row_op']
-
+    quarter: int
+    bimonth: int
     if task_type in ['cl-gcabs', 'cl-ycabs']:
-        if task_type == 'cl-gcabs':
-            file_suffix = 'green'
-        elif task_type == 'cl-ycabs':
-            file_suffix = 'yellow'
-
         task_split = task.split('-')
         year = task_split[0]
-        quarter: int = int(task_split[1])
-        months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
-        get_filename = lambda month: file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
-        files = list(map(get_filename, months(quarter)))
+        if task_type == 'cl-gcabs':
+            file_suffix = 'green'
+            quarter = int(task_split[1])
+            months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
+            get_filename = lambda month: file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
+            files = list(map(get_filename, months(quarter)))
+        elif task_type == 'cl-ycabs':
+            file_suffix = 'yellow'
+            bimonth = int(task_split[1])
+            months = lambda bimonth: range((bimonth - 1) * 2 + 1, (bimonth - 1) * 2 + 3)
+            get_filename = lambda month: file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
+            files = list(map(get_filename, months(bimonth)))
 
 
 
@@ -159,7 +167,8 @@ def perform(task_type: str, b_task: bytes) -> bool:
             #print('file encoding is '+encoding)
 
             # handle change in data format for cab data
-            if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016','2017','2018'] and quarter > 2:
+            if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016','2017','2018'] \
+                and ( (task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and bimonth > 3) ):
                 df = pd.read_csv(file_obj,
                                  header=None,
                                  usecols=[2, 6, 7],

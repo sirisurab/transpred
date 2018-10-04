@@ -136,6 +136,28 @@ task_type_map: Dict = {
                                 },
                                 'aggr_func': sum
                                 },
+                  'rs-ycabs': {
+                                'in': 'cl-ycabs',
+                                'out': 'rs-ycabs',
+                                'dtypes': {
+                                        'dodatetime': 'datetime64[ns]',
+                                        'passengers': 'int64',
+                                        'dolocationid': 'int64'
+                                        },
+                                'date_cols': ['dodatetime'],
+                                'index': {
+                                        'col': 'dodatetime',
+                                        'sorted': True
+                                        },
+                                'diff': {
+                                        'compute': False
+                                        },
+                                'group': {
+                                        'compute': True,
+                                        'by_cols': ['dolocationid']
+                                },
+                                'aggr_func': sum
+                                },
                   'rs-transit': {
                                 'in': 'cl-transit',
                                 'out': 'rs-transit',

@@ -35,9 +35,14 @@ def make_traffic() -> List[str]:
 
 
 
-def make_cabs(*args) -> List[str]:
-    print('constructing tasks for years '+str(args))
+def make_gcabs(*args) -> List[str]:
+    print('constructing gcabs tasks for years '+str(args))
     tasks_for_year = lambda tasks, year: tasks + [year+"-"+str(quarter) for quarter in range(1, 5)]
+    return reduce(tasks_for_year, list(*args), [])
+
+def make_ycabs(*args) -> List[str]:
+    print('constructing ycabs tasks for years '+str(args))
+    tasks_for_year = lambda tasks, year: tasks + [year+"-"+str(bimonth) for bimonth in range(1, 7)]
     return reduce(tasks_for_year, list(*args), [])
 
 
@@ -129,11 +134,18 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
     task: str = str(b_task, 'utf-8')
     task_split: List[str] = task.split('-')
     year: str = task_split[0]
-    quarter: int = int(task_split[1])
-    prefix_zero = lambda x: "0"+str(x) if x < 10 else str(x)
-    months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
-    get_url = lambda month: 'https://s3.amazonaws.com/nyc-tlc/trip+data/'+file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
-    urls: List[str] = list(map(get_url, months(quarter)))
+    urls: List[str]
+    if cab_type == 'green':
+        quarter: int = int(task_split[1])
+        months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
+        get_url = lambda month: 'https://s3.amazonaws.com/nyc-tlc/trip+data/'+file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
+        urls = list(map(get_url, months(quarter)))
+    elif cab_type == 'yellow':
+        bimonth: int = int(task_split[1])
+        months = lambda bimonth: range( (bimonth-1)*2+1, (bimonth-1)*2+3 )
+        get_url = lambda month: 'https://s3.amazonaws.com/nyc-tlc/trip+data/'+file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
+        urls = list(map(get_url, months(bimonth)))
+
     print('downloading from urls '+str(urls))
     source_folder: str = os.path.dirname(__file__)+'/'+bucket+'/'
     os.makedirs(source_folder, exist_ok=True)

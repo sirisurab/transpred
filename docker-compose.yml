@@ -138,7 +138,7 @@ services:
     - y_cabs_creator
     deploy:
       mode: replicated
-      replicas: 4
+      replicas: 6
 
   turnstile_creator:
     build: .
