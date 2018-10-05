@@ -10,6 +10,7 @@ from shapely.geometry import Point
 from data_tools import row_operations as row_ops
 from data_tools import file_io
 from functools import partial
+from numpy import int64
 
 
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
@@ -98,19 +99,21 @@ def remove_outliers(df, col):
     return df.loc[~discard]
 
 
-def add_cab_zone(df: DataFrame, taxi_zone_df: GeoDataFrame) -> DataFrame:
-
+def add_cab_zone(df, taxi_zone_df: GeoDataFrame):
+    lon_var: str = 'dolongitude'
+    lat_var: str = 'dolatitude'
     try:
-        if ('dolatitude' in df.columns) and ('dolongitude' in df.columns):
-            geometry: List[Point] = [Point(xy) for xy in zip(df['dolongitude'], df['dolatitude'])]
-            df = df.drop(['dolatitude', 'dolongitude'], axis=1)
+        if (lat_var in df.columns) and (lon_var in df.columns):
+            localdf = df[[lon_var, lat_var]].copy()
+            localdf[lon_var] = localdf[lon_var].fillna(value=0.)
+            localdf[lat_var] = localdf[lat_var].fillna(value=0.)
+            geometry: List[Point] = [Point(xy) for xy in zip(localdf[lon_var], localdf[lat_var])]
             crs: Dict[str, str] = {'init': 'epsg:4326'}
-            geodf: GeoDataFrame = GeoDataFrame(df, crs=crs, geometry=geometry)
-            geodf = sjoin(geodf, taxi_zone_df, how='left', op='within')
+            local_gdf: GeoDataFrame = GeoDataFrame(localdf, crs=crs, geometry=geometry)
+            local_gdf = sjoin(local_gdf, taxi_zone_df, how='left', op='within')
             print('after spatial join with taxi zones ')
-            df = geodf[['dodatetime', 'LocationID', 'passengers']].rename(columns={'LocationID': 'dolocationid'})
+            return local_gdf.LocationID.rename('dolocationid')
 
-            return df
         else:
             print('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')
             raise KeyError('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')
@@ -250,7 +253,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
             if task_type in ['cl-gcabs', 'cl-ycabs'] and 'dolocationid' not in df.columns:
                 print('In data clean tasks for cabs. Field dolocationid not found')
                 # df = df.apply(func=row_op['func'], axis=1)
-                df = add_cab_zone(df, taxi_zones_df)
+                df['dolocationid'] = add_cab_zone(df, taxi_zones_df)
 
             if not sorted:
                 df = df.set_index(index_col).sort_index().reset_index()
@@ -399,7 +402,7 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 250000) -> boo
                 if task_type in ['cl-gcabs', 'cl-ycabs'] and 'dolocationid' not in df.columns:
                     print('In data clean tasks for cabs. Field dolocationid not found')
                     # df = df.apply(func=row_op['func'], axis=1)
-                    df = add_cab_zone(df, taxi_zones_df)
+                    df['dolocationid'] = add_cab_zone(df, taxi_zones_df)
 
                 if not sorted:
                     df = df.set_index(index_col).sort_index().reset_index()
@@ -544,12 +547,8 @@ def perform_dask(task_type: str) -> bool:
             # fetch cab zones
             taxi_zones_df: GeoDataFrame = fetch_cab_zones()
             #df = add_cab_zone(df, taxi_zones_df)
-            df = df.map_partitions(partial(add_cab_zone, taxi_zone_df=taxi_zones_df),
-                                   meta={
-                                        'dodatetime': 'datetime64[ns]',
-                                        'passengers': 'int64',
-                                        'dolocationid': 'object'
-                                        })
+            df['dolocationid'] = df.map_partitions(partial(add_cab_zone, taxi_zone_df=taxi_zones_df),
+                                   meta=('dolocationid', int64))
 
         #if not sorted:
         #    df = df.set_index(index_col).sort_index().reset_index()
