@@ -2,8 +2,6 @@ name: transpred
 
 dependencies:
   - pandas=0.23.0
-#  - dask=0.19.2
-#  - s3fs
   - pip:
     - fuzzywuzzy
     - python-Levenshtein

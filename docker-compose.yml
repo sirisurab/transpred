@@ -40,6 +40,9 @@ services:
     command: ['dask-worker','dscheduler:8786']
     networks:
       - backend
+    deploy:
+      mode: replicated
+      replicas: 20
 
 
   g_cabs_creator:
