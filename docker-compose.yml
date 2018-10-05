@@ -37,7 +37,7 @@ services:
 
   dworker:
     image: daskdev/dask
-    command: ['dask-worker','scheduler:8786']
+    command: ['dask-worker','dscheduler:8786']
     networks:
       - backend
 
