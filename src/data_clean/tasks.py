@@ -18,6 +18,21 @@ from data_tools import file_io
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
 
 
+def is_cabs_special_case(task_type: str, year: str, sub_task: int) -> bool:
+    special_case: bool = task_type in ['cl-gcabs', 'cl-ycabs'] \
+            and (
+            (
+                    year in ['2016']
+                    and (
+                            (task_type == 'cl-gcabs' and sub_task > 2)
+                            or (task_type == 'cl-ycabs' and sub_task > 6)
+                    )
+            )
+            or year in ['2017', '2018']
+    )
+    return special_case
+
+
 def make_cabs(cab_type: str, *args) -> List[str]:
     task_type: str = ''
     if cab_type == 'green':
@@ -165,10 +180,14 @@ def perform(task_type: str, b_task: bytes) -> bool:
     s3 = ps.get_s3fs_client()
     print('got s3fs client')
 
+    # determine if task is cabs special case
+    cabs_special_case: bool = False
+    if task_type in ['cl-gcabs', 'cl-ycabs']:
+        cabs_special_case = is_cabs_special_case(task_type=task_type, year=year, sub_task=quarter if task_type == 'cl-gcabs' else month)
+
     # fetch cab zones
     taxi_zones_df: GeoDataFrame = GeoDataFrame()
-    if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016', '2017', '2018'] \
-            and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and month > 5)):
+    if cabs_special_case:
         taxi_zones_df = fetch_cab_zones()
 
     try:
@@ -184,12 +203,19 @@ def perform(task_type: str, b_task: bytes) -> bool:
             #print('file encoding is '+encoding)
 
             # handle change in data format for cab data
-            if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016','2017','2018'] \
-                and ( (task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and month > 5) ):
+
+            if cabs_special_case:
+                if task_type == 'cl-gcabs':
+                    usecols = [2, 6, 7]
+                    names = ['dodatetime', 'dolocationid', 'passengers']
+                else:
+                    usecols = [2, 3, 8]
+                    names = ['dodatetime', 'passengers', 'dolocationid']
+
                 df = read_csv(file_obj,
                                  header=None,
-                                 usecols=[2, 6, 7],
-                                 names=['dodatetime', 'dolocationid', 'passengers'],
+                                 usecols=usecols,
+                                 names=names,
                                  parse_dates=dates,
                                  date_parser=date_parser,
                                  skipinitialspace=True,
@@ -327,10 +353,15 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
     s3 = ps.get_s3fs_client()
     print('got s3fs client')
 
+    # determine if task is cabs special case
+    cabs_special_case: bool = False
+    if task_type in ['cl-gcabs', 'cl-ycabs']:
+        cabs_special_case = is_cabs_special_case(task_type=task_type, year=year,
+                                                 sub_task=quarter if task_type == 'cl-gcabs' else month)
+
     # fetch cab zones
     taxi_zones_df: GeoDataFrame = GeoDataFrame()
-    if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016', '2017', '2018'] \
-            and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and month > 5)):
+    if cabs_special_case:
         taxi_zones_df = fetch_cab_zones()
 
     try:
@@ -346,12 +377,18 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
             # print('file encoding is '+encoding)
             tf_reader: TextFileReader
             # handle change in data format for cab data
-            if task_type in ['cl-gcabs', 'cl-ycabs'] and year in ['2016', '2017', '2018'] \
-                    and ((task_type == 'cl-gcabs' and quarter > 2) or (task_type == 'cl-ycabs' and month > 5)):
+            if cabs_special_case:
+                if task_type == 'cl-gcabs':
+                    usecols = [2, 6, 7]
+                    names = ['dodatetime', 'dolocationid', 'passengers']
+                else:
+                    usecols = [2, 3, 8]
+                    names = ['dodatetime', 'passengers', 'dolocationid']
+
                 tf_reader = read_csv(file_obj,
                                  header=None,
-                                 usecols=[2, 6, 7],
-                                 names=['dodatetime', 'dolocationid', 'passengers'],
+                                 usecols=usecols,
+                                 names=names,
                                  parse_dates=dates,
                                  date_parser=date_parser,
                                  skipinitialspace=True,
