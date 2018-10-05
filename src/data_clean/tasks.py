@@ -552,6 +552,9 @@ def perform_dask(task_type: str) -> bool:
             df['dolocationid'] = df.map_partitions(partial(add_cab_zone, taxi_zone_df=taxi_zones_df),
                                    meta=('dolocationid', int64))
 
+        if task_type in ['cl-gcabs', 'cl-ycabs']:
+            df = df[['dodatetime', 'dolocationid', 'passengers']]
+
         #if not sorted:
         #    df = df.set_index(index_col).sort_index().reset_index()
         #    print('after sort ' + str(df.columns))
