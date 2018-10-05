@@ -283,7 +283,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
     return True
 
 
-def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
+def perform_large(task_type: str, b_task: bytes, chunksize: int = 5000) -> bool:
     task: str = str(b_task, 'utf-8')
     files: List[str] = []
     task_split: List[str]
