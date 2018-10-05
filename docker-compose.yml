@@ -38,6 +38,8 @@ services:
   dworker:
     image: daskdev/dask
     command: ['dask-worker','dscheduler:8786']
+    environment:
+      EXTRA_CONDA_PACKAGES: s3fs -c conda-forge
     networks:
       - backend
     deploy:
