@@ -1,16 +1,11 @@
-import sys
 from typing import Dict, List, Callable, Union, Optional
-from minio import Object
 from pandas import DataFrame, read_csv
 from pandas.io.parsers import TextFileReader
 from data_tools import task_map
 from utils import persistence as ps
-from functools import reduce
 from data_load import tasks as dl_tasks
-from s3fs.core import S3FileSystem
-from geopandas import GeoDataFrame, read_file, sjoin
+from geopandas import GeoDataFrame, sjoin
 from shapely.geometry import Point
-from urllib3.response import HTTPResponse
 from data_tools import row_operations as row_ops
 from data_tools import file_io
 
@@ -18,41 +13,67 @@ from data_tools import file_io
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
 
 
-def is_cabs_special_case(task_type: str, year: str, sub_task: int) -> bool:
-    special_case: bool = task_type in ['cl-gcabs', 'cl-ycabs'] \
-            and (
-            (
-                    year in ['2016']
-                    and (
-                            (task_type == 'cl-gcabs' and sub_task > 2)
-                            or (task_type == 'cl-ycabs' and sub_task > 6)
-                    )
-            )
-            or year in ['2017', '2018']
-    )
+def get_cab_months(task_type: str, task: str) -> List[int]:
+    cab_type: str = task_type.rsplit('-', 1)[1]
+    months: List[int] = []
+    task_split = task.split('-')
+    if cab_type == 'gcabs':
+        quarter = int(task_split[1])
+        months = list(range((quarter - 1) * 3 + 1, (quarter - 1) * 3 + 4))
+    elif cab_type == 'ycabs':
+        months = [int(task_split[1])]
+    return months
+
+
+def get_cab_filenames(task_type: str, task: str) -> List[str]:
+    cab_type: str = task_type.rsplit('-', 1)[1]
+    task_split = task.split('-')
+    year = task_split[0]
+    months = get_cab_months(task_type=task_type, task=task)
+    files: List[str] = []
+
+    if cab_type == 'gcabs':
+        file_suffix = 'green'
+    elif cab_type == 'ycabs':
+        file_suffix = 'yellow'
+
+    get_filename = lambda month: file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
+    files = list(map(get_filename, months))
+    return files
+
+
+def is_cabs_special_case(task_type: str, task: str) -> bool:
+    cab_type: str = task_type.rsplit('-', 1)[1]
+    task_split = task.split('-')
+    year = task_split[0]
+    sub_task = int(task_split[1])
+    special_case: bool = cab_type in ['gcabs', 'ycabs'] \
+                        and \
+                        (
+                            (
+                                    year in ['2016']
+                                    and (
+                                            (cab_type == 'gcabs' and sub_task > 2)
+                                            or (cab_type == 'ycabs' and sub_task > 6)
+                                    )
+                            )
+                            or year in ['2017', '2018']
+                        )
     return special_case
 
 
-def make_cabs(cab_type: str, *args) -> List[str]:
-    task_type: str = ''
-    if cab_type == 'green':
-        task_type = 'cl-gcabs'
-    elif cab_type == 'yellow':
-        task_type = 'cl-ycabs'
+def make_gcabs(*args) -> List[str]:
+    map: Dict = task_map.task_type_map['cl-gcabs']
+    out_bucket: str = map['out']
+    ps.create_bucket(out_bucket)
+    return dl_tasks.make_gcabs(*args)
 
-    if not task_type == '':
-        map: Dict = task_map.task_type_map[task_type]
-        out_bucket: str = map['out']
-        ps.create_bucket(out_bucket)
-        if cab_type == 'green':
-            return dl_tasks.make_gcabs(*args)
-        elif cab_type == 'yellow':
-            return dl_tasks.make_ycabs(*args)
-        #return dl_tasks.make_cabs(*args)
-        else:
-            return []
-    else:
-        return []
+
+def make_ycabs(*args) -> List[str]:
+    map: Dict = task_map.task_type_map['cl-ycabs']
+    out_bucket: str = map['out']
+    ps.create_bucket(out_bucket)
+    return dl_tasks.make_ycabs(*args)
 
 
 def make_transit(*args) -> List[str]:
@@ -74,6 +95,7 @@ def remove_outliers(df, col):
     discard = (df[col] < 0) | (df[col] > 3 * intqrange)
     return df.loc[~discard]
 
+
 def add_cab_zone(df: DataFrame, taxi_zone_df: GeoDataFrame) -> DataFrame:
 
     try:
@@ -93,13 +115,9 @@ def add_cab_zone(df: DataFrame, taxi_zone_df: GeoDataFrame) -> DataFrame:
     except Exception as err:
         raise err
 
-def fetch_cab_zones() -> GeoDataFrame:
 
+def fetch_cab_zones() -> GeoDataFrame:
     # load taxi-zone shapefile
-    #path_prefix: str = '/tmp/'
-    #file_obj: Object = ps.get_file(bucket='ref-base', filename=filename, filepath=path_prefix+filename)
-    #print('fetched taxi zones shape file %s' % str(file_obj))
-    #taxi_zone_df: GeoDataFrame = read_file('/taxi_zones.shp', vfs='zip://'+path_prefix+filename)
     zipname: str = 'taxi_zones.zip'
     filename: str = 'taxi_zones.shp'
     taxi_zone_df: GeoDataFrame = file_io.fetch_geodf_from_zip(filename=filename,
@@ -108,12 +126,9 @@ def fetch_cab_zones() -> GeoDataFrame:
     return taxi_zone_df
 
 
-
 def perform(task_type: str, b_task: bytes) -> bool:
     task: str = str(b_task, 'utf-8')
     files: List[str] = []
-    task_split: List[str]
-    year: str
 
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
@@ -144,28 +159,9 @@ def perform(task_type: str, b_task: bytes) -> bool:
     index_col: str = task_type_map['index']['col']
     sorted: bool = task_type_map['index']['sorted']
     row_op: Dict[str, Callable] = task_type_map['row_op']
-    quarter: int
-    #bimonth: int
-    month: int
+
     if task_type in ['cl-gcabs', 'cl-ycabs']:
-        task_split = task.split('-')
-        year = task_split[0]
-        if task_type == 'cl-gcabs':
-            file_suffix = 'green'
-            quarter = int(task_split[1])
-            months = lambda quarter: range( (quarter-1)*3+1, (quarter-1)*3+4 )
-            get_filename = lambda month: file_suffix+'_tripdata_'+year+'-'+prefix_zero(month)+'.csv'
-            files = list(map(get_filename, months(quarter)))
-        elif task_type == 'cl-ycabs':
-            file_suffix = 'yellow'
-            #bimonth = int(task_split[1])
-            #months = lambda bimonth: range((bimonth - 1) * 2 + 1, (bimonth - 1) * 2 + 3)
-            #get_filename = lambda month: file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
-            #files = list(map(get_filename, months(bimonth)))
-            month = int(task_split[1])
-            files = [file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv']
-
-
+        files = get_cab_filenames(task_type=task_type, task=task)
 
     elif task_type == 'cl-transit':
         task_split = task.split('-')
@@ -183,7 +179,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
     # determine if task is cabs special case
     cabs_special_case: bool = False
     if task_type in ['cl-gcabs', 'cl-ycabs']:
-        cabs_special_case = is_cabs_special_case(task_type=task_type, year=year, sub_task=quarter if task_type == 'cl-gcabs' else month)
+        cabs_special_case = is_cabs_special_case(task_type=task_type, task=task)
 
     # fetch cab zones
     taxi_zones_df: GeoDataFrame = GeoDataFrame()
@@ -200,8 +196,6 @@ def perform(task_type: str, b_task: bytes) -> bool:
             except Exception:
                 # skip file not found (transit)
                 continue
-            #encoding: str = find_encoding(file_obj)
-            #print('file encoding is '+encoding)
 
             # handle change in data format for cab data
 
@@ -260,19 +254,9 @@ def perform(task_type: str, b_task: bytes) -> bool:
                 df = df.set_index(index_col).sort_index().reset_index()
                 print('after sort '+str(df.columns))
 
-
-
-            # specific processing for transit
-            #if task_type == 'cl-transit':
-                #df = remove_outliers(df, col='DELEXITS')
-
             # drop na values
             df = df.dropna()
 
-
-            # save in out bucket
-            #s3_out_url: str = 's3://' + out_bucket
-            #df.to_csv(s3.open('s3://'+out_bucket+'/'+file, 'w'))
             file_io.write_csv(df=df, bucket=out_bucket, filename=file)
             print('wrote file to output bucket '+str(file))
 
@@ -283,11 +267,9 @@ def perform(task_type: str, b_task: bytes) -> bool:
     return True
 
 
-def perform_large(task_type: str, b_task: bytes, chunksize: int = 5000) -> bool:
+def perform_large(task_type: str, b_task: bytes, chunksize: int = 250000) -> bool:
     task: str = str(b_task, 'utf-8')
     files: List[str] = []
-    task_split: List[str]
-    year: str
 
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
@@ -318,28 +300,9 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 5000) -> bool:
     index_col: str = task_type_map['index']['col']
     sorted: bool = task_type_map['index']['sorted']
     row_op: Dict[str, Callable] = task_type_map['row_op']
-    quarter: int
-    #bimonth: int
-    month: int
+
     if task_type in ['cl-gcabs', 'cl-ycabs']:
-        task_split = task.split('-')
-        year = task_split[0]
-        if task_type == 'cl-gcabs':
-            file_suffix = 'green'
-            quarter = int(task_split[1])
-            months = lambda quarter: range((quarter - 1) * 3 + 1, (quarter - 1) * 3 + 4)
-            get_filename = lambda month: file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
-            files = list(map(get_filename, months(quarter)))
-        elif task_type == 'cl-ycabs':
-            file_suffix = 'yellow'
-            #bimonth = int(task_split[1])
-            #months = lambda bimonth: range((bimonth - 1) * 2 + 1, (bimonth - 1) * 2 + 3)
-            #get_filename = lambda month: file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
-            #files = list(map(get_filename, months(bimonth)))
-            month = int(task_split[1])
-            files = [file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv']
-
-
+        files = get_cab_filenames(task_type=task_type, task=task)
 
     elif task_type == 'cl-transit':
         task_split = task.split('-')
@@ -357,8 +320,7 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 5000) -> bool:
     # determine if task is cabs special case
     cabs_special_case: bool = False
     if task_type in ['cl-gcabs', 'cl-ycabs']:
-        cabs_special_case = is_cabs_special_case(task_type=task_type, year=year,
-                                                 sub_task=quarter if task_type == 'cl-gcabs' else month)
+        cabs_special_case = is_cabs_special_case(task_type=task_type, task=task)
 
     # fetch cab zones
     taxi_zones_df: GeoDataFrame = GeoDataFrame()
@@ -376,9 +338,8 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 5000) -> bool:
                 # skip file not found (transit)
                 continue
 
-            # encoding: str = find_encoding(file_obj)
-            # print('file encoding is '+encoding)
             tf_reader: TextFileReader
+
             # handle change in data format for cab data
             if cabs_special_case:
                 if task_type == 'cl-gcabs':
@@ -442,17 +403,11 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 5000) -> bool:
                     df = df.set_index(index_col).sort_index().reset_index()
                     print('after sort ' + str(df.columns))
 
-                # specific processing for transit
-                # if task_type == 'cl-transit':
-                # df = remove_outliers(df, col='DELEXITS')
-
                 # drop na values
                 df = df.dropna()
 
                 # save in out bucket
-                # s3_out_url: str = 's3://' + out_bucket
                 df.to_csv(s3.open('s3://'+out_bucket+'/'+file, 'a'))
-                # file_io.write_csv(df=df, bucket=out_bucket, filename=file)
                 print('appended cleaned chunk to file in output bucket ' + str(file))
 
     except Exception as err:
@@ -460,6 +415,7 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 5000) -> bool:
         raise err
 
     return True
+
 
 #TODO
 def perform_traffic(cab_type: str, b_task: bytes) -> bool:

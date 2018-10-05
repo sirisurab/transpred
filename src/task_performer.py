@@ -39,7 +39,7 @@ def perform_task(task_type: str) -> bool:
         elif task_type in ['cl-transit', 'cl-traffic', 'cl-gcabs']:
             status = dc_tasks.perform(task_type, task)
         elif task_type in ['cl-ycabs']:
-            status = dc_tasks.perform_large(task_type, task, chunksize=5000)
+            status = dc_tasks.perform_large(task_type, task, chunksize=250000)
         elif task_type in ['rs-transit', 'rs-traffic', 'rs-gcabs', 'rs-ycabs']:
             status = rs_tasks.perform(task_type, task)
         else:

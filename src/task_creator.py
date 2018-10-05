@@ -41,17 +41,17 @@ def create_tasks(task_type: str, *args) -> None:
     elif task_type == 'cl-traffic':
         tasks = dc_tasks.make_traffic()
     elif task_type == 'cl-gcabs':
-        tasks = dc_tasks.make_cabs('green', *args)
+        tasks = dc_tasks.make_gcabs(*args)
     elif task_type == 'cl-ycabs':
-        tasks = dc_tasks.make_cabs('yellow', *args)
+        tasks = dc_tasks.make_ycabs(*args)
     elif task_type == 'rs-transit':
         tasks = rs_tasks.make_transit(*args)
     elif task_type == 'rs-traffic':
         tasks = rs_tasks.make_traffic()
     elif task_type == 'rs-gcabs':
-        tasks = rs_tasks.make_cabs('green', *args)
+        tasks = rs_tasks.make_gcabs(*args)
     elif task_type == 'rs-ycabs':
-        tasks = rs_tasks.make_cabs('yellow', *args)
+        tasks = rs_tasks.make_ycabs(*args)
     else:
         tasks = []
 
