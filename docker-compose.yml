@@ -26,20 +26,20 @@ services:
   #    networks:
   #      - backend
 
-  #  dscheduler:
-  #    image: daskdev/dask
-  #    ports:
-  #      - '8786:8786'
-  #      - '8787:8787'
-  #    command: ['dask-scheduler']
-  #    networks:
-  #      - backend
+  dscheduler:
+    image: daskdev/dask
+    ports:
+      - '8786:8786'
+      - '8787:8787'
+    command: ['dask-scheduler']
+    networks:
+      - backend
 
-  #  dworker:
-  #    image: daskdev/dask
-  #    command: ['dask-worker','scheduler:8786']
-  #    networks:
-  #      - backend
+  dworker:
+    image: daskdev/dask
+    command: ['dask-worker','scheduler:8786']
+    networks:
+      - backend
 
 
   g_cabs_creator:
@@ -112,7 +112,7 @@ services:
     - backend
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
 
   y_cabs_loader:
     build: .
@@ -130,15 +130,17 @@ services:
   y_cabs_cleaner:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_performer.py cl-ycabs
+    command: ./src/dask_performer.py cl-ycabs
     restart: on-failure
     networks:
     - backend
     depends_on:
-    - y_cabs_creator
+#    - y_cabs_creator
+     - dscheduler
+     - dworker
     deploy:
       mode: replicated
-      replicas: 12
+      replicas: 1
 
   turnstile_creator:
     build: .
