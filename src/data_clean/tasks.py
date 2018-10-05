@@ -562,7 +562,7 @@ def perform_dask(task_type: str) -> bool:
         s3_out_url: str = 's3://'+out_bucket+'/*.csv'
         dd.to_csv(df=df,
                   filename=s3_out_url,
-                  name_function=lambda i: task_type.rsplit('-', 1)[1]+'_'+i,
+                  name_function=lambda i: task_type.rsplit('-', 1)[1]+'_'+str(i),
                   storage_options=s3_options)
 
     except Exception as err:
