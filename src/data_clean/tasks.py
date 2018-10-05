@@ -187,7 +187,8 @@ def perform(task_type: str, b_task: bytes) -> bool:
 
     # fetch cab zones
     taxi_zones_df: GeoDataFrame = GeoDataFrame()
-    if cabs_special_case:
+    if task_type in ['cl-gcabs', 'cl-ycabs'] \
+        and not cabs_special_case:
         taxi_zones_df = fetch_cab_zones()
 
     try:
@@ -361,7 +362,8 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 500) -> bool:
 
     # fetch cab zones
     taxi_zones_df: GeoDataFrame = GeoDataFrame()
-    if cabs_special_case:
+    if task_type in ['cl-gcabs', 'cl-ycabs'] \
+        and not cabs_special_case:
         taxi_zones_df = fetch_cab_zones()
 
     try:
