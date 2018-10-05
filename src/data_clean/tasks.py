@@ -375,6 +375,7 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 5000) -> bool:
             except Exception:
                 # skip file not found (transit)
                 continue
+
             # encoding: str = find_encoding(file_obj)
             # print('file encoding is '+encoding)
             tf_reader: TextFileReader
@@ -415,7 +416,11 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 5000) -> bool:
                                  converters=converters,
                                  encoding='utf-8'
                                  )
+
             s3_out_url: str = 's3://' + out_bucket
+
+            # delete output file
+            ps.remove_file(out_bucket, file)
 
             for chunk in tf_reader:
                 df: DataFrame = DataFrame(chunk)

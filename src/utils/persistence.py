@@ -168,3 +168,13 @@ def get_all_filenames(bucket: str, path: str='/') -> List[str]:
         path = path + '/'
     filenames: List[str] = s3.glob(bucket+path+'*')
     return [file.rsplit('/', 1)[1] for file in filenames]
+
+
+def remove_file(bucket: str, filename: str) -> bool:
+    mc = get_client()
+    try:
+        mc.remove_object(bucket_name=bucket, object_name=filename)
+    except Exception as err:
+        raise err
+    else:
+        return True
