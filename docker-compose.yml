@@ -44,7 +44,7 @@ services:
       - backend
     deploy:
       mode: replicated
-      replicas: 20
+      replicas: 10
 
 
   g_cabs_creator:
