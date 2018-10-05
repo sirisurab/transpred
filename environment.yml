@@ -2,13 +2,14 @@ name: transpred
 
 dependencies:
   - pandas=0.23.0
-  - dask=0.19.2
+#  - dask=0.19.2
   - pip:
     - fuzzywuzzy
     - python-Levenshtein
     - minio
     - redis
     - s3fs
+    - dask[complete]
 #    - dask[dataframe]
 #    - dask[distributed]
     - fastparquet
