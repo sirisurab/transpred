@@ -36,12 +36,14 @@ services:
       - backend
 
   dworker:
-    image: daskdev/dask
-    command: ['dask-worker','dscheduler:8786']
-    environment:
-      EXTRA_CONDA_PACKAGES: s3fs -c conda-forge
+#    image: daskdev/dask
+#    command: ['dask-worker','dscheduler:8786']
+    image: sirisurab/tp-app:latest
+    command: ./src/dask_worker.py
     networks:
       - backend
+    depends_on:
+      - dscheduler
     deploy:
       mode: replicated
       replicas: 4
