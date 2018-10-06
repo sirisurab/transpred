@@ -137,12 +137,11 @@ services:
   y_cabs_cleaner:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/dask_performer.py cl-ycabs
+    command: ./src/dask_performer.py cl-ycabs 2016
     restart: on-failure
     networks:
     - backend
     depends_on:
-#    - y_cabs_creator
      - dscheduler
      - dworker
     deploy:
