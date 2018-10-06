@@ -11,7 +11,6 @@ from data_tools import row_operations as row_ops
 from data_tools import file_io
 from functools import partial
 from numpy import int64
-from dask.distributed import Client
 
 
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
@@ -480,8 +479,6 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     try:
         s3_options: Dict = ps.fetch_s3_options()
 
-        # initialize distributed client
-        client: Client = Client('dscheduler:8786')
 
         if task_type in ['cl-gcabs', 'cl-ycabs']:
             s3_glob_cabs: Dict[str, Dict[str, List[str]]] = get_s3_glob_for_cabs(bucket=in_bucket, years=years)
@@ -555,7 +552,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                     df = df.dropna()
 
                     # async compute
-                    df = client.persist(df)
+                    #df = client.persist(df)
 
                     # save in out bucket
                     s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
