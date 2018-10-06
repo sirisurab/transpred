@@ -424,11 +424,11 @@ def perform_large(task_type: str, b_task: bytes, chunksize: int = 250000) -> boo
     return True
 
 
-def get_s3_glob_for_cabs(bucket: str) -> Dict[str, List[str]]:
+def get_s3_glob_for_cabs(bucket: str, years: List[str]) -> Dict[str, Dict[str, List[str]]]:
     all_files: List[str] = ps.get_all_filenames(bucket=bucket, path='/')
     s3_prefix: str = 's3://' + bucket + '/'
-    special: List[str] = []
-    other: List[str] = []
+    special: Dict[str, List[str]] = {year: [] for year in years}
+    other: Dict[str, List[str]] = {year: [] for year in years}
     for file in all_files:
         # parse format - file_suffix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv
         no_ext: str = file.rsplit('.', 1)[0]
@@ -437,14 +437,14 @@ def get_s3_glob_for_cabs(bucket: str) -> Dict[str, List[str]]:
         year: str = no_ext_no_month.rsplit('_', 1)[1]
         special_case: bool = (year in ['2016'] and month > 6) \
                              or year in ['2017', '2018']
-        if special_case:
-            special.append(s3_prefix+file)
-        else:
-            other.append(s3_prefix+file)
+        if year in years and special_case:
+            special[year].append(s3_prefix+file)
+        elif year in years:
+            other[year].append(s3_prefix+file)
     return {'special': special, 'other': other}
 
 
-def perform_dask(task_type: str) -> bool:
+def perform_dask(task_type: str, years: List[str]) -> bool:
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
@@ -482,92 +482,85 @@ def perform_dask(task_type: str) -> bool:
         s3_options: Dict = ps.fetch_s3_options()
 
         if task_type in ['cl-gcabs', 'cl-ycabs']:
-            s3_glob_cabs: Dict[str, List[str]] = get_s3_glob_for_cabs(bucket=in_bucket)
+            s3_glob_cabs: Dict[str, Dict[str, List[str]]] = get_s3_glob_for_cabs(bucket=in_bucket, years=years)
 
             for case in s3_glob_cabs.keys():
-                if case == 'special':
-                    if task_type == 'cl-gcabs':
-                        usecols = [2, 6, 7]
-                        names = ['dodatetime', 'dolocationid', 'passengers']
+
+                for year in s3_glob_cabs[case].keys():
+
+                    if case == 'special':
+                        if task_type == 'cl-gcabs':
+                            usecols = [2, 6, 7]
+                            names = ['dodatetime', 'dolocationid', 'passengers']
+                        else:
+                            usecols = [2, 3, 8]
+                            names = ['dodatetime', 'passengers', 'dolocationid']
+
+                        df = dd.read_csv(urlpath=s3_glob_cabs[case],
+                                         storage_options=s3_options,
+                                         header=None,
+                                         usecols=usecols,
+                                         names=names,
+                                         parse_dates=dates,
+                                         date_parser=date_parser,
+                                         skipinitialspace=True,
+                                         skip_blank_lines=True,
+                                         converters={
+                                             'dodatetime': row_ops.clean_cabs_dt,
+                                             'passengers': row_ops.clean_num
+                                         },
+                                         encoding='utf-8'
+                                         )
                     else:
-                        usecols = [2, 3, 8]
-                        names = ['dodatetime', 'passengers', 'dolocationid']
+                        df = dd.read_csv(urlpath=s3_glob_cabs[case],
+                                         storage_options=s3_options,
+                                         header=0,
+                                         usecols=lambda x: x.strip().lower() in list(cols.keys()),
+                                         parse_dates=dates,
+                                         date_parser=date_parser,
+                                         skipinitialspace=True,
+                                         skip_blank_lines=True,
+                                         converters=converters,
+                                         encoding='utf-8'
+                                         )
 
-                    df = dd.read_csv(urlpath=s3_glob_cabs[case],
-                                     storage_options=s3_options,
-                                     header=None,
-                                     usecols=usecols,
-                                     names=names,
-                                     parse_dates=dates,
-                                     date_parser=date_parser,
-                                     skipinitialspace=True,
-                                     skip_blank_lines=True,
-                                     converters={
-                                         'dodatetime': row_ops.clean_cabs_dt,
-                                         'passengers': row_ops.clean_num
-                                     },
-                                     encoding='utf-8'
-                                     )
-                else:
-                    df = dd.read_csv(urlpath=s3_glob_cabs[case],
-                                     storage_options=s3_options,
-                                     header=0,
-                                     usecols=lambda x: x.strip().lower() in list(cols.keys()),
-                                     parse_dates=dates,
-                                     date_parser=date_parser,
-                                     skipinitialspace=True,
-                                     skip_blank_lines=True,
-                                     converters=converters,
-                                     encoding='utf-8'
-                                     )
-        else:
-            s3_in_url: str = 's3://' + in_bucket + '/*.*'
-            df = dd.read_csv(urlpath=s3_in_url,
-                             storage_options=s3_options,
-                             header=0,
-                             usecols=lambda x: x.strip().lower() in list(cols.keys()),
-                             parse_dates=dates,
-                             date_parser=date_parser,
-                             skipinitialspace=True,
-                             skip_blank_lines=True,
-                             converters=converters,
-                             encoding='utf-8'
-                             )
 
-        # rename columns
-        df.columns = map(str.lower, df.columns)
-        df.columns = map(str.strip, df.columns)
-        print('before rename ' + str(df.columns))
+                    # rename columns
+                    df.columns = map(str.lower, df.columns)
+                    df.columns = map(str.strip, df.columns)
+                    print('before rename ' + str(df.columns))
 
-        df = df.rename(columns=rename_cols)
-        print('after rename ' + str(df.columns))
+                    df = df.rename(columns=rename_cols)
+                    print('after rename ' + str(df.columns))
 
-        # map row-wise operations
-        if task_type in ['cl-gcabs', 'cl-ycabs'] and 'dolocationid' not in df.columns:
-            print('In data clean tasks for cabs. Field dolocationid not found')
-            # df = df.apply(func=row_op['func'], axis=1)
-            # fetch cab zones
-            taxi_zones_df: GeoDataFrame = fetch_cab_zones()
-            #df = add_cab_zone(df, taxi_zones_df)
-            df['dolocationid'] = df.map_partitions(partial(add_cab_zone, taxi_zone_df=taxi_zones_df),
-                                   meta=('dolocationid', int64))
+                    # map row-wise operations
+                    if task_type in ['cl-gcabs', 'cl-ycabs'] and 'dolocationid' not in df.columns:
+                        print('In data clean tasks for cabs. Field dolocationid not found')
+                        # df = df.apply(func=row_op['func'], axis=1)
+                        # fetch cab zones
+                        taxi_zones_df: GeoDataFrame = fetch_cab_zones()
+                        #df = add_cab_zone(df, taxi_zones_df)
+                        df['dolocationid'] = df.map_partitions(partial(add_cab_zone, taxi_zone_df=taxi_zones_df),
+                                               meta=('dolocationid', int64))
 
-        if task_type in ['cl-gcabs', 'cl-ycabs']:
-            df = df[['dodatetime', 'dolocationid', 'passengers']]
+                    if task_type in ['cl-gcabs', 'cl-ycabs']:
+                        df = df[['dodatetime', 'dolocationid', 'passengers']]
 
-        #if not sorted:
-        #    df = df.set_index(index_col).sort_index().reset_index()
-        #    print('after sort ' + str(df.columns))
+                    #if not sorted:
+                    #    df = df.set_index(index_col).sort_index().reset_index()
+                    #    print('after sort ' + str(df.columns))
 
-        # drop na values
-        df = df.dropna()
+                    # drop na values
+                    df = df.dropna()
 
-        # save in out bucket
-        s3_out_url: str = 's3://'+out_bucket+'/*.csv'
-        dd.to_csv(df=df,
-                  filename=s3_out_url,
-                  name_function=lambda i: task_type.rsplit('-', 1)[1]+'_'+str(i),
-                  storage_options=s3_options)
+                    # save in out bucket
+                    # clean year folder in out bucket
+                    ps.remove_all_files(bucket=out_bucket, path='/year/')
+                    s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
+                    dd.to_csv(df=df,
+                              filename=s3_out_url,
+                              name_function=lambda i: task_type.rsplit('-', 1)[1]+'_'+str(i),
+                              storage_options=s3_options)
 
     except Exception as err:
         print('error in perform_cabs %s' % str(err))

@@ -4,6 +4,8 @@ from minio.error import ResponseError, BucketAlreadyExists, BucketAlreadyOwnedBy
 from s3fs.core import S3FileSystem
 from urllib3.response import HTTPResponse
 import glob
+from functools import reduce
+
 KEY: str = 'minio'
 SECRET: str = 'minio123'
 ENDPOINT: str = 'minio:9000'
@@ -166,6 +168,8 @@ def get_all_filenames(bucket: str, path: str='/') -> List[str]:
     s3: S3FileSystem = get_s3fs_client()
     if not path.rsplit('/', 1)[1] == '':
         path = path + '/'
+    if not path.split('/', 1)[0] == '':
+        path = '/' + path
     filenames: List[str] = s3.glob(bucket+path+'*')
     return [file.rsplit('/', 1)[1] for file in filenames]
 
@@ -178,3 +182,11 @@ def remove_file(bucket: str, filename: str) -> bool:
         raise err
     else:
         return True
+
+def remove_all_files(bucket: str, path: str = '/') -> bool:
+    #s3: S3FileSystem = get_s3fs_client()
+    #filenames: List[str] = s3.glob(bucket+'/*')
+    filenames: List[str] = get_all_filenames(bucket, path)
+    print('all files in bucket %(bucket)s at path %(path)s are %(files)s' % {'bucket': bucket, 'path': path, 'files': filenames})
+    return reduce(lambda rem_prev, rem_curr: rem_prev and rem_curr, [remove_file(bucket=bucket, filename=file) for file in filenames], True)
+
