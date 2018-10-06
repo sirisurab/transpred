@@ -138,7 +138,7 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     command: ./src/dask_performer.py cl-ycabs 2016
-    restart: none
+    restart: "no"
     networks:
     - backend
     depends_on:
