@@ -42,8 +42,7 @@ apt-get -y install  libfreetype6-dev \
                     redis-tools && \
 mkdir /minio && \
 wget -P /minio/ https://dl.minio.io/client/mc/release/linux-amd64/mc && \
-chmod -R +x /minio && \
-conda install -n base s3fs
+chmod -R +x /minio
 # copy minio config file
 #mkdir /root/.mc && \
 #yes | cp -f /tmp/config.json /root/.mc/ && \

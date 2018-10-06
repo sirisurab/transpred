@@ -496,7 +496,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                             usecols = [2, 3, 8]
                             names = ['dodatetime', 'passengers', 'dolocationid']
 
-                        df = dd.read_csv(urlpath=s3_glob_cabs[case],
+                        df = dd.read_csv(urlpath=s3_glob_cabs[case][year],
                                          storage_options=s3_options,
                                          header=None,
                                          usecols=usecols,
@@ -512,7 +512,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                                          encoding='utf-8'
                                          )
                     else:
-                        df = dd.read_csv(urlpath=s3_glob_cabs[case],
+                        df = dd.read_csv(urlpath=s3_glob_cabs[case][year],
                                          storage_options=s3_options,
                                          header=0,
                                          usecols=lambda x: x.strip().lower() in list(cols.keys()),
