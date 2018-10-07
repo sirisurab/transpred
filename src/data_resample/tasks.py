@@ -199,14 +199,17 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             else:
                 grouper_cols = []
 
+            per_group = lambda grp: grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
+
             # resample using frequency and aggregate function specified
             cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
             #df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
-            df = df.resample(resample_freq, on=index_col).sum()
-            print('after resampling')
+            #df = df.resample(resample_freq, on=index_col).sum()
+            #print('after resampling')
 
-            df = df.groupby(grouper_cols)[cols].sum()
-            print('after grouping')
+            #df = df.groupby(grouper_cols)[cols].sum()
+            df = df.groupby(grouper_cols).apply(per_group, columns=[index_col]+cols)
+            print('after grouping and resampling')
 
             # save in out bucket
             s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
@@ -220,3 +223,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
         raise err
 
     return True
+
+
+
+def resample_group_dask(group, datecol, resample_freq, aggr_func='sum'):
+    return group.groupby(datecol).resample(resample_freq, how=aggr_func)
