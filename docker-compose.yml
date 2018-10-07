@@ -50,7 +50,7 @@ services:
       - dscheduler
     deploy:
       mode: replicated
-      replicas: 5
+      replicas: 4
 
 
   g_cabs_creator:
@@ -150,7 +150,7 @@ services:
      - dworker
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
 
   y_cabs_resampler:
     build: .
@@ -164,7 +164,7 @@ services:
     - dworker
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   turnstile_creator:
     build: .
