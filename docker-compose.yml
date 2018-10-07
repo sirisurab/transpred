@@ -117,7 +117,7 @@ services:
   y_cabs_creator:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_creator.py cl-ycabs 2017
+    command: ./src/task_creator.py dl-ycabs 2017
     restart: on-failure
     networks:
     - backend
