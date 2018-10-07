@@ -16,7 +16,7 @@ if __name__ == '__main__':
         client: Client = Client('dscheduler:8786')
         task_prefix: str = task_type.split('-', 1)[0]
         if task_prefix == 'rs':
-            status = rs_tasks.perform_dask(task_type, years)
+            status = rs_tasks.perform_dask(task_type, years, client)
         elif task_prefix == 'cl':
             status = cl_tasks.perform_dask(task_type, years)
 

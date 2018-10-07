@@ -145,7 +145,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
     return True
 
 
-def perform_dask(task_type: str, years: List[str]) -> bool:
+def perform_dask(task_type: str, years: List[str], client) -> bool:
 
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
@@ -179,8 +179,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                              dtype={key: dtypes[key] for key in dtypes.keys() if key not in date_cols},
                              encoding='utf-8'
                              )
-            #df = df.set_index(index_col)
-            #print('after set index ')
+
 
             if diff['compute']:
                 df[diff['new_cols']] = df[diff['cols']].diff()
@@ -192,23 +191,27 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
             # filter
             if filter_by_key == 'weekday':
-                df = df.loc[df[index_col].dt.weekday == filter_by_val]
+                df = df.loc[df[index_col].dt.weekday == filter_by_val].repartition(npartitions=df.npartitions // 7)
+                df = client.persist(df)
+
+            df = df.set_index(index_col, sorted=True)
+            print('after set index ')
 
             if group['compute']:
                 grouper_cols = group['by_cols']
             else:
                 grouper_cols = []
 
-            per_group = lambda grp: grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
+            #per_group = lambda grp: grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
 
             # resample using frequency and aggregate function specified
             cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
             #df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
-            #df = df.resample(resample_freq, on=index_col).sum()
+            df = df.resample(resample_freq).sum()
             #print('after resampling')
 
-            #df = df.groupby(grouper_cols)[cols].sum()
-            df = df.groupby(grouper_cols).apply(per_group, columns=[index_col]+cols)
+            df = df.groupby(grouper_cols)[cols].sum()
+            #df = df.groupby(grouper_cols).apply(per_group, columns=[index_col]+cols)
             print('after grouping and resampling')
 
             # save in out bucket
