@@ -223,7 +223,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                       storage_options=s3_options)
 
     except Exception as err:
-        print('error in perform_cabs %s' % str(err))
+        print('error in perform_cabs %s')
         raise err
 
     return True
