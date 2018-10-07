@@ -145,7 +145,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
     return True
 
 
-def perform_dask(task_type: str) -> bool:
+def perform_dask(task_type: str, years: List[str]) -> bool:
 
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
@@ -166,53 +166,54 @@ def perform_dask(task_type: str) -> bool:
     print('got s3fs client')
 
     try:
-        s3_in_url: str = 's3://' + in_bucket + '/*.*'
-        s3_options: Dict = ps.fetch_s3_options()
+        for year in years:
+            s3_in_url: str = 's3://' + in_bucket + '/'+year+'/*.*'
+            s3_options: Dict = ps.fetch_s3_options()
 
-        df = dd.read_csv(urlpath=s3_in_url,
-                         storage_options=s3_options,
-                         header=0,
-                         usecols=dtypes.keys(),
-                         parse_dates=date_cols,
-                         skipinitialspace=True,
-                         dtype=dtypes,
-                         encoding='utf-8'
-                         )
-        #df = df.set_index(index_col)
-        #print('after set index ')
+            df = dd.read_csv(urlpath=s3_in_url,
+                             storage_options=s3_options,
+                             header=0,
+                             usecols=dtypes.keys(),
+                             parse_dates=date_cols,
+                             skipinitialspace=True,
+                             dtype=dtypes,
+                             encoding='utf-8'
+                             )
+            #df = df.set_index(index_col)
+            #print('after set index ')
 
-        if diff['compute']:
-            df[diff['new_cols']] = df[diff['cols']].diff()
-            df = df.drop(diff['cols'], axis=1)
+            if diff['compute']:
+                df[diff['new_cols']] = df[diff['cols']].diff()
+                df = df.drop(diff['cols'], axis=1)
 
-        # specific processing for transit
-        #if task_type == 'rs-transit':
-        #    df = remove_outliers(df, cols=diff['new_cols'])
+            # specific processing for transit
+            #if task_type == 'rs-transit':
+            #    df = remove_outliers(df, cols=diff['new_cols'])
 
-        # filter
-        if filter_by_key == 'weekday':
-            df = df.loc[df[index_col].dt.weekday == filter_by_val]
+            # filter
+            if filter_by_key == 'weekday':
+                df = df.loc[df[index_col].dt.weekday == filter_by_val]
 
-        if group['compute']:
-            grouper_cols = group['by_cols']
-        else:
-            grouper_cols = []
+            if group['compute']:
+                grouper_cols = group['by_cols']
+            else:
+                grouper_cols = []
 
-        # resample using frequency and aggregate function specified
-        cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
-        #df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
-        df = df.resample(resample_freq, convention='end', on=index_col).sum()
-        print('after resampling')
+            # resample using frequency and aggregate function specified
+            cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
+            #df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
+            df = df.resample(resample_freq, convention='end', on=index_col).sum()
+            print('after resampling')
 
-        df = df.groupby(grouper_cols)[cols].sum()
-        print('after grouping')
+            df = df.groupby(grouper_cols)[cols].sum()
+            print('after grouping')
 
-        # save in out bucket
-        s3_out_url: str = 's3://'+out_bucket+'/*.csv'
-        dd.to_csv(df=df,
-                  filename=s3_out_url,
-                  name_function=lambda i: task_type.rsplit('-', 1)[1]+'_'+str(i),
-                  storage_options=s3_options)
+            # save in out bucket
+            s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
+            dd.to_csv(df=df,
+                      filename=s3_out_url,
+                      name_function=lambda i: task_type.rsplit('-', 1)[1]+'_'+str(i),
+                      storage_options=s3_options)
 
     except Exception as err:
         print('error in perform_cabs %s' % str(err))

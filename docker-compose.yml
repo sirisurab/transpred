@@ -34,6 +34,9 @@ services:
     command: ['dask-scheduler']
     networks:
       - backend
+    deploy:
+      mode: replicated
+      replicas: 0
 
   dworker:
 #    image: daskdev/dask
@@ -42,11 +45,12 @@ services:
     command: ./src/dask_worker.py
     networks:
       - backend
+    restart: "no"
     depends_on:
       - dscheduler
     deploy:
       mode: replicated
-      replicas: 4
+      replicas: 0
 
 
   g_cabs_creator:
@@ -113,13 +117,13 @@ services:
   y_cabs_creator:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_creator.py cl-ycabs 2016
+    command: ./src/task_creator.py cl-ycabs 2017
     restart: on-failure
     networks:
     - backend
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   y_cabs_loader:
     build: .
@@ -132,7 +136,7 @@ services:
     - y_cabs_creator
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 12
 
   y_cabs_cleaner:
     build: .
@@ -146,7 +150,21 @@ services:
      - dworker
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
+
+  y_cabs_resampler:
+    build: .
+    image: sirisurab/tp-app:latest
+    command: ./src/dask_performer.py rs-ycabs 2016
+    restart: "no"
+    networks:
+    - backend
+    depends_on:
+    - dscheduler
+    - dworker
+    deploy:
+      mode: replicated
+      replicas: 0
 
   turnstile_creator:
     build: .
