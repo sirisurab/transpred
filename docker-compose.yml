@@ -36,7 +36,7 @@ services:
       - backend
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   dworker:
 #    image: daskdev/dask
@@ -50,7 +50,7 @@ services:
       - dscheduler
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 5
 
 
   g_cabs_creator:
@@ -123,7 +123,7 @@ services:
     - backend
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
 
   y_cabs_loader:
     build: .
@@ -136,12 +136,12 @@ services:
     - y_cabs_creator
     deploy:
       mode: replicated
-      replicas: 12
+      replicas: 0
 
   y_cabs_cleaner:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/dask_performer.py cl-ycabs 2016
+    command: ./src/dask_performer.py cl-ycabs 2017
     restart: "no"
     networks:
     - backend
@@ -150,7 +150,7 @@ services:
      - dworker
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   y_cabs_resampler:
     build: .
