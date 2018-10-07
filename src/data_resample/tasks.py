@@ -145,7 +145,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
     return True
 
 
-def perform_dask(task_type: str, years: List[str], client) -> bool:
+def perform_dask(task_type: str, years: List[str]) -> bool:
 
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
@@ -192,7 +192,7 @@ def perform_dask(task_type: str, years: List[str], client) -> bool:
             # filter
             if filter_by_key == 'weekday':
                 df = df.loc[df[index_col].dt.weekday == filter_by_val].repartition(npartitions=df.npartitions // 7)
-                df = client.persist(df)
+                #df = client.persist(df)
 
             df = df.set_index(index_col, sorted=True)
             print('after set index ')
