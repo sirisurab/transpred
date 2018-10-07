@@ -202,7 +202,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             # resample using frequency and aggregate function specified
             cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
             #df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
-            df = df.resample(resample_freq, convention='end', on=index_col).sum()
+            df = df.resample(resample_freq, on=index_col).sum()
             print('after resampling')
 
             df = df.groupby(grouper_cols)[cols].sum()
