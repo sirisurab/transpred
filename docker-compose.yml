@@ -142,13 +142,15 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     command: ./src/dask_performer.py cl-ycabs 2017
-    restart: "no"
+#    restart: "no"
     networks:
     - backend
     depends_on:
      - dscheduler
      - dworker
     deploy:
+      restart_policy:
+        condition: none
       mode: replicated
       replicas: 0
 
@@ -156,15 +158,15 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     command: ./src/dask_performer.py rs-ycabs 2016
-    restart: "no"
+#    restart: "no"
     networks:
     - backend
     depends_on:
     - dscheduler
     - dworker
     deploy:
-      mode: replicated
-      replicas: 1
+      restart_policy:
+        condition: none
 
   turnstile_creator:
     build: .
