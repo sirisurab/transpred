@@ -148,7 +148,7 @@ def perform(task_type: str, b_task: bytes) -> bool:
 def get_s3_glob(bucket: str, years: List[str]) -> Dict[str, List[str]]:
     s3_prefix: str = 's3://' + bucket + '/'
     glob_str: Dict[str, List[str]] = {year:
-                                          [s3_prefix+file
+                                          [s3_prefix+'/'+year+'/'+file
                                            for file in ps.get_all_filenames(bucket=bucket, path='/'+year+'/')]
                                       for year in years}
     return glob_str
