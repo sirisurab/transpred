@@ -32,6 +32,8 @@ services:
       - '8786:8786'
       - '8787:8787'
     command: ['dask-scheduler']
+    environment:
+      EXTRA_PIP_PACKAGES:  lz4 --upgrade
     networks:
       - backend
     deploy:
