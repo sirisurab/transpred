@@ -12,7 +12,7 @@ from data_tools import file_io
 from functools import partial
 from numpy import int64
 from dask.distributed import Client
-from dask.distributed.deploy.local import LocalCluster
+from distributed.deploy.local import LocalCluster
 import time
 
 
