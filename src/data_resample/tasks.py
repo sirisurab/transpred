@@ -7,6 +7,8 @@ from functools import reduce, partial
 from data_load import tasks as dl_tasks
 from data_clean.tasks import get_cab_months, get_cab_filenames
 from toolz.functoolz import compose
+from dask.distributed import Client
+import time
 
 resample_map: Dict = {
     'filter_by': {
@@ -176,6 +178,19 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
     #s3_glob: Dict[str, List[str]] = get_s3_glob(bucket=in_bucket, years=years)
     s3_options: Dict = ps.fetch_s3_options()
+
+    # initialize distributed client
+    while True:
+        try:
+            client: Client = Client('dscheduler:8786')
+        except (TimeoutError, OSError, IOError):
+            time.sleep(2)
+            pass
+        except Exception as err:
+            raise err
+        else:
+            break
+
     try:
         for year in years:
             s3_in_url: str = 's3://' + in_bucket + '/'+year+'/*.*'
@@ -191,7 +206,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                              encoding='utf-8'
                              )
 
-
+            df = client.persist(df)
             #if diff['compute']:
             #    df[diff['new_cols']] = df[diff['cols']].diff()
             #    df = df.drop(diff['cols'], axis=1)
@@ -203,8 +218,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             # filter
             if filter_by_key == 'weekday':
                 df = df.loc[df[index_col].dt.weekday == filter_by_val]\
-                    .repartition(npartitions=df.npartitions // 7).compute()
-                #df = client.persist(df)
+                    .repartition(npartitions=df.npartitions // 7)
+                df = client.persist(df)
 
             #df = df.set_index(index_col, sorted=True)
             #print('after set index ')
@@ -241,7 +256,10 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
     except Exception as err:
         print('error in perform_cabs %s')
+        client.close()
         raise err
+
+    client.close()
 
     return True
 
