@@ -12,7 +12,7 @@ dependencies:
 #    - dask[dataframe]
     - distributed
     - fastparquet
-    - blosc
+    - lz4
     - geopandas
     - Rtree
     - descartes
