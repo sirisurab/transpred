@@ -185,9 +185,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                              header=0,
                              usecols=dtypes.keys(),
                              parse_dates=date_cols,
-                             skipinitialspace=True,
-                             dtype={key: dtypes[key] for key in dtypes.keys() if key not in date_cols},
-                             encoding='utf-8'
+                             dtype={key: dtypes[key] for key in dtypes.keys() if key not in date_cols}
                              )
 
 
