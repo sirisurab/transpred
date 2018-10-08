@@ -590,7 +590,10 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
     except Exception as err:
         print('error in perform_cabs %s' % str(err))
+        client.close()
         raise err
+
+    client.close()
 
     return True
 
