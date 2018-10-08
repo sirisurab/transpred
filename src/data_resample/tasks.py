@@ -184,14 +184,14 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                              storage_options=s3_options,
                              header=0,
                              usecols=dtypes.keys(),
-                             parse_dates=date_cols
-                             #dtype={key: dtypes[key] for key in dtypes.keys() if key not in date_cols}
+                             parse_dates=date_cols,
+                             dtype={key: dtypes[key] for key in dtypes.keys() if key not in date_cols}
                              )
 
 
-            if diff['compute']:
-                df[diff['new_cols']] = df[diff['cols']].diff()
-                df = df.drop(diff['cols'], axis=1)
+            #if diff['compute']:
+               # df[diff['new_cols']] = df[diff['cols']].diff()
+               # df = df.drop(diff['cols'], axis=1)
 
             # specific processing for transit
             #if task_type == 'rs-transit':
@@ -199,8 +199,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
             # filter
             if filter_by_key == 'weekday':
-                df = df.loc[df[index_col].dt.weekday == filter_by_val]\
-                    .repartition(npartitions=df.npartitions // 7).compute()
+                df = df.loc[df[index_col].dt.weekday == filter_by_val]
+                #    .repartition(npartitions=df.npartitions // 7).compute()
                 #df = client.persist(df)
 
             df = df.set_index(index_col, sorted=True)
@@ -236,7 +236,3 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
     return True
 
-
-
-def resample_group_dask(group, datecol, resample_freq, aggr_func='sum'):
-    return group.groupby(datecol).resample(resample_freq, how=aggr_func)
