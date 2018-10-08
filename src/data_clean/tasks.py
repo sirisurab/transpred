@@ -578,7 +578,6 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                     dd.to_parquet(df=df,
                               path=s3_out_url,
                               engine='fastparquet',
-                              compute=True,
                               compression='snappy',
                               storage_options=s3_options)
 
