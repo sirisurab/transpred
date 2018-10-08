@@ -20,4 +20,5 @@ if __name__ == '__main__':
         elif task_prefix == 'cl':
             status = cl_tasks.perform_dask(task_type, years)
 
+    client.close()
     print('pipeline for task %(task)s executed with status %(status)s' % {'task': task_type, 'status': status})
