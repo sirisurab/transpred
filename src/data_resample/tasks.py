@@ -199,8 +199,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
             # filter
             if filter_by_key == 'weekday':
-                df = df.loc[df[index_col].dt.weekday == filter_by_val]\
-                    .repartition(npartitions=df.npartitions // 7).compute()
+                df = df.loc[df[index_col].dt.weekday == filter_by_val]
+                #    .repartition(npartitions=df.npartitions // 7).compute()
                 #df = client.persist(df)
 
             #df = df.set_index(index_col, sorted=True)
