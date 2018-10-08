@@ -580,6 +580,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                               engine='fastparquet',
                               compute=True,
                               compression='lz4',
+                              encoding='bytes',
                               storage_options=s3_options)
 
     except Exception as err:
