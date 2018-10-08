@@ -206,8 +206,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                     .repartition(npartitions=df.npartitions // 7).compute()
                 #df = client.persist(df)
 
-            df = df.set_index(index_col, sorted=True)
-            print('after set index ')
+            #df = df.set_index(index_col, sorted=True)
+            #print('after set index ')
 
             if group['compute']:
                 grouper_cols = group['by_cols']
