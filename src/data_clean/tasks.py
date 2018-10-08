@@ -459,7 +459,7 @@ def create_dask_client(num_workers: int) -> Client:
     cluster = LocalCluster(n_workers=num_workers)
     return Client(cluster)
 
-def perform_dask_test(task_type: str, years: List[str]) -> bool :
+def perform_dask_test() -> bool :
     client = create_dask_client(4)
     time.sleep(3000)
     return True
