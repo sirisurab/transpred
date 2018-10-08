@@ -198,37 +198,37 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             #    df = remove_outliers(df, cols=diff['new_cols'])
 
             # filter
-            if filter_by_key == 'weekday':
-                df = df.loc[df[index_col].dt.weekday == filter_by_val]
+            #if filter_by_key == 'weekday':
+                #df = df.loc[df[index_col].dt.weekday == filter_by_val]
                 #    .repartition(npartitions=df.npartitions // 7).compute()
                 #df = client.persist(df)
 
-            df = df.set_index(index_col, sorted=True)
-            print('after set index ')
+            #df = df.set_index(index_col, sorted=True)
+            #print('after set index ')
 
-            if group['compute']:
-                grouper_cols = group['by_cols']
-            else:
-                grouper_cols = []
+            #if group['compute']:
+                #grouper_cols = group['by_cols']
+            #else:
+                #grouper_cols = []
 
             #per_group = lambda grp: grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
 
             # resample using frequency and aggregate function specified
-            cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
+            #cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
             #df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
-            df = df.resample(resample_freq).sum()
+            #df = df.resample(resample_freq).sum()
             #print('after resampling')
 
-            df = df.groupby(grouper_cols)[cols].sum()
+            #df = df.groupby(grouper_cols)[cols].sum()
             #df = df.groupby(grouper_cols).apply(per_group, columns=[index_col]+cols)
             print('after grouping and resampling')
 
             # save in out bucket
-            s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
-            dd.to_csv(df=df,
-                      filename=s3_out_url,
-                      name_function=lambda i: task_type.rsplit('-', 1)[1]+'_'+str(i),
-                      storage_options=s3_options)
+            #s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
+            #dd.to_csv(df=df,
+            #          filename=s3_out_url,
+            #          name_function=lambda i: task_type.rsplit('-', 1)[1]+'_'+str(i),
+            #          storage_options=s3_options)
 
     except Exception as err:
         print('error in perform_cabs %s')
