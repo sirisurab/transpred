@@ -519,7 +519,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                                          skip_blank_lines=True,
                                          converters={
                                              'dodatetime': row_ops.clean_cabs_dt,
-                                             'passengers': row_ops.clean_num
+                                             'passengers': row_ops.clean_num,
+                                             'dolocationid': row_ops.clean_num
                                          },
                                          encoding='utf-8'
                                          )
@@ -560,7 +561,6 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                     #if not sorted:
                     #    df = df.set_index(index_col).sort_index().reset_index()
                     #    print('after sort ' + str(df.columns))
-
                     # drop na values
                     df = df.dropna()
 
@@ -580,8 +580,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                               engine='fastparquet',
                               compute=True,
                               compression='lz4',
-                              storage_options=s3_options,
-                              object_encoding='bytes')
+                              storage_options=s3_options)
 
     except Exception as err:
         print('error in perform_cabs %s' % str(err))
