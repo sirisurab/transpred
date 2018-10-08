@@ -32,9 +32,6 @@ services:
       - '8786:8786'
       - '8787:8787'
     command: ['dask-scheduler']
-    environment:
-      EXTRA_APT_PKGS:  libsnappy-dev
-      EXTRA_PIP_PKGS:  python-snappy
     networks:
       - backend
     deploy:

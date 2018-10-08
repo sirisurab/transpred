@@ -579,7 +579,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                               path=s3_out_url,
                               engine='fastparquet',
                               compute=True,
-                              compression='snappy',
+                              compression='lz4',
                               storage_options=s3_options)
 
     except Exception as err:
