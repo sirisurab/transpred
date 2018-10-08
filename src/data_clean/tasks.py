@@ -456,7 +456,7 @@ def create_dask_client(num_workers: int) -> Client:
     #        raise err
     #    else:
     #        break
-    cluster = LocalCluster(n_workers=num_workers)
+    cluster = LocalCluster(n_workers=num_workers, diagnostics_port=8787)
     return Client(cluster)
 
 
