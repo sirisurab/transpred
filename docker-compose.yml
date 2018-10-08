@@ -149,7 +149,7 @@ services:
      - dworker
     deploy:
       restart_policy:
-        condition: none
+        condition: on-failure
       replicas: 0
 
   y_cabs_resampler:
@@ -163,7 +163,7 @@ services:
     - dworker
     deploy:
       restart_policy:
-        condition: none
+        condition: on-failure
       replicas: 1
 
   turnstile_creator:

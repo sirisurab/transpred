@@ -17,9 +17,9 @@ if __name__ == '__main__':
         while True:
             try:
                 client: Client = Client('dscheduler:8786')
-            except TimeoutError:
+            except (TimeoutError, OSError, IOError):
                 time.sleep(2)
-                continue
+                pass
             except Exception as err:
                 raise err
             else:
