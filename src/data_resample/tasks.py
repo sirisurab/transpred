@@ -5,11 +5,9 @@ from data_tools import task_map
 from utils import persistence as ps
 from functools import reduce, partial
 from data_load import tasks as dl_tasks
-from data_clean.tasks import get_cab_months, get_cab_filenames
+from data_clean.tasks import get_cab_months, get_cab_filenames, create_dask_client
 from toolz.functoolz import compose
 from dask.distributed import Client
-import time
-
 resample_map: Dict = {
     'filter_by': {
         'key': 'weekday',
@@ -179,17 +177,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     #s3_glob: Dict[str, List[str]] = get_s3_glob(bucket=in_bucket, years=years)
     s3_options: Dict = ps.fetch_s3_options()
 
-    # initialize distributed client
-    while True:
-        try:
-            client: Client = Client('dscheduler:8786')
-        except (TimeoutError, OSError, IOError):
-            time.sleep(2)
-            pass
-        except Exception as err:
-            raise err
-        else:
-            break
+    client: Client = create_dask_client(num_workers=4)
+
 
     try:
         for year in years:

@@ -11,7 +11,7 @@ from data_tools import row_operations as row_ops
 from data_tools import file_io
 from functools import partial
 from numpy import int64
-from dask.distributed import Client
+from dask.distributed import Client, LocalCluster
 import time
 
 
@@ -444,6 +444,22 @@ def get_s3_glob_for_cabs(bucket: str, years: List[str]) -> Dict[str, Dict[str, L
     return {'special': special, 'other': other}
 
 
+def create_dask_client(num_workers: int) -> Client:
+    # initialize distributed client
+    # while True:
+    #    try:
+    #       client: Client = Client('dscheduler:8786')
+    #    except (TimeoutError, OSError, IOError):
+    #        time.sleep(2)
+    #        pass
+    #    except Exception as err:
+    #        raise err
+    #    else:
+    #        break
+    cluster = LocalCluster(n_workers=num_workers)
+    return Client(cluster)
+
+
 def perform_dask(task_type: str, years: List[str]) -> bool:
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
@@ -478,17 +494,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     s3 = ps.get_s3fs_client()
     print('got s3fs client')
 
-    # initialize distributed client
-    while True:
-        try:
-            client: Client = Client('dscheduler:8786')
-        except (TimeoutError, OSError, IOError):
-            time.sleep(2)
-            pass
-        except Exception as err:
-            raise err
-        else:
-            break
+    client: Client = create_dask_client(num_workers=4)
 
     try:
         s3_options: Dict = ps.fetch_s3_options()

@@ -38,7 +38,7 @@ services:
       - backend
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
 
   dworker:
 #    image: daskdev/dask
@@ -52,7 +52,7 @@ services:
       - dscheduler
     deploy:
       mode: replicated
-      replicas: 4
+      replicas: 0
 
 
   g_cabs_creator:
@@ -146,9 +146,9 @@ services:
     command: ./src/dask_performer.py cl-ycabs 2017
     networks:
     - backend
-    depends_on:
-     - dscheduler
-     - dworker
+  #  depends_on:
+  #   - dscheduler
+  #   - dworker
     deploy:
       restart_policy:
         condition: on-failure
