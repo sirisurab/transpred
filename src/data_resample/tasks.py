@@ -145,6 +145,15 @@ def perform(task_type: str, b_task: bytes) -> bool:
     return True
 
 
+def get_s3_glob(bucket: str, years: List[str]) -> Dict[str, List[str]]:
+    s3_prefix: str = 's3://' + bucket + '/'
+    glob_str: Dict[str, List[str]] = {year:
+                                          [s3_prefix+file
+                                           for file in ps.get_all_filenames(bucket=bucket, path='/'+year+'/')]
+                                      for year in years}
+    return glob_str
+
+
 def perform_dask(task_type: str, years: List[str]) -> bool:
 
     task_type_map: Dict = task_map.task_type_map[task_type]
@@ -165,12 +174,13 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     s3 = ps.get_s3fs_client()
     print('got s3fs client')
 
+    s3_glob: Dict[str, List[str]] = get_s3_glob(bucket=in_bucket, years=years)
+    s3_options: Dict = ps.fetch_s3_options()
     try:
         for year in years:
-            s3_in_url: str = 's3://' + in_bucket + '/'+year+'/*.*'
-            s3_options: Dict = ps.fetch_s3_options()
+            #s3_in_url: str = 's3://' + in_bucket + '/'+year+'/*.*'
 
-            df = dd.read_csv(urlpath=s3_in_url,
+            df = dd.read_csv(urlpath=s3_glob[year],
                              storage_options=s3_options,
                              header=0,
                              usecols=dtypes.keys(),
