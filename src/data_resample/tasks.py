@@ -203,24 +203,30 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                 #    .repartition(npartitions=df.npartitions // 7).compute()
                 #df = client.persist(df)
 
-            df = df.set_index(index_col, sorted=True)
-            print('after set index ')
+            #df = df.set_index(index_col, sorted=True)
+            #print('after set index ')
 
-            #if group['compute']:
-                #grouper_cols = group['by_cols']
-            #else:
-                #grouper_cols = []
+            if group['compute']:
+                grouper_cols = group['by_cols']
+            else:
+                grouper_cols = []
+
+            cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
+            meta_cols = {key: dtypes[key] for key in dtypes.keys() if key in cols}
 
             #per_group = lambda grp: grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
 
             # resample using frequency and aggregate function specified
-            #cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
             #df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
             #df = df.resample(resample_freq).sum()
             #print('after resampling')
 
             #df = df.groupby(grouper_cols)[cols].sum()
-            #df = df.groupby(grouper_cols).apply(per_group, columns=[index_col]+cols)
+            df = df.groupby(grouper_cols).apply(per_group,
+                                                meta=meta_cols,
+                                                index_col=index_col,
+                                                cols=cols,
+                                                resample_freq=resample_freq)
             print('after grouping and resampling')
 
             # save in out bucket
@@ -236,3 +242,6 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
     return True
 
+
+def per_group(grp, index_col, cols, resample_freq):
+    return grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
