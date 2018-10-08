@@ -189,9 +189,9 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                              )
 
 
-            if diff['compute']:
-                df[diff['new_cols']] = df[diff['cols']].diff()
-                df = df.drop(diff['cols'], axis=1)
+            #if diff['compute']:
+            #    df[diff['new_cols']] = df[diff['cols']].diff()
+            #    df = df.drop(diff['cols'], axis=1)
 
             # specific processing for transit
             #if task_type == 'rs-transit':
