@@ -26,33 +26,33 @@ services:
   #    networks:
   #      - backend
 
-  dscheduler:
-    image: daskdev/dask
-    ports:
-      - '8786:8786'
-      - '8787:8787'
-    command: ['dask-scheduler']
-    environment:
-      EXTRA_CONDA_PACKAGES:  lz4 -c conda-forge
-    networks:
-      - backend
-    deploy:
-      mode: replicated
-      replicas: 0
+  #dscheduler:
+  #  image: daskdev/dask
+  #  ports:
+  #    - '8786:8786'
+  #    - '8787:8787'
+  #  command: ['dask-scheduler']
+  #  environment:
+  #    EXTRA_CONDA_PACKAGES:  lz4 -c conda-forge
+  #  networks:
+  #    - backend
+  #  deploy:
+  #    mode: replicated
+  #    replicas: 0
 
-  dworker:
+  #dworker:
 #    image: daskdev/dask
 #    command: ['dask-worker','dscheduler:8786']
-    image: sirisurab/tp-app:latest
-    command: ./src/dask_worker.py
-    networks:
-      - backend
-    restart: "no"
-    depends_on:
-      - dscheduler
-    deploy:
-      mode: replicated
-      replicas: 0
+  #  image: sirisurab/tp-app:latest
+  #  command: ./src/dask_worker.py
+  #  networks:
+  #    - backend
+  #  restart: "no"
+  #  depends_on:
+  #    - dscheduler
+  #  deploy:
+  #    mode: replicated
+  #    replicas: 0
 
 
   g_cabs_creator:
