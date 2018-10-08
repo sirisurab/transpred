@@ -141,7 +141,7 @@ services:
   y_cabs_cleaner:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/dask_performer.py cl-ycabs 2017
+    command: ./src/dask_performer.py cl-ycabs 2016
     networks:
     - backend
     depends_on:
@@ -150,7 +150,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-      replicas: 0
+      replicas: 1
 
   y_cabs_resampler:
     build: .
@@ -164,7 +164,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-      replicas: 1
+      replicas: 0
 
   turnstile_creator:
     build: .

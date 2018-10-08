@@ -206,7 +206,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                              encoding='utf-8'
                              )
 
-            df = client.persist(df)
+            #df = client.persist(df)
             #if diff['compute']:
             #    df[diff['new_cols']] = df[diff['cols']].diff()
             #    df = df.drop(diff['cols'], axis=1)
