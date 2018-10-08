@@ -11,7 +11,8 @@ from data_tools import row_operations as row_ops
 from data_tools import file_io
 from functools import partial
 from numpy import int64
-from dask.distributed import Client, LocalCluster
+from dask.distributed import Client
+from dask.distributed.deploy.local import LocalCluster
 import time
 
 
