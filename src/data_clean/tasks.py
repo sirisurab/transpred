@@ -457,7 +457,7 @@ def create_dask_client(num_workers: int) -> Client:
     #        raise err
     #    else:
     #        break
-    cluster = LocalCluster(n_workers=num_workers)
+    cluster = LocalCluster(n_workers=num_workers, ip='')
     return Client(cluster)
 
 def perform_dask_test() -> bool :
