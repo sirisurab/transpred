@@ -565,7 +565,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                     df = df.dropna()
 
                     # async compute
-                    df = client.persist(df)
+                    #df = client.persist(df)
 
                     # save in out bucket
                     #s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
