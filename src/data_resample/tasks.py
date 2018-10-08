@@ -184,8 +184,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                              storage_options=s3_options,
                              header=0,
                              usecols=dtypes.keys(),
-                             parse_dates=date_cols,
-                             dtype={key: dtypes[key] for key in dtypes.keys() if key not in date_cols}
+                             parse_dates=date_cols
+                             #dtype={key: dtypes[key] for key in dtypes.keys() if key not in date_cols}
                              )
 
 
