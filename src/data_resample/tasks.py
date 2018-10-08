@@ -189,18 +189,18 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                              )
 
 
-            #if diff['compute']:
-               # df[diff['new_cols']] = df[diff['cols']].diff()
-               # df = df.drop(diff['cols'], axis=1)
+            if diff['compute']:
+                df[diff['new_cols']] = df[diff['cols']].diff()
+                df = df.drop(diff['cols'], axis=1)
 
             # specific processing for transit
             #if task_type == 'rs-transit':
             #    df = remove_outliers(df, cols=diff['new_cols'])
 
             # filter
-            #if filter_by_key == 'weekday':
-                #df = df.loc[df[index_col].dt.weekday == filter_by_val]
-                #    .repartition(npartitions=df.npartitions // 7).compute()
+            if filter_by_key == 'weekday':
+                df = df.loc[df[index_col].dt.weekday == filter_by_val]\
+                    .repartition(npartitions=df.npartitions // 7).compute()
                 #df = client.persist(df)
 
             #df = df.set_index(index_col, sorted=True)

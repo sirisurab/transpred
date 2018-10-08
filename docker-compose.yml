@@ -142,7 +142,6 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     command: ./src/dask_performer.py cl-ycabs 2017
-#    restart: "no"
     networks:
     - backend
     depends_on:
@@ -157,7 +156,6 @@ services:
     build: .
     image: sirisurab/tp-app:latest
     command: ./src/dask_performer.py rs-ycabs 2016
-#    restart: "no"
     networks:
     - backend
     depends_on:
