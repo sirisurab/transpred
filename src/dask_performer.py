@@ -16,7 +16,7 @@ if __name__ == '__main__':
         if task_prefix == 'rs':
             status = rs_tasks.perform_dask(task_type, years)
         elif task_prefix == 'cl':
-            status = cl_tasks.perform_dask(task_type, years)
-            #status = cl_tasks.perform_dask_test()
+            #status = cl_tasks.perform_dask(task_type, years)
+            status = cl_tasks.perform_dask_test()
 
     print('pipeline for task %(task)s executed with status %(status)s' % {'task': task_type, 'status': status})

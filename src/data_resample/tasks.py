@@ -196,8 +196,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             #                 )
             df = dd.read_parquet(path=s3_in_url,
                                  storage_options=s3_options,
-                                 engine='fastparquet',
-                                 index=False)
+                                 engine='fastparquet')
 
             #df = client.persist(df)
             #if diff['compute']:
@@ -212,10 +211,10 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             if filter_by_key == 'weekday':
                 df = df.loc[df[index_col].dt.weekday == filter_by_val]\
                     .repartition(npartitions=df.npartitions // 7)
-                #df = client.persist(df)
+                df = client.persist(df)
 
-            #df = df.set_index(index_col, sorted=True)
-            #print('after set index ')
+            df = df.set_index(index_col, sorted=False)
+            print('after set index ')
 
             if group['compute']:
                 grouper_cols = group['by_cols']
@@ -229,7 +228,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             #per_group = lambda grp: grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
 
             # resample using frequency and aggregate function specified
-            df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols].sum()
+            df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].sum()
             #df = df.resample(resample_freq).sum()
             #print('after resampling')
 
