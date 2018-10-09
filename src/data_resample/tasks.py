@@ -229,17 +229,17 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             #per_group = lambda grp: grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
 
             # resample using frequency and aggregate function specified
-            #df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
+            df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols].sum()
             #df = df.resample(resample_freq).sum()
             #print('after resampling')
 
             #df = df.groupby(grouper_cols)[cols].sum()
-            df = df.groupby(grouper_cols).apply(per_group,
-                                                meta=meta_cols,
-                                                index_col=index_col,
-                                                cols=cols,
-                                                resample_freq=resample_freq,
-                                                level=len(grouper_cols))
+            #df = df.groupby(grouper_cols).apply(per_group,
+            #                                    meta=meta_cols,
+            #                                    index_col=index_col,
+            #                                    cols=cols,
+            #                                    resample_freq=resample_freq,
+            #                                    level=len(grouper_cols))
             print('after grouping and resampling')
 
             # save in out bucket
