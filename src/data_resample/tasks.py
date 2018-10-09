@@ -196,7 +196,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             #                 )
             df = dd.read_parquet(path=s3_in_url,
                                  storage_options=s3_options,
-                                 engine='fastparquet')
+                                 engine='fastparquet',
+                                 index=False)
 
             #df = client.persist(df)
             #if diff['compute']:
