@@ -183,7 +183,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     try:
         for year in years:
             s3_in_url: str = 's3://' + in_bucket + '/'+year+'/'
-
+            print('s3 url %s' % s3_in_url)
             #df = dd.read_csv(
             #                #urlpath=s3_glob[year],
             #                 urlpath=s3_in_url,
@@ -209,12 +209,12 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
             # filter
             if filter_by_key == 'weekday':
-                df = df.loc[df[index_col].dt.weekday == filter_by_val]\
-                    .repartition(npartitions=df.npartitions // 7)
-                df = client.persist(df)
+                df = df.loc[df[index_col].dt.weekday == filter_by_val]
+                   # .repartition(npartitions=df.npartitions // 7)
+                #df = client.persist(df)
 
-            df = df.set_index(index_col, sorted=False)
-            print('after set index ')
+            #df = df.set_index(index_col, sorted=False)
+            #print('after set index ')
 
             if group['compute']:
                 grouper_cols = group['by_cols']
@@ -228,7 +228,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             #per_group = lambda grp: grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
 
             # resample using frequency and aggregate function specified
-            df = df.groupby([pd.Grouper(freq=resample_freq)] + grouper_cols)[cols].sum()
+            df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols].sum()
             #df = df.resample(resample_freq).sum()
             #print('after resampling')
 
@@ -240,8 +240,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             #                                    resample_freq=resample_freq,
             #                                    level=len(grouper_cols))
             print('after grouping and resampling %s' % str(df.shape))
-            print('after grouping and resampling %s' % str(df.head(compute=True)))
-            print('after compute %s' % str(df.shape))
+            #print('after grouping and resampling %s' % str(df.head(compute=True)))
+            #print('after compute %s' % str(df.shape))
 
             # save in out bucket
             #s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
