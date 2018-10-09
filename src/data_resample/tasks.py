@@ -224,7 +224,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
             cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
             meta_cols = {key: dtypes[key] for key in dtypes.keys() if key in cols}
-
+            print('cols %s' % cols)
+            print('meta_cols %s' % meta_cols)
             #per_group = lambda grp: grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
 
             # resample using frequency and aggregate function specified
@@ -265,5 +266,5 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     return True
 
 
-def per_group(grp, index_col, cols, resample_freq):
-    return grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
+def per_group(grp, index_col, cols, resample_freq, level):
+    return grp.groupby(index_col)[cols].resample(resample_freq, level=index_col, how='sum')
