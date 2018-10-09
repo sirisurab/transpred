@@ -238,7 +238,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                                                 meta=meta_cols,
                                                 index_col=index_col,
                                                 cols=cols,
-                                                resample_freq=resample_freq)
+                                                resample_freq=resample_freq,
+                                                level=len(grouper_cols))
             print('after grouping and resampling')
 
             # save in out bucket
@@ -266,5 +267,5 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     return True
 
 
-def per_group(grp, index_col, cols, resample_freq):
-    return grp.groupby(index_col)[cols].resample(resample_freq, level=index_col, how='sum')
+def per_group(grp, index_col, cols, resample_freq, level):
+    return grp.groupby(index_col)[cols].resample(resample_freq, level=level, how='sum')
