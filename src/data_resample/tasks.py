@@ -239,7 +239,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             #                                    cols=cols,
             #                                    resample_freq=resample_freq,
             #                                    level=len(grouper_cols))
-            print('after grouping and resampling')
+            print('after grouping and resampling %s' % df.shape)
+            print('after grouping and resampling %s' % df.head(compute=False))
 
             # save in out bucket
             #s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
