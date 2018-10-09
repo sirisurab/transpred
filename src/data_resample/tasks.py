@@ -266,5 +266,5 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     return True
 
 
-def per_group(grp, index_col, cols, resample_freq, level):
+def per_group(grp, index_col, cols, resample_freq):
     return grp.groupby(index_col)[cols].resample(resample_freq, level=index_col, how='sum')
