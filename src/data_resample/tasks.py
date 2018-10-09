@@ -182,18 +182,21 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
     try:
         for year in years:
-            s3_in_url: str = 's3://' + in_bucket + '/'+year+'/*.*'
+            s3_in_url: str = 's3://' + in_bucket + '/'+year+'/'
 
-            df = dd.read_csv(
-                            #urlpath=s3_glob[year],
-                             urlpath=s3_in_url,
-                             storage_options=s3_options,
-                             header=0,
-                             usecols=dtypes.keys(),
-                             parse_dates=date_cols,
-                             dtype={key: dtypes[key] for key in dtypes.keys() if key not in date_cols},
-                             encoding='utf-8'
-                             )
+            #df = dd.read_csv(
+            #                #urlpath=s3_glob[year],
+            #                 urlpath=s3_in_url,
+            #                 storage_options=s3_options,
+            #                 header=0,
+            #                 usecols=dtypes.keys(),
+            #                 parse_dates=date_cols,
+            #                 dtype={key: dtypes[key] for key in dtypes.keys() if key not in date_cols},
+            #                 encoding='utf-8'
+            #                 )
+            df = dd.read_parquet(path=s3_in_url,
+                                 storage_options=s3_options,
+                                 engine='fastparquet')
 
             #df = client.persist(df)
             #if diff['compute']:
@@ -208,7 +211,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             if filter_by_key == 'weekday':
                 df = df.loc[df[index_col].dt.weekday == filter_by_val]\
                     .repartition(npartitions=df.npartitions // 7)
-                df = client.persist(df)
+                #df = client.persist(df)
 
             #df = df.set_index(index_col, sorted=True)
             #print('after set index ')
@@ -237,11 +240,19 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             print('after grouping and resampling')
 
             # save in out bucket
-            s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
-            dd.to_csv(df=df,
-                      filename=s3_out_url,
-                      name_function=lambda i: task_type.rsplit('-', 1)[1]+'_'+str(i),
-                      storage_options=s3_options)
+            #s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
+            #dd.to_csv(df=df,
+            #          filename=s3_out_url,
+            #          name_function=lambda i: task_type.rsplit('-', 1)[1]+'_'+str(i),
+            #          storage_options=s3_options)
+
+            s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
+            dd.to_parquet(df=df,
+                          path=s3_out_url,
+                          engine='fastparquet',
+                          compute=True,
+                          compression='lz4',
+                          storage_options=s3_options)
 
     except Exception as err:
         print('error in perform_cabs %s')
