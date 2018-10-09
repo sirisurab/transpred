@@ -164,8 +164,8 @@ services:
     networks:
     - backend
     ports:
-      - '8786:8786'
-      - '8787:8787'
+      - '8788:8786'
+      - '8789:8787'
   #  depends_on:
   #  - dscheduler
   #  - dworker
