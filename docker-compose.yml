@@ -155,7 +155,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-      replicas: 1
+      replicas: 0
 
   y_cabs_resampler:
     build: .
@@ -172,7 +172,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-      replicas: 0
+      replicas: 1
 
   turnstile_creator:
     build: .
