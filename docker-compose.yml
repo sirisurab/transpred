@@ -155,21 +155,24 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-      replicas: 1
+      replicas: 0
 
   y_cabs_resampler:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/dask_performer.py rs-ycabs 2016
+    command: ./src/dask_performer.py rs-ycabs 2017
     networks:
     - backend
-    depends_on:
-    - dscheduler
-    - dworker
+    ports:
+      - '8786:8786'
+      - '8787:8787'
+  #  depends_on:
+  #  - dscheduler
+  #  - dworker
     deploy:
       restart_policy:
         condition: on-failure
-      replicas: 0
+      replicas: 1
 
   turnstile_creator:
     build: .
