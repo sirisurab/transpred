@@ -58,17 +58,19 @@ services:
   g_cabs_creator:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/task_creator.py cl-gcabs 2016
+    runtime: nvidia
+    command: ./src/task_creator.py dl-gcabs 2016
     restart: on-failure
     networks:
     - backend
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   g_cabs_loader:
     build: .
     image: sirisurab/tp-app:latest
+    runtime: nvidia
     command: ./src/task_performer.py dl-gcabs
     restart: on-failure
     networks:
@@ -77,7 +79,7 @@ services:
     - g_cabs_creator
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 4
 
   g_cabs_cleaner:
     build: .
@@ -172,7 +174,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-      replicas: 1
+      replicas: 0
 
   turnstile_creator:
     build: .

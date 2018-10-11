@@ -5,9 +5,10 @@ from s3fs.core import S3FileSystem
 from urllib3.response import HTTPResponse
 import glob
 from functools import reduce
+from os import environ
 
-KEY: str = 'minio'
-SECRET: str = 'minio123'
+KEY: str = environ.get('MINIO_ACCESS_KEY')
+SECRET: str = environ.get('MINIO_SECRET_KEY')
 ENDPOINT: str = 'minio:9000'
 USE_SSL: bool = False
 
