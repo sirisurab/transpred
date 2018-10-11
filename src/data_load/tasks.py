@@ -201,9 +201,13 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 
         for year in years:
 
-            url: str = 'https://s3.amazonaws.com/nyc-tlc/trip+data/'+file_prefix+'_tripdata_'+year+'-*.csv'
-            print('downloading from urls with dask '+str(url))
-            df = dd.read_csv(urlpath=url,
+            #url: str = 'https://s3.amazonaws.com/nyc-tlc/trip+data/'+file_prefix+'_tripdata_'+year+'-*.csv'
+
+            urls: List[str] = ['https://s3.amazonaws.com/nyc-tlc/trip+data/' +
+                               file_prefix + '_tripdata_' + year + '-'+prefix_zero(month)+'.csv'
+                               for month in range(1, 13)]
+            print('downloading from urls with dask '+str(urls))
+            df = dd.read_csv(urlpath=urls,
                              header=0,
                              usecols=lambda x: x.strip().lower() in list(cols.keys()),
                              parse_dates=dates,
