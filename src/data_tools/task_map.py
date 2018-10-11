@@ -25,6 +25,7 @@ task_type_map: Dict = {
                                         },
                                 'converters': {
                                         'passenger_count': row_ops.clean_num,
+                                        'Passenger_count': row_ops.clean_num,
                                         'dropoff_longitude': row_ops.clean_num,
                                         'dropoff_latitude': row_ops.clean_num,
                                         'pickup_longitude': row_ops.clean_num,
@@ -53,6 +54,7 @@ task_type_map: Dict = {
                                         },
                                 'converters': {
                                         'passenger_count': row_ops.clean_num,
+                                        'Passenger_count': row_ops.clean_num,
                                         'dropoff_longitude': row_ops.clean_num,
                                         'dropoff_latitude': row_ops.clean_num,
                                         'pickup_longitude': row_ops.clean_num,
