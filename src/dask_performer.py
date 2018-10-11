@@ -3,6 +3,7 @@ from data_tools import task_map
 import sys
 from data_resample import tasks as rs_tasks
 from data_clean import tasks as cl_tasks
+from data_load import tasks as dl_tasks
 from typing import List
 
 if __name__ == '__main__':
@@ -16,7 +17,9 @@ if __name__ == '__main__':
         if task_prefix == 'rs':
             status = rs_tasks.perform_dask(task_type, years)
         elif task_prefix == 'cl':
-            #status = cl_tasks.perform_dask(task_type, years)
-            status = cl_tasks.perform_dask_test()
+            status = cl_tasks.perform_dask(task_type, years)
+            #status = cl_tasks.perform_dask_test()
+        elif task_prefix == 'dl':
+            status = dl_tasks.perform_cabs_dask(task_type, years)
 
     print('pipeline for task %(task)s executed with status %(status)s' % {'task': task_type, 'status': status})

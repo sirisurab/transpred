@@ -4,6 +4,94 @@ from data_tools import row_operations as row_ops
 from numpy import int64, float64
 
 task_type_map: Dict = {
+                  'dl-gcabs': {
+                                'out': 'dl-gcabs',
+                                'cols': {
+                                        'lpep_dropoff_datetime': 'dodatetime',
+                                        'lpep_pickup_datetime': 'pudatetime',
+                                        'passenger_count': 'passengers',
+                                        'dolocationid': 'dolocationid',
+                                        'pulocationid': 'pulocationid',
+                                        'dropoff_longitude': 'dolongitude',
+                                        'dropoff_latitude': 'dolatitude',
+                                        'pickup_longitude': 'pulongitude',
+                                        'pickup_latitude': 'pulatitude',
+                                        'trip_distance': 'distance'
+                                        },
+                                'dates': {
+                                        'parse': True,
+                                        'cols': ['dodatetime', 'pudatetime'],
+                                        'parser': row_ops.clean_cabs_dt
+                                        },
+                                'converters': {
+                                        'passengers': row_ops.clean_num,
+                                        'dolongitude': row_ops.clean_num,
+                                        'dolatitude': row_ops.clean_num,
+                                        'pulongitude': row_ops.clean_num,
+                                        'pulatitude': row_ops.clean_num,
+                                        'distance': row_ops.clean_num
+                                        },
+                                'dtypes': {
+                                        'dodatetime': 'datetime64[ns]',
+                                        'pudatetime': 'datetime64[ns]',
+                                        'passengers': 'int64',
+                                        'dolocationid': 'int64',
+                                        'pulocationid': 'int64',
+                                        'dolongitude': 'float64',
+                                        'dolatitude': 'float64',
+                                        'pulongitude': 'float64',
+                                        'pulatitude': 'float64',
+                                        'distance': 'float64'
+                                        },
+                                'index': {
+                                        'col': 'dodatetime',
+                                        'sorted': False
+                                        }
+                                },
+                  'dl-ycabs': {
+                                'out': 'dl-gcabs',
+                                'cols': {
+                                        'tpep_dropoff_datetime': 'dodatetime',
+                                        'tpep_pickup_datetime': 'pudatetime',
+                                        'passenger_count': 'passengers',
+                                        'dolocationid': 'dolocationid',
+                                        'pulocationid': 'pulocationid',
+                                        'dropoff_longitude': 'dolongitude',
+                                        'dropoff_latitude': 'dolatitude',
+                                        'pickup_longitude': 'pulongitude',
+                                        'pickup_latitude': 'pulatitude',
+                                        'trip_distance': 'distance'
+                                        },
+                                'dates': {
+                                        'parse': True,
+                                        'cols': ['dodatetime', 'pudatetime'],
+                                        'parser': row_ops.clean_cabs_dt
+                                        },
+                                'converters': {
+                                        'passengers': row_ops.clean_num,
+                                        'dolongitude': row_ops.clean_num,
+                                        'dolatitude': row_ops.clean_num,
+                                        'pulongitude': row_ops.clean_num,
+                                        'pulatitude': row_ops.clean_num,
+                                        'distance': row_ops.clean_num
+                                        },
+                                'dtypes': {
+                                        'dodatetime': 'datetime64[ns]',
+                                        'pudatetime': 'datetime64[ns]',
+                                        'passengers': 'int64',
+                                        'dolocationid': 'int64',
+                                        'pulocationid': 'int64',
+                                        'dolongitude': 'float64',
+                                        'dolatitude': 'float64',
+                                        'pulongitude': 'float64',
+                                        'pulatitude': 'float64',
+                                        'distance': 'float64'
+                                        },
+                                'index': {
+                                        'col': 'dodatetime',
+                                        'sorted': False
+                                        }
+                                },
                   'cl-gcabs': {
                                 'in': 'gcabs',
                                 'out': 'cl-gcabs',

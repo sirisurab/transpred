@@ -1,11 +1,16 @@
 # prepare tasks for data loading(dl)
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Union, Optional, Callable
 from functools import reduce, partial
 from utils import persistence as ps, http
 import os
 import urllib.error as u_err
 import datetime as dt
 from error_handling import errors
+import dask.dataframe as dd
+from data_tools import task_map
+from data_clean.tasks import create_dask_client
+from dask.distributed import Client
+
 MIN_YEAR = 2010
 MAX_YEAR = 2018
 
@@ -164,5 +169,64 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
         raise err
     else:
         return status
+
+
+def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
+    file_prefix: str
+    cab_type: str = task_type.split('-', 1)[1]
+    if cab_type == 'gcabs':
+        file_prefix = 'green'
+    elif cab_type == 'ycabs':
+        file_prefix = 'yellow'
+
+    task_type_map: Dict = task_map.task_type_map[task_type]
+    out_bucket: str = task_type_map['out']
+    cols: Dict[str, str] = task_type_map['cols']
+    parse_dates: bool = task_type_map['dates']['parse']
+    dates: Union[bool, Dict[str, List[str]], List[str]]
+    date_parser: Optional[Callable]
+    if parse_dates:
+        dates = task_type_map['dates']['cols']
+        date_parser = task_type_map['dates']['parser']
+    else:
+        dates = False
+        date_parser = None
+    converters: Dict[str, Callable] = task_type_map['converters']
+    #dtypes: Dict[str, str] = task_type_map['dtypes']
+
+    status: bool = False
+    try:
+        s3_options: Dict = ps.fetch_s3_options()
+        client: Client = create_dask_client(num_workers=20)
+
+        for year in years:
+
+            url: str = 'https://s3.amazonaws.com/nyc-tlc/trip+data/'+file_prefix+'_tripdata_'+year+'-*.csv'
+            print('downloading from urls with dask '+str(url))
+            df = dd.read_csv(urlpath=url,
+                             header=0,
+                             usecols=lambda x: x.strip().lower() in list(cols.keys()),
+                             parse_dates=dates,
+                             date_parser=date_parser,
+                             skipinitialspace=True,
+                             skip_blank_lines=True,
+                             converters=converters,
+                             encoding='utf-8'
+                             )
+
+            s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
+            dd.to_parquet(df=df,
+                          path=s3_out_url,
+                          engine='fastparquet',
+                          compute=True,
+                          compression='lz4',
+                          storage_options=s3_options)
+
+    except Exception as err:
+        raise err
+
+    else:
+        return status
+
 
 
