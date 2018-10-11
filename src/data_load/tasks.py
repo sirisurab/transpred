@@ -10,6 +10,7 @@ import dask.dataframe as dd
 from data_tools import task_map
 from data_clean.tasks import create_dask_client
 from dask.distributed import Client
+from data_tools import row_operations as row_ops
 
 MIN_YEAR = 2010
 MAX_YEAR = 2018
@@ -171,6 +172,24 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
         return status
 
 
+def to_parquet(df: dd.DataFrame, out_bucket: str, year: str, compute: bool = True) -> bool:
+    try:
+        s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
+        s3_options: Dict = ps.fetch_s3_options()
+        dd.to_parquet(df=df,
+                      path=s3_out_url,
+                      engine='fastparquet',
+                      compute=compute,
+                      compression='lz4',
+                      storage_options=s3_options)
+    except Exception as err:
+        print('error while saving to parquet for year %(year)s - %(error)s'
+               % {'year': year, 'error': str(err)})
+        raise err
+    else:
+        return True
+
+
 def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
     file_prefix: str
     cab_type: str = task_type.split('-', 1)[1]
@@ -196,35 +215,76 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 
     status: bool = False
     try:
-        s3_options: Dict = ps.fetch_s3_options()
         client: Client = create_dask_client(num_workers=1)
-
+        special_case: bool = False
+        normal_case: bool = False
         for year in years:
 
             #url: str = 'https://s3.amazonaws.com/nyc-tlc/trip+data/'+file_prefix+'_tripdata_'+year+'-*.csv'
+            month_range_sp: List[int]
+            month_range_norm: List[int]
+            if int(year) == 2016:
+                special_case = True
+                normal_case = True
+                month_range_sp = range(7, 13)
+                month_range_norm = range(1, 7)
+            elif int(year) > 2016:
+                special_case = True
+                normal_case = False
+                month_range_sp = range(1, 13)
+            elif int(year) < 2016:
+                special_case = False
+                normal_case = True
+                month_range_norm = range(1, 13)
 
-            urls: List[str] = ['https://s3.amazonaws.com/nyc-tlc/trip+data/' +
-                               file_prefix + '_tripdata_' + year + '-'+prefix_zero(month)+'.csv'
-                               for month in range(1, 13)]
-            print('downloading from urls with dask '+str(urls))
-            df = dd.read_csv(urlpath=urls,
-                             header=0,
-                             usecols=lambda x: x.strip().lower() in list(cols.keys()),
-                             parse_dates=dates,
-                             date_parser=date_parser,
-                             skipinitialspace=True,
-                             skip_blank_lines=True,
-                             converters=converters,
-                             encoding='utf-8'
-                             )
+            if special_case:
+                if task_type == 'dl-gcabs':
+                    usecols = [1, 2, 5, 6, 7, 8]
+                    names = ['pudatetime', 'dodatetime', 'pulocationid', 'dolocationid', 'passengers', 'distance']
+                else:
+                    usecols = [1, 2, 3, 4, 7, 8]
+                    names = ['pudatetime', 'dodatetime', 'passengers', 'distance', 'pulocationid', 'dolocationid']
 
-            s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
-            dd.to_parquet(df=df,
-                          path=s3_out_url,
-                          engine='fastparquet',
-                          compute=True,
-                          compression='lz4',
-                          storage_options=s3_options)
+                urls = ['https://s3.amazonaws.com/nyc-tlc/trip+data/' +
+                                   file_prefix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
+                                   for month in month_range_sp]
+
+                df = dd.read_csv(urlpath=urls,
+                                 header=None,
+                                 usecols=usecols,
+                                 names=names,
+                                 parse_dates=dates,
+                                 date_parser=date_parser,
+                                 skipinitialspace=True,
+                                 skip_blank_lines=True,
+                                 converters={
+                                     'dodatetime': row_ops.clean_cabs_dt,
+                                     'pudatetime': row_ops.clean_cabs_dt,
+                                     'passengers': row_ops.clean_num,
+                                     'distance': row_ops.clean_num,
+                                     'dolocationid': row_ops.clean_num,
+                                     'pulocationid': row_ops.clean_num
+                                 },
+                                 encoding='utf-8'
+                                 )
+                to_parquet(df=df, out_bucket=out_bucket, year=year, compute=True)
+
+            if normal_case:
+                urls = ['https://s3.amazonaws.com/nyc-tlc/trip+data/' +
+                        file_prefix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
+                        for month in month_range_norm]
+                df = dd.read_csv(urlpath=urls,
+                                 header=0,
+                                 usecols=lambda x: x.strip().lower() in list(cols.keys()),
+                                 parse_dates=dates,
+                                 date_parser=date_parser,
+                                 skipinitialspace=True,
+                                 skip_blank_lines=True,
+                                 converters=converters,
+                                 encoding='utf-8'
+                                 )
+
+                to_parquet(df=df, out_bucket=out_bucket, year=year, compute=True)
 
     except Exception as err:
         raise err

@@ -10,22 +10,21 @@ task_type_map: Dict = {
                                         'lpep_dropoff_datetime': 'dodatetime',
                                         'lpep_pickup_datetime': 'pudatetime',
                                         'passenger_count': 'passengers',
+                                        'trip_distance': 'distance',
                                         'dolocationid': 'dolocationid',
                                         'pulocationid': 'pulocationid',
                                         'dropoff_longitude': 'dolongitude',
                                         'dropoff_latitude': 'dolatitude',
                                         'pickup_longitude': 'pulongitude',
-                                        'pickup_latitude': 'pulatitude',
-                                        'trip_distance': 'distance'
+                                        'pickup_latitude': 'pulatitude'
                                         },
                                 'dates': {
-                                        'parse': True,
-                                        'cols': [1, 2],
-                                        'parser': row_ops.clean_cabs_dt
+                                        'parse': False
                                         },
                                 'converters': {
                                         'passenger_count': row_ops.clean_num,
-                                        'Passenger_count': row_ops.clean_num,
+                                        'dolocationid': row_ops.clean_num,
+                                        'pulocationid': row_ops.clean_num,
                                         'dropoff_longitude': row_ops.clean_num,
                                         'dropoff_latitude': row_ops.clean_num,
                                         'pickup_longitude': row_ops.clean_num,
@@ -48,13 +47,10 @@ task_type_map: Dict = {
                                         'trip_distance': 'distance'
                                         },
                                 'dates': {
-                                        'parse': True,
-                                        'cols': [1, 2],
-                                        'parser': row_ops.clean_cabs_dt
+                                        'parse': False
                                         },
                                 'converters': {
                                         'passenger_count': row_ops.clean_num,
-                                        'Passenger_count': row_ops.clean_num,
                                         'dropoff_longitude': row_ops.clean_num,
                                         'dropoff_latitude': row_ops.clean_num,
                                         'pickup_longitude': row_ops.clean_num,
