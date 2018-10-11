@@ -1,5 +1,5 @@
 from minio import Minio, Object
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Optional
 from minio.error import ResponseError, BucketAlreadyExists, BucketAlreadyOwnedByYou
 from s3fs.core import S3FileSystem
 from urllib3.response import HTTPResponse
@@ -7,8 +7,8 @@ import glob
 from functools import reduce
 from os import environ
 
-KEY: str = environ.get('MINIO_ACCESS_KEY')
-SECRET: str = environ.get('MINIO_SECRET_KEY')
+KEY: Optional[str] = environ.get('MINIO_ACCESS_KEY')
+SECRET: Optional[str] = environ.get('MINIO_SECRET_KEY')
 ENDPOINT: str = 'minio:9000'
 USE_SSL: bool = False
 
@@ -21,7 +21,7 @@ def get_client():
                       secret_key=SECRET,
                       secure=USE_SSL)
 
-def fetch_s3_options() -> Dict[str, Union[str, bool, Dict[str, str]]]:
+def fetch_s3_options() -> Dict[str, Union[Optional[str], bool, Dict[str, str]]]:
     return {
         'anon': False,
         'use_ssl': USE_SSL,
