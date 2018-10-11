@@ -20,7 +20,7 @@ task_type_map: Dict = {
                                         },
                                 'dates': {
                                         'parse': True,
-                                        'cols': ['lpep_dropoff_datetime', 'lpep_pickup_datetime'],
+                                        'cols': [1, 2],
                                         'parser': row_ops.clean_cabs_dt
                                         },
                                 'converters': {
@@ -48,7 +48,7 @@ task_type_map: Dict = {
                                         },
                                 'dates': {
                                         'parse': True,
-                                        'cols': ['tpep_dropoff_datetime', 'tpep_pickup_datetime'],
+                                        'cols': [1, 2],
                                         'parser': row_ops.clean_cabs_dt
                                         },
                                 'converters': {
