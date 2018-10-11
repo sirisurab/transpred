@@ -9,7 +9,6 @@ dependencies:
     - redis
     - s3fs
     - dask[complete]
-#    - dask[dataframe]
     - distributed
     - fastparquet
     - lz4
@@ -19,3 +18,4 @@ dependencies:
     - bokeh
     - wget
     - chardet
+    - requests

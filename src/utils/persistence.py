@@ -21,6 +21,7 @@ def get_client():
                       secret_key=SECRET,
                       secure=USE_SSL)
 
+
 def fetch_s3_options() -> Dict[str, Union[Optional[str], bool, Dict[str, str]]]:
     return {
         'anon': False,
@@ -32,6 +33,7 @@ def fetch_s3_options() -> Dict[str, Union[Optional[str], bool, Dict[str, str]]]:
             'endpoint_url': 'http://'+ENDPOINT
         }
     }
+
 
 def copy_files(source_folder:str, dest_bucket:str) -> bool:
     mc = get_client()

@@ -197,7 +197,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
     status: bool = False
     try:
         s3_options: Dict = ps.fetch_s3_options()
-        client: Client = create_dask_client(num_workers=20)
+        client: Client = create_dask_client(num_workers=1)
 
         for year in years:
 
