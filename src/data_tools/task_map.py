@@ -19,7 +19,8 @@ task_type_map: Dict = {
                                         'pickup_latitude': 'pulatitude'
                                         },
                                 'dates': {
-                                        'parse': False
+                                        'parse': True,
+                                        'parser': row_ops.clean_cabs_dt
                                         },
                                 'converters': {
                                         'passenger_count': row_ops.clean_num,
@@ -47,7 +48,8 @@ task_type_map: Dict = {
                                         'trip_distance': 'distance'
                                         },
                                 'dates': {
-                                        'parse': False
+                                        'parse': True,
+                                        'parser': row_ops.clean_cabs_dt
                                         },
                                 'converters': {
                                         'passenger_count': row_ops.clean_num,

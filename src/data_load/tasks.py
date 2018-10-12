@@ -205,12 +205,10 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
     dates: Union[bool, Dict[str, List[str]], List[str]]
     date_parser: Optional[Callable]
     if parse_dates:
-        dates = task_type_map['dates']['cols']
         date_parser = task_type_map['dates']['parser']
     else:
         dates = False
         date_parser = None
-    converters: Dict[str, Callable] = task_type_map['converters']
     #dtypes: Dict[str, str] = task_type_map['dtypes']
 
     status: bool = False
@@ -257,13 +255,11 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                  header=None,
                                  usecols=usecols,
                                  names=names,
-                                 parse_dates=dates,
+                                 parse_dates=[1, 2],
                                  date_parser=date_parser,
                                  skipinitialspace=True,
                                  skip_blank_lines=True,
                                  dtype={
-                                     'dodatetime': 'datetime64[ns]',
-                                     'pudatetime': 'datetime64[ns]',
                                      'passengers': 'float64',
                                      'distance': 'float64',
                                      'dolocationid': 'int64',
@@ -287,13 +283,11 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                  header=None,
                                  usecols=usecols,
                                  names=names,
-                                 parse_dates=dates,
+                                 parse_dates=[1, 2],
                                  date_parser=date_parser,
                                  skipinitialspace=True,
                                  skip_blank_lines=True,
                                  dtype={
-                                     'dodatetime': 'datetime64[ns]',
-                                     'pudatetime': 'datetime64[ns]',
                                      'passengers': 'float64',
                                      'distance': 'float64',
                                      'dolongitude': 'float64',
