@@ -259,11 +259,11 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                  date_parser=date_parser,
                                  skipinitialspace=True,
                                  skip_blank_lines=True,
-                                 dtype={
-                                     'passengers': 'float64',
-                                     'distance': 'float64',
-                                     'dolocationid': 'int64',
-                                     'pulocationid': 'int64'
+                                 converters={
+                                     'passengers': row_ops.clean_num,
+                                     'distance': row_ops.clean_num,
+                                     'dolocationid': row_ops.clean_num,
+                                     'pulocationid': row_ops.clean_num
                                  },
                                  encoding='utf-8'
                                  )
@@ -287,13 +287,13 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                  date_parser=date_parser,
                                  skipinitialspace=True,
                                  skip_blank_lines=True,
-                                 dtype={
-                                     'passengers': 'float64',
-                                     'distance': 'float64',
-                                     'dolongitude': 'float64',
-                                     'dolatitude': 'float64',
-                                     'pulongitude': 'float64',
-                                     'pulatitude': 'float64'
+                                 converters={
+                                     'passengers': row_ops.clean_num,
+                                     'distance': row_ops.clean_num,
+                                     'dolongitude': row_ops.clean_num,
+                                     'dolatitude': row_ops.clean_num,
+                                     'pulongitude': row_ops.clean_num,
+                                     'pulatitude': row_ops.clean_num
                                  },
                                  encoding='utf-8'
                                  )
