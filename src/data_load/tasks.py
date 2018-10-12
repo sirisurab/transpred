@@ -267,7 +267,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                  },
                                  encoding='utf-8'
                                  )
-                to_parquet(df=df, out_bucket=out_bucket, folder=year+'/'+str(month_st_sp)+'-'+str(month_end_sp)+'/', compute=True)
+                to_parquet(df=df, out_bucket=out_bucket, folder=year+'/special/', compute=True)
 
             if normal_case:
                 if task_type == 'dl-gcabs':
@@ -298,7 +298,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                  encoding='utf-8'
                                  )
 
-                to_parquet(df=df, out_bucket=out_bucket, folder=year+'/'+str(month_st_norm)+'-'+str(month_end_norm)+'/', compute=True)
+                to_parquet(df=df, out_bucket=out_bucket, folder=year+'/normal/', compute=True)
 
     except Exception as err:
         raise err
