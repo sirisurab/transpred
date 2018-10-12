@@ -172,9 +172,9 @@ def perform_cabs(cab_type: str, b_task: bytes) -> bool:
         return status
 
 
-def to_parquet(df: dd.DataFrame, out_bucket: str, year: str, compute: bool = True) -> bool:
+def to_parquet(df: dd.DataFrame, out_bucket: str, folder: str, compute: bool = True) -> bool:
     try:
-        s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
+        s3_out_url: str = 's3://' + out_bucket + '/' + folder
         s3_options: Dict = ps.fetch_s3_options()
         dd.to_parquet(df=df,
                       path=s3_out_url,
@@ -183,8 +183,8 @@ def to_parquet(df: dd.DataFrame, out_bucket: str, year: str, compute: bool = Tru
                       compression='lz4',
                       storage_options=s3_options)
     except Exception as err:
-        print('error while saving to parquet for year %(year)s - %(error)s'
-               % {'year': year, 'error': str(err)})
+        print('error while saving to parquet to path %(path)s - %(error)s'
+               % {'path': out_bucket + '/' + folder, 'error': str(err)})
         raise err
     else:
         return True
@@ -218,24 +218,28 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
         client: Client = create_dask_client(num_workers=1)
         special_case: bool = False
         normal_case: bool = False
+        month_st_sp: int
+        month_end_sp: int
+        month_st_norm: int
+        month_end_norm: int
         for year in years:
-
-            #url: str = 'https://s3.amazonaws.com/nyc-tlc/trip+data/'+file_prefix+'_tripdata_'+year+'-*.csv'
-            month_range_sp: List[int]
-            month_range_norm: List[int]
             if int(year) == 2016:
                 special_case = True
                 normal_case = True
-                month_range_sp = range(7, 13)
-                month_range_norm = range(1, 7)
+                month_st_sp = 7
+                month_end_sp = 13
+                month_st_norm = 1
+                month_end_norm = 7
             elif int(year) > 2016:
                 special_case = True
                 normal_case = False
-                month_range_sp = range(1, 13)
+                month_st_sp = 1
+                month_end_sp = 13
             elif int(year) < 2016:
                 special_case = False
                 normal_case = True
-                month_range_norm = range(1, 13)
+                month_st_norm = 1
+                month_end_norm = 13
 
             if special_case:
                 if task_type == 'dl-gcabs':
@@ -247,7 +251,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 
                 urls = ['https://s3.amazonaws.com/nyc-tlc/trip+data/' +
                                    file_prefix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
-                                   for month in month_range_sp]
+                                   for month in range(month_st_sp, month_end_sp)]
 
                 df = dd.read_csv(urlpath=urls,
                                  header=None,
@@ -257,34 +261,50 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                  date_parser=date_parser,
                                  skipinitialspace=True,
                                  skip_blank_lines=True,
-                                 converters={
-                                     'dodatetime': row_ops.clean_cabs_dt,
-                                     'pudatetime': row_ops.clean_cabs_dt,
-                                     'passengers': row_ops.clean_num,
-                                     'distance': row_ops.clean_num,
-                                     'dolocationid': row_ops.clean_num,
-                                     'pulocationid': row_ops.clean_num
+                                 dtype={
+                                     'dodatetime': 'datetime64[ns]',
+                                     'pudatetime': 'datetime64[ns]',
+                                     'passengers': 'float64',
+                                     'distance': 'float64',
+                                     'dolocationid': 'int64',
+                                     'pulocationid': 'int64'
                                  },
                                  encoding='utf-8'
                                  )
-                to_parquet(df=df, out_bucket=out_bucket, year=year, compute=True)
+                to_parquet(df=df, out_bucket=out_bucket, folder=year+'/'+str(month_st_sp)+'-'+str(month_end_sp)+'/', compute=True)
 
             if normal_case:
+                if task_type == 'dl-gcabs':
+                    usecols = [1, 2, 5, 6, 7, 8, 9, 10]
+                    names = ['pudatetime', 'dodatetime', 'pulongitude', 'pulatitude', 'dolongitude', 'dolatitude', 'passengers', 'distance']
+                else:
+                    usecols = [1, 2, 3, 4, 5, 6, 9, 10]
+                    names = ['pudatetime', 'dodatetime', 'passengers', 'distance', 'pulongitude', 'pulatitude', 'dolongitude', 'dolatitude']
                 urls = ['https://s3.amazonaws.com/nyc-tlc/trip+data/' +
                         file_prefix + '_tripdata_' + year + '-' + prefix_zero(month) + '.csv'
-                        for month in month_range_norm]
+                        for month in range(month_st_norm, month_end_norm)]
                 df = dd.read_csv(urlpath=urls,
-                                 header=0,
-                                 usecols=lambda x: x.strip().lower() in list(cols.keys()),
+                                 header=None,
+                                 usecols=usecols,
+                                 names=names,
                                  parse_dates=dates,
                                  date_parser=date_parser,
                                  skipinitialspace=True,
                                  skip_blank_lines=True,
-                                 converters=converters,
+                                 dtype={
+                                     'dodatetime': 'datetime64[ns]',
+                                     'pudatetime': 'datetime64[ns]',
+                                     'passengers': 'float64',
+                                     'distance': 'float64',
+                                     'dolongitude': 'float64',
+                                     'dolatitude': 'float64',
+                                     'pulongitude': 'float64',
+                                     'pulatitude': 'float64'
+                                 },
                                  encoding='utf-8'
                                  )
 
-                to_parquet(df=df, out_bucket=out_bucket, year=year, compute=True)
+                to_parquet(df=df, out_bucket=out_bucket, folder=year+'/'+str(month_st_norm)+'-'+str(month_end_norm)+'/', compute=True)
 
     except Exception as err:
         raise err
