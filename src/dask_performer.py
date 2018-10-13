@@ -19,7 +19,9 @@ if __name__ == '__main__':
         elif task_prefix == 'cl':
             status = cl_tasks.perform_dask(task_type, years)
             #status = cl_tasks.perform_dask_test()
-        elif task_prefix == 'dl':
+        elif task_type in ['dl-gcabs', 'dl-ycabs']:
             status = dl_tasks.perform_cabs_dask(task_type, years)
+        elif task_type == 'dl-transit':
+            status = dl_tasks.perform_transit_dask(task_type, years)
 
     print('pipeline for task %(task)s executed with status %(status)s' % {'task': task_type, 'status': status})

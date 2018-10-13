@@ -11,6 +11,7 @@ from data_tools import task_map
 from data_clean.tasks import create_dask_client
 from dask.distributed import Client
 from data_tools import row_operations as row_ops
+import calendar as cal
 
 MIN_YEAR = 2010
 MAX_YEAR = 2018
@@ -305,6 +306,58 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 
     else:
         return status
+
+
+def perform_transit_dask(task_type: str, years: List[str]) -> bool:
+
+    task_type_map: Dict = task_map.task_type_map[task_type]
+    out_bucket: str = task_type_map['out']
+
+    status: bool = False
+    try:
+        client: Client = create_dask_client(num_workers=1)
+        month_st: int = 1
+        month_end: int = 13
+        calendar: cal.Calendar = cal.Calendar()
+        for year in years:
+            usecols = [3, 6, 7, 9, 10]
+            names = ['station', 'date', 'time', 'entries', 'exits']
+            url_part1: str = "http://web.mta.info/developers/data/nyct/turnstile/turnstile_"
+            url_part2: str = ".txt"
+            # urls for all saturdays in month range for year
+            urls: List[str] = [url_part1 + year[2:] + prefix_zero(month) + prefix_zero(day_tuple[0]) + url_part2
+                               for month in range(month_st, month_end)
+                               for day_tuple in calendar.itermonthdays2(int(year), month)
+                               if day_tuple[0] in range(1, 32) and day_tuple[1] == 5]
+
+            #for url in urls:
+            #    print(url)
+            df = dd.read_csv(urlpath=urls,
+                             header=None,
+                             usecols=usecols,
+                             names=names,
+                             parse_dates={'datetime': ['date', 'time']},
+                             date_parser=row_ops.clean_transit_date,
+                             skipinitialspace=True,
+                             skip_blank_lines=True,
+                             converters={
+                                 'entries': row_ops.clean_num,
+                                 'exits': row_ops.clean_num
+                             },
+                             encoding='utf-8'
+                             )
+
+            to_parquet(df=df, out_bucket=out_bucket, folder=year + '/', compute=True)
+
+    except Exception as err:
+        raise err
+
+    else:
+        return status
+
+
+if __name__=='__main__':
+    perform_transit_dask('dl-transit', ['2018','2017'])
 
 
 

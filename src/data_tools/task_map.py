@@ -4,6 +4,9 @@ from data_tools import row_operations as row_ops
 from numpy import int64, float64
 
 task_type_map: Dict = {
+                  'dl-transit': {
+                                'out': 'dl-transit'
+                                },
                   'dl-gcabs': {
                                 'out': 'dl-gcabs',
                                 'cols': {
