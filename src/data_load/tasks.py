@@ -53,7 +53,6 @@ def make_ycabs(*args) -> List[str]:
     return reduce(tasks_for_year, list(*args), [])
 
 
-
 def perform_transit(b_task: bytes) -> bool:
     task: str = str(b_task, 'utf-8')
     task_split: List[str] = task.split('-')
@@ -311,18 +310,20 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 def perform_transit_dask(task_type: str, years: List[str]) -> bool:
 
     task_type_map: Dict = task_map.task_type_map[task_type]
+    in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
 
     status: bool = False
     try:
         client: Client = create_dask_client(num_workers=1)
+        s3_options: Dict = ps.fetch_s3_options()
         month_st: int = 1
         month_end: int = 13
         calendar: cal.Calendar = cal.Calendar()
         for year in years:
             usecols = [3, 6, 7, 9, 10]
             names = ['station', 'date', 'time', 'entries', 'exits']
-            url_part1: str = "http://web.mta.info/developers/data/nyct/turnstile/turnstile_"
+            url_part1: str = 's3://'+in_bucket+'/turnstile_'
             url_part2: str = ".txt"
             # urls for all saturdays in month range for year
             urls: List[str] = [url_part1 + year[2:] + prefix_zero(month) + prefix_zero(day_tuple[0]) + url_part2
@@ -333,6 +334,7 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
             #for url in urls:
             #    print(url)
             df = dd.read_csv(urlpath=urls,
+                             storage_options=s3_options,
                              header=None,
                              usecols=usecols,
                              names=names,

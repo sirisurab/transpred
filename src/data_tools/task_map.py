@@ -5,6 +5,7 @@ from numpy import int64, float64
 
 task_type_map: Dict = {
                   'dl-transit': {
+                                'in': 'transit',
                                 'out': 'dl-transit'
                                 },
                   'dl-gcabs': {
