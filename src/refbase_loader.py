@@ -6,16 +6,50 @@ from urllib3.response import HTTPResponse
 from typing import Tuple, List, Dict, Callable
 from zipfile import ZipFile
 from geopandas import GeoDataFrame, read_file
-from shapely.geometry import Point
+from shapely.geometry import Point, LineString
 import pandas as pd
 import os
 from io import BytesIO
 import glob
 from fuzzywuzzy import process, fuzz
-from numpy import nan
+from numpy import nan, isnan
+import re
 
 REFBASE_BUCKET: str = 'ref-base'
 TRANSIT_BUCKET: str = 'transit'
+
+float_pattern = re.compile('^-?\d*\.\d{4,}$')
+
+
+def build_single_coord_pair(xy):
+    # coord pair xy should be a comma separated string of float values
+    xy_arr = xy.split(',')
+    if (len(xy_arr) == 2):
+        x = xy_arr[0]
+        y = xy_arr[1]
+        try:
+            return (make_float(x), make_float(y))
+        except:
+            return (nan, nan)
+    else:
+        return (nan, nan)
+
+
+def make_float(x):
+    match = float_pattern.match(x)
+    if (match):
+        try:
+            return float(x)
+        except:
+            return nan
+    else:
+        return nan
+
+
+def build_coord_tuples(coords_str):
+    coords_arr = coords_str.split(' ')
+    coord_xy = [build_single_coord_pair(x_comma_y) for x_comma_y in coords_arr]
+    return [xy for xy in coord_xy if (~(isnan(xy[0]) or isnan(xy[1])))]
 
 
 def add_fuzzy_station(df: pd.DataFrame) -> pd.DataFrame:
@@ -57,7 +91,7 @@ def load_ref_files(*args) -> bool:
     for task in list(*args):
         print('loading ref files for %s' % task)
 
-        if task in ['cabs', 'transit']:
+        if task in ['cabs', 'transit', 'traffic']:
             # create ref-base bucket
             ps.create_bucket(REFBASE_BUCKET)
             crs: Dict[str, str] = {'init': 'epsg:4326'}
@@ -120,6 +154,40 @@ def load_ref_files(*args) -> bool:
                         zipfile.write(file.rsplit('/', 1)[1])
                 #ps.copy_files(dest_bucket=REFBASE_BUCKET, source_folder=stations_out_path)
                 ps.copy_file(dest_bucket=REFBASE_BUCKET, source=stations_out_path+'stations.zip', file='stations.zip')
+
+            elif task == 'traffic':
+                # load traffic links file
+                links_url: str = 'http://data.beta.nyc//dataset/e8facf61-2bb1-49e0-9128-5a8797b214c8/resource/1384aa3a-b7e2-4c28-9b5e-2808a07a7193/download/linkinfo.csv'
+                cols: List[int] = [0, 1]
+                names: List[str] = ['linkid', 'link']
+                dtype: Dict[str, str] = {
+                                        'linkid': 'int64'
+                                        }
+                links_df: pd.DataFrame = pd.read_csv(links_url,
+                                                        header=None,
+                                                        usecols=cols,
+                                                        names=names,
+                                                        dtype=dtype,
+                                                        encoding='utf-8')
+
+                links_df.drop_duplicates(inplace=True)
+                links_df.dropna(inplace=True)
+
+                geometry = [LineString(build_coord_tuples(x)) for x in links_df.link]
+                links_geodf = GeoDataFrame(links_df.drop('link', axis=1),
+                                           crs=crs,
+                                           geometry=geometry)
+
+                links_out_path: str = '/tmp/traffic-ref-out/'
+                os.makedirs(links_out_path, exist_ok=True)
+                links_filename: str = 'traffic_links.shp'
+                links_geodf.to_file(links_out_path+links_filename)
+                links_files: List[str] = glob.glob(links_out_path+'*')
+                os.chdir(links_out_path)
+                with ZipFile('traffic_links.zip', 'w') as zipfile:
+                    for file in links_files:
+                        zipfile.write(file.rsplit('/', 1)[1])
+                ps.copy_file(dest_bucket=REFBASE_BUCKET, source=links_out_path+'traffic_links.zip', file='traffic_links.zip')
 
         else:
             print('unrecognized ref-base load task %s' % task)

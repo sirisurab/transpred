@@ -36,20 +36,37 @@ def geo_merge(buffer_radius: float) -> bool:
                                                                   bucket=REFBASE_BUCKET)
         # perform spatial join
         # between stations (buffer circles) and taxi-zones polygons
-        stations_df = sjoin(stations_df, taxi_zone_df, how='left', op='intersects')
+        stations_cabs_df = sjoin(stations_df, taxi_zone_df, how='left', op='intersects')
 
         # write joined file (as csv without geometry columns) to geo-merged bucket
-        df: DataFrame = stations_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'LocationID']]
-        df.rename(columns={'LocationID': 'dolocationid'}, inplace=True)
-        geomerged_file: str = GEOMERGED_PATH+str(buffer_radius)+'.csv'
-        status: bool = file_io.write_csv(df=df, bucket=REFBASE_BUCKET, filename=geomerged_file)
+        df: DataFrame = stations_cabs_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'LocationID']]
+        df.rename(columns={'LocationID': 'locationid'}, inplace=True)
+        geomerged_file: str = GEOMERGED_PATH+str(buffer_radius)+'/cabs.csv'
+        status_1: bool = file_io.write_csv(df=df, bucket=REFBASE_BUCKET, filename=geomerged_file)
+
+        # load traffic_links data
+        tl_zipname: str = 'traffic_links.zip'
+        tl_filename: str = 'traffic_links.shp'
+        links_df: GeoDataFrame = file_io.fetch_geodf_from_zip(filename=tl_filename,
+                                                                  zipname=tl_zipname,
+                                                                  bucket=REFBASE_BUCKET)
+        # perform spatial join
+        # between stations (buffer circles) and traffic_links lines
+        stations_traffic_df = sjoin(stations_df, links_df, how='left', op='intersects')
+
+        # write joined file (as csv without geometry columns) to geo-merged bucket
+        df = stations_traffic_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'linkid']]
+        #df.rename(columns={'LocationID': 'dolocationid'}, inplace=True)
+        geomerged_file = GEOMERGED_PATH + str(buffer_radius) + '/traffic.csv'
+        status_2: bool = file_io.write_csv(df=df, bucket=REFBASE_BUCKET, filename=geomerged_file)
+
 
     except Exception as err:
         print('Error in geo_merge %(radius)s' % {'radius': str(buffer_radius)})
         raise err
 
     else:
-        return status
+        return status_1 and status_2
 
 
 if __name__ == '__main__':
