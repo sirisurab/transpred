@@ -33,15 +33,24 @@ def geo_merge(buffer_radius: float) -> bool:
         stations_df.rename(columns={'geometry': 'point'}, inplace=True)
         stations_df.set_geometry('circle', inplace=True)
 
+        # create plots
+        stations_df.plot(color='b')
+
         # load taxi_zones data
         tz_zipname: str = 'taxi_zones.zip'
         tz_filename: str = 'taxi_zones.shp'
         taxi_zone_df: GeoDataFrame = file_io.fetch_geodf_from_zip(filename=tz_filename,
                                                                   zipname=tz_zipname,
                                                                   bucket=REFBASE_BUCKET)
+        # plot
+        taxi_zone_df.plot(color='g')
+
         # perform spatial join
         # between stations (buffer circles) and taxi-zones polygons
         stations_cabs_df: GeoDataFrame = sjoin(stations_df, taxi_zone_df, how='left', op='intersects')
+
+        # plot
+        stations_cabs_df.plot(color='y')
 
         # write joined file (as csv without geometry columns) to geo-merged bucket
         stations_cabs_df = stations_cabs_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'LocationID']]
@@ -59,18 +68,18 @@ def geo_merge(buffer_radius: float) -> bool:
         # between stations (buffer circles) and traffic_links lines
         stations_traffic_df: GeoDataFrame = sjoin(stations_df, links_df, how='left', op='intersects')
 
+        # plot
+        links_df.plot(color='m')
+        stations_traffic_df.plot(color='c')
+
         # write joined file (as csv without geometry columns) to geo-merged bucket
         stations_traffic_df = stations_traffic_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'linkid']]
         #df.rename(columns={'LocationID': 'dolocationid'}, inplace=True)
         geomerged_file = GEOMERGED_PATH + str(buffer_radius) + '/traffic.csv'
         status_2: bool = file_io.write_csv(df=stations_traffic_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
 
-        # create plots
-        stations_df.plot()
-        taxi_zone_df.plot()
-        links_df.plot()
-        stations_cabs_df.plot()
-        stations_traffic_df.plot()
+
+        # save plots
         plt.show()
         plotfilepath: str = '/tmp/'
         plotfilename: str = 'geomerged'+str(buffer_radius)+'.png'
