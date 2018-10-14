@@ -14,6 +14,7 @@ import glob
 from fuzzywuzzy import process, fuzz
 from numpy import nan, isnan
 import re
+from data_tools import row_operations as row_ops
 
 REFBASE_BUCKET: str = 'ref-base'
 TRANSIT_BUCKET: str = 'transit'
@@ -160,14 +161,14 @@ def load_ref_files(*args) -> bool:
                 links_url: str = 'http://data.beta.nyc//dataset/e8facf61-2bb1-49e0-9128-5a8797b214c8/resource/1384aa3a-b7e2-4c28-9b5e-2808a07a7193/download/linkinfo.csv'
                 cols: List[int] = [0, 1]
                 names: List[str] = ['linkid', 'link']
-                dtype: Dict[str, str] = {
-                                        'linkid': 'int64'
+                converters: Dict[str, Callable] = {
+                                        'linkid': row_ops.clean_num
                                         }
                 links_df: pd.DataFrame = pd.read_csv(links_url,
                                                         header=None,
                                                         usecols=cols,
                                                         names=names,
-                                                        dtype=dtype,
+                                                        converters=converters,
                                                         encoding='utf-8')
 
                 links_df.drop_duplicates(inplace=True)
