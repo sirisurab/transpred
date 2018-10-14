@@ -69,7 +69,7 @@ task_type_map: Dict = {
                                         }
                                 },
                   'cl-gcabs': {
-                                'in': 'gcabs',
+                                'in': 'dl-gcabs',
                                 'out': 'cl-gcabs',
                                 'cols': {
                                         'lpep_dropoff_datetime':'dodatetime',
@@ -104,7 +104,7 @@ task_type_map: Dict = {
                                         }
                                 },
                   'cl-ycabs': {
-                                'in': 'ycabs',
+                                'in': 'dl-ycabs',
                                 'out': 'cl-ycabs',
                                 'cols': {
                                         'tpep_dropoff_datetime':'dodatetime',
@@ -139,7 +139,7 @@ task_type_map: Dict = {
                                         }
                                 },
                   'cl-transit': {
-                                'in': 'transit',
+                                'in': 'dl-transit',
                                 'out': 'cl-transit',
                                 'cols': {
                                         'station': 'station',
@@ -173,8 +173,8 @@ task_type_map: Dict = {
                                         }
                                 },
                   'cl-traffic': {
-                                'in': 'gcabs',
-                                'out': 'cl-gcabs',
+                                'in': 'dl-traffic',
+                                'out': 'cl-traffic',
                                 'row_op': row_ops.clean_traffic,
                                 'aggr_func': ''
                                 },
