@@ -341,7 +341,7 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
                                                    meta=('dolocationid', int64))
 
         df = df[['dodatetime', 'dolocationid', 'passengers']]
-
+        df = df.drop_duplicates()
         df = df.dropna()
         dd.to_parquet(df=df,
                       path=s3_out_url,
@@ -401,6 +401,52 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                    s3_in_url=s3_in_url + '/normal/',
                                    s3_out_url=s3_out_url + '/normal/',
                                    s3_options=s3_options)
+
+    except Exception as err:
+        print('error in perform_cabs %s' % str(err))
+        client.close()
+        raise err
+
+    client.close()
+
+    return True
+
+def perform_transit_dask(task_type: str, years: List[str]) -> bool:
+    task_type_map: Dict = task_map.task_type_map[task_type]
+    in_bucket: str = task_type_map['in']
+    out_bucket: str = task_type_map['out']
+
+    client: Client = create_dask_client(num_workers=8)
+    special_case: bool = False
+    normal_case: bool = False
+    s3_in_prefix: str = 's3://' + in_bucket + '/'
+    try:
+        s3_options: Dict = ps.fetch_s3_options()
+
+        for year in years:
+
+            s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
+            s3_in_url: str = s3_in_prefix + year
+
+            df = dd.read_parquet(path=s3_in_url,
+                                 storage_options=s3_options,
+                                 engine='fastparquet')
+
+            df['delex'] = df['exits'].diff()
+            df['delent'] = df['entries'].diff()
+            df = df.drop(['exits', 'entries'], axis=1)
+
+            delex_quantiles: List[List[float]] = df[['delex', 'delent']].quantile(q=[.25, .75])
+
+
+            df = df.dropna()
+            dd.to_parquet(df=df,
+                          path=s3_out_url,
+                          engine='fastparquet',
+                          compute=True,
+                          compression='lz4',
+                          storage_options=s3_options)
+
 
     except Exception as err:
         print('error in perform_cabs %s' % str(err))
