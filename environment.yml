@@ -19,3 +19,4 @@ dependencies:
     - wget
     - chardet
     - requests
+    - matplotlib

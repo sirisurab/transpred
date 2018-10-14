@@ -3,10 +3,15 @@ from data_tools import file_io
 from geopandas import GeoDataFrame, sjoin
 from pandas import DataFrame
 from math import sin, pi
+from bokeh.plotting import figure, output_file, show
+from bokeh.models import GeoJSONDataSource
+import matplotlib.pyplot as plt
+from utils import persistence as ps
 
 GEOMERGED_PATH: str = 'geo-merged/'
 REFBASE_BUCKET: str = 'ref-base'
 NYC_LATITUDE: float = 40.7128
+PLOTS_BUCKET: str = 'plots'
 
 
 def geo_merge(buffer_radius: float) -> bool:
@@ -36,13 +41,13 @@ def geo_merge(buffer_radius: float) -> bool:
                                                                   bucket=REFBASE_BUCKET)
         # perform spatial join
         # between stations (buffer circles) and taxi-zones polygons
-        stations_cabs_df = sjoin(stations_df, taxi_zone_df, how='left', op='intersects')
+        stations_cabs_df: GeoDataFrame = sjoin(stations_df, taxi_zone_df, how='left', op='intersects')
 
         # write joined file (as csv without geometry columns) to geo-merged bucket
-        df: DataFrame = stations_cabs_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'LocationID']]
-        df.rename(columns={'LocationID': 'locationid'}, inplace=True)
+        stations_cabs_df = stations_cabs_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'LocationID']]
+        stations_cabs_df.rename(columns={'LocationID': 'locationid'}, inplace=True)
         geomerged_file: str = GEOMERGED_PATH+str(buffer_radius)+'/cabs.csv'
-        status_1: bool = file_io.write_csv(df=df, bucket=REFBASE_BUCKET, filename=geomerged_file)
+        status_1: bool = file_io.write_csv(df=stations_cabs_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
 
         # load traffic_links data
         tl_zipname: str = 'traffic_links.zip'
@@ -52,13 +57,25 @@ def geo_merge(buffer_radius: float) -> bool:
                                                                   bucket=REFBASE_BUCKET)
         # perform spatial join
         # between stations (buffer circles) and traffic_links lines
-        stations_traffic_df = sjoin(stations_df, links_df, how='left', op='intersects')
+        stations_traffic_df: GeoDataFrame = sjoin(stations_df, links_df, how='left', op='intersects')
 
         # write joined file (as csv without geometry columns) to geo-merged bucket
-        df = stations_traffic_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'linkid']]
+        stations_traffic_df = stations_traffic_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'linkid']]
         #df.rename(columns={'LocationID': 'dolocationid'}, inplace=True)
         geomerged_file = GEOMERGED_PATH + str(buffer_radius) + '/traffic.csv'
-        status_2: bool = file_io.write_csv(df=df, bucket=REFBASE_BUCKET, filename=geomerged_file)
+        status_2: bool = file_io.write_csv(df=stations_traffic_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
+
+        # create plots
+        stations_df.plot()
+        taxi_zone_df.plot()
+        links_df.plot()
+        stations_cabs_df.plot()
+        stations_traffic_df.plot()
+        plt.show()
+        plotfilepath: str = '/tmp/plots/'
+        plotfilename: str = 'geomerged'+str(buffer_radius)+'.png'
+        plt.savefig(plotfilepath+plotfilename)
+        status_3: bool = ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plotfilepath+plotfilename, source=plotfilename)
 
 
     except Exception as err:
