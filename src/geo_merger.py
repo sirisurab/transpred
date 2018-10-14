@@ -72,7 +72,7 @@ def geo_merge(buffer_radius: float) -> bool:
         stations_cabs_df.plot()
         stations_traffic_df.plot()
         plt.show()
-        plotfilepath: str = '/tmp/plots/'
+        plotfilepath: str = '/tmp/'
         plotfilename: str = 'geomerged'+str(buffer_radius)+'.png'
         plt.savefig(plotfilepath+plotfilename)
         status_3: bool = ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plotfilepath+plotfilename, source=plotfilename)
