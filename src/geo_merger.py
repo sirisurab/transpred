@@ -47,6 +47,7 @@ def geo_merge(buffer_radii: List[str]) -> bool:
                   'expecting a floating point value but received %s' % radius)
         else:
             try:
+                print('performing geographic data-merges for buffer radius %s' % buffer_radius_miles)
 
                 # covert buffer_radius from miles to degrees
                 buffer_degrees: float = buffer_radius_miles / gc_radius_miles
@@ -107,8 +108,8 @@ def geo_merge(buffer_radii: List[str]) -> bool:
                 print('Error in geo_merge %(radius)s' % {'radius': str(buffer_radius_miles)})
                 raise err
 
-            else:
-                return status_1 and status_2
+
+    return True
 
 
 if __name__ == '__main__':
