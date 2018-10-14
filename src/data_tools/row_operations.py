@@ -17,7 +17,8 @@ def clean_num(x):
 def clean_transit_date(date,time):
     return pd.to_datetime(str(date)+str(time),format="%m/%d/%Y%H:%M:%S", errors='coerce')
 
-
+def clean_traffic_date(x):
+    return pd.to_datetime(x, format="%m/%d/%Y %H:%M", errors='coerce')
 
 def clean_transit(row: pd.Series) -> pd.Series:
     row['DATETIME'] = pd.to_datetime(str(row['DATE'])+str(row['TIME']),

@@ -8,6 +8,10 @@ task_type_map: Dict = {
                                 'in': 'transit',
                                 'out': 'dl-transit'
                                 },
+                  'dl-traffic': {
+                                'in': 'traffic',
+                                'out': 'dl-traffic'
+                                },
                   'dl-gcabs': {
                                 'out': 'dl-gcabs',
                                 'cols': {

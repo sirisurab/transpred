@@ -358,6 +358,65 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
         return status
 
 
+def perform_traffic_dask(task_type: str, years: List[str]) -> bool:
+
+    task_type_map: Dict = task_map.task_type_map[task_type]
+    in_bucket: str = task_type_map['in']
+    out_bucket: str = task_type_map['out']
+
+    status: bool = False
+    try:
+        client: Client = create_dask_client(num_workers=8)
+        s3_options: Dict = ps.fetch_s3_options()
+        month_st: int = 1
+        month_end: int = 13
+        calendar: cal.Calendar = cal.Calendar()
+        for year in years:
+            if year in ['2016', '2017']:
+                month_st = 1
+                month_end = 13
+            elif year == '2015':
+                month_st = 4
+                month_end = 13
+            elif year == '2018':
+                month_st = 1
+                month_end = 10
+            usecols = [1, 2, 4, 5]
+            names = ['speed', 'traveltime', 'datetime', 'linkid']
+            url_part1: str = 's3://'+in_bucket+'/'
+            url_part2: str = ".csv"
+            # urls for all saturdays in month range for year
+            urls: List[str] = [url_part1 + prefix_zero(month) + year + url_part2
+                               for month in range(month_st, month_end)]
+
+            #for url in urls:
+            #    print(url)
+            df = dd.read_csv(urlpath=urls,
+                             storage_options=s3_options,
+                             header=None,
+                             usecols=usecols,
+                             names=names,
+                             parse_dates=['datetime'],
+                             date_parser=row_ops.clean_traffic_date,
+                             skipinitialspace=True,
+                             skip_blank_lines=True,
+                             converters={
+                                 'speed': row_ops.clean_num,
+                                 'traveltime': row_ops.clean_num,
+                                 'linkid': row_ops.clean_num
+                             },
+                             encoding='utf-8'
+                             )
+
+            to_parquet(df=df, out_bucket=out_bucket, folder=year + '/', compute=True)
+
+    except Exception as err:
+        raise err
+
+    else:
+        return status
+
+
 if __name__=='__main__':
     perform_transit_dask('dl-transit', ['2018','2017'])
 
