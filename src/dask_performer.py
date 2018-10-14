@@ -16,8 +16,8 @@ if __name__ == '__main__':
         task_prefix: str = task_type.split('-', 1)[0]
         if task_prefix == 'rs':
             status = rs_tasks.perform_dask(task_type, years)
-        elif task_prefix == 'cl':
-            status = cl_tasks.perform_dask(task_type, years)
+        elif task_type in ['cl-gcabs', 'cl-ycabs']:
+            status = cl_tasks.perform_cabs_dask(task_type, years)
             #status = cl_tasks.perform_dask_test()
         elif task_type in ['dl-gcabs', 'dl-ycabs']:
             status = dl_tasks.perform_cabs_dask(task_type, years)
