@@ -30,21 +30,21 @@ services:
   #    replicas: 0
 
 
-  g_cabs_creator:
-    build: .
-    image: sirisurab/tp-app:latest
-    command: ./src/task_creator.py dl-gcabs 2016
-    restart: on-failure
-    networks:
-    - backend
-    deploy:
-      mode: replicated
-      replicas: 0
+  #g_cabs_creator:
+  #  build: .
+  #  image: sirisurab/tp-app:latest
+  #  command: ./src/task_creator.py dl-gcabs 2016
+  #  restart: on-failure
+  #  networks:
+  #  - backend
+  #  deploy:
+  #    mode: replicated
+  #    replicas: 0
 
   g_cabs_loader:
     build: .
     image: sirisurab/tp-app:latest
-    command: ./src/dask_performer.py dl-gcabs 2016 2017
+    command: ./src/dask_performer.py dl-gcabs 2016
     networks:
     - backend
     ports:

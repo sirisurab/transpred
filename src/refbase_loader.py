@@ -29,7 +29,7 @@ def build_single_coord_pair(xy):
         x = xy_arr[0]
         y = xy_arr[1]
         try:
-            return (make_float(x), make_float(y))
+            return (make_float(y), make_float(x))
         except:
             return (nan, nan)
     else:
