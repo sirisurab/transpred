@@ -392,6 +392,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 #                    usecols = [2, 3, 8]
 #                    names = ['dodatetime', 'passengers', 'dolocationid']
                 s3_in_url = s3_in_url + '/special/'
+                s3_out_url = s3_out_url + '/special/'
                 clean_cabs_at_path(special=True,
                                    s3_in_url=s3_in_url,
                                    s3_out_url=s3_out_url,
@@ -399,6 +400,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 
             if normal_case:
                 s3_in_url = s3_in_url + '/normal/'
+                s3_out_url = s3_out_url + '/normal/'
                 clean_cabs_at_path(special=False,
                                    s3_in_url=s3_in_url,
                                    s3_out_url=s3_out_url,
