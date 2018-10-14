@@ -34,8 +34,9 @@ def geo_merge(buffer_radius: float) -> bool:
         stations_df.set_geometry('circle', inplace=True)
 
         # create plots
-        plt.subplot(2, 3, 1)
-        stations_df.plot(color='b')
+        fig, ax = plt.subplots()
+        ax.set_aspect('equal')
+        stations_df.plot(ax=ax, color='b')
 
         # load taxi_zones data
         tz_zipname: str = 'taxi_zones.zip'
@@ -44,16 +45,14 @@ def geo_merge(buffer_radius: float) -> bool:
                                                                   zipname=tz_zipname,
                                                                   bucket=REFBASE_BUCKET)
         # plot
-        plt.subplot(2, 3, 2)
-        taxi_zone_df.plot(color='g')
+        taxi_zone_df.plot(ax=ax, color='g')
 
         # perform spatial join
         # between stations (buffer circles) and taxi-zones polygons
         stations_cabs_df: GeoDataFrame = sjoin(stations_df, taxi_zone_df, how='left', op='intersects')
 
         # plot
-        plt.subplot(2, 3, 3)
-        stations_cabs_df.plot(color='y')
+        stations_cabs_df.plot(ax=ax, color='y')
 
         # write joined file (as csv without geometry columns) to geo-merged bucket
         stations_cabs_df = stations_cabs_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'LocationID']]
@@ -72,10 +71,8 @@ def geo_merge(buffer_radius: float) -> bool:
         stations_traffic_df: GeoDataFrame = sjoin(stations_df, links_df, how='left', op='intersects')
 
         # plot
-        plt.subplot(2, 3, 4)
-        links_df.plot(color='m')
-        plt.subplot(2, 3, 5)
-        stations_traffic_df.plot(color='c')
+        links_df.plot(ax=ax, color='m')
+        stations_traffic_df.plot(ax=ax, color='c')
 
         # write joined file (as csv without geometry columns) to geo-merged bucket
         stations_traffic_df = stations_traffic_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'linkid']]
