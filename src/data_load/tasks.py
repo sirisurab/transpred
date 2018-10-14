@@ -213,7 +213,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 
     status: bool = False
     try:
-        client: Client = create_dask_client(num_workers=1)
+        client: Client = create_dask_client(num_workers=8)
         special_case: bool = False
         normal_case: bool = False
         month_st_sp: int
@@ -255,7 +255,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                  header=None,
                                  usecols=usecols,
                                  names=names,
-                                 parse_dates=[1, 2],
+                                 parse_dates=['pudatetime', 'dodatetime'],
                                  date_parser=date_parser,
                                  skipinitialspace=True,
                                  skip_blank_lines=True,
@@ -283,7 +283,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                  header=None,
                                  usecols=usecols,
                                  names=names,
-                                 parse_dates=[1, 2],
+                                 parse_dates=['pudatetime', 'dodatetime'],
                                  date_parser=date_parser,
                                  skipinitialspace=True,
                                  skip_blank_lines=True,
@@ -315,7 +315,7 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
 
     status: bool = False
     try:
-        client: Client = create_dask_client(num_workers=1)
+        client: Client = create_dask_client(num_workers=8)
         s3_options: Dict = ps.fetch_s3_options()
         month_st: int = 1
         month_end: int = 13
