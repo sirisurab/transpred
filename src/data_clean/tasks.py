@@ -373,7 +373,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
         for year in years:
 
             s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
-
+            s3_in_url: str = s3_in_prefix + year
             if int(year) == 2016:
                 special_case = True
                 normal_case = True
@@ -391,14 +391,14 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 #                else:
 #                    usecols = [2, 3, 8]
 #                    names = ['dodatetime', 'passengers', 'dolocationid']
-                s3_in_url: str = s3_in_prefix + year + '/special/'
+                s3_in_url = s3_in_url + '/special/'
                 clean_cabs_at_path(special=True,
                                    s3_in_url=s3_in_url,
                                    s3_out_url=s3_out_url,
                                    s3_options=s3_options)
 
             if normal_case:
-                s3_in_url: str = s3_in_prefix + year + '/normal/'
+                s3_in_url = s3_in_url + '/normal/'
                 clean_cabs_at_path(special=False,
                                    s3_in_url=s3_in_url,
                                    s3_out_url=s3_out_url,
