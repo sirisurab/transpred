@@ -436,6 +436,7 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
             df['delex'] = df['exits'].diff()
             df['delent'] = df['entries'].diff()
             df = df.drop(['exits', 'entries'], axis=1)
+            df = df.dropna()
 
             quantiles = df[['delex', 'delent']].quantile(q=[.25, .75]).compute()
             iqr = quantiles.diff()[.75]
@@ -444,8 +445,6 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
                       (df['delent'] < quantiles['delent'][.25] - 1.5 * iqr['delent']) | \
                       (df['delent'] > quantiles['delent'][.75] + 1.5 * iqr['delent'])
             df = df.loc[~discard]
-
-            df = df.dropna()
             dd.to_parquet(df=df,
                           path=s3_out_url,
                           engine='fastparquet',
