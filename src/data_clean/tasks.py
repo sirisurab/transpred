@@ -14,6 +14,7 @@ from numpy import int64
 from dask.distributed import Client
 from distributed.deploy.local import LocalCluster
 import time
+#from numba import jit
 
 
 prefix_zero = lambda x: "0" + str(x) if x < 10 else str(x)
@@ -358,6 +359,7 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
         return True
 
 
+#@jit(target='gpu')
 def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
@@ -411,14 +413,13 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 
     return True
 
+
 def perform_transit_dask(task_type: str, years: List[str]) -> bool:
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
 
     client: Client = create_dask_client(num_workers=8)
-    special_case: bool = False
-    normal_case: bool = False
     s3_in_prefix: str = 's3://' + in_bucket + '/'
     try:
         s3_options: Dict = ps.fetch_s3_options()
@@ -436,8 +437,13 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
             df['delent'] = df['entries'].diff()
             df = df.drop(['exits', 'entries'], axis=1)
 
-            delex_quantiles: List[List[float]] = df[['delex', 'delent']].quantile(q=[.25, .75])
-
+            quantiles = df[['delex', 'delent']].quantile(q=[.25, .75]).compute()
+            iqr = quantiles.diff()[.75]
+            discard = (df['delex'] < quantiles['delex'][.25] - 1.5 * iqr['delex']) | \
+                      (df['delex'] > quantiles['delex'][.75] + 1.5 * iqr['delex']) | \
+                      (df['delent'] < quantiles['delent'][.25] - 1.5 * iqr['delent']) | \
+                      (df['delent'] > quantiles['delent'][.75] + 1.5 * iqr['delent'])
+            df = df.loc[~discard]
 
             df = df.dropna()
             dd.to_parquet(df=df,
@@ -447,9 +453,8 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
                           compression='lz4',
                           storage_options=s3_options)
 
-
     except Exception as err:
-        print('error in perform_cabs %s' % str(err))
+        print('error in perform_transit %s' % str(err))
         client.close()
         raise err
 

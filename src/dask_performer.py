@@ -19,6 +19,8 @@ if __name__ == '__main__':
         elif task_type in ['cl-gcabs', 'cl-ycabs']:
             status = cl_tasks.perform_cabs_dask(task_type, years)
             #status = cl_tasks.perform_dask_test()
+        elif task_type == 'cl-transit':
+            status = cl_tasks.perform_transit_dask(task_type, years)
         elif task_type in ['dl-gcabs', 'dl-ycabs']:
             status = dl_tasks.perform_cabs_dask(task_type, years)
         elif task_type == 'dl-transit':
