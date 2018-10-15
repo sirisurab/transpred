@@ -103,9 +103,7 @@ def remove_outliers(df, col):
     return df.loc[~discard]
 
 
-def add_cab_zone(df, taxi_zone_df: GeoDataFrame):
-    lon_var: str = 'dolongitude'
-    lat_var: str = 'dolatitude'
+def add_cab_zone(df, lon_var: str, lat_var: str, locid_var: str, taxi_zone_df: GeoDataFrame):
     try:
         if (lat_var in df.columns) and (lon_var in df.columns):
             localdf = df[[lon_var, lat_var]].copy()
@@ -116,7 +114,7 @@ def add_cab_zone(df, taxi_zone_df: GeoDataFrame):
             local_gdf: GeoDataFrame = GeoDataFrame(localdf, crs=crs, geometry=geometry)
             local_gdf = sjoin(local_gdf, taxi_zone_df, how='left', op='within')
             print('after spatial join with taxi zones ')
-            return local_gdf.LocationID.rename('dolocationid')
+            return local_gdf.LocationID.rename(locid_var)
 
         else:
             print('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')
@@ -325,25 +323,27 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
                              storage_options=s3_options,
                              engine='fastparquet')
 
-        # rename columns
-        #df.columns = map(str.lower, df.columns)
-        #df.columns = map(str.strip, df.columns)
-        #print('before rename ' + str(df.columns))
-
-        #f = df.rename(columns=rename_cols)
-        #print('after rename ' + str(df.columns))
-
         # add cab zones
         if not special:
             print('In data clean tasks for cabs. Field dolocationid not found')
             # fetch cab zones
             taxi_zones_df: GeoDataFrame = fetch_cab_zones()
-            df['dolocationid'] = df.map_partitions(partial(add_cab_zone, taxi_zone_df=taxi_zones_df),
+            df['dolocationid'] = df.map_partitions(partial(add_cab_zone,
+                                                           taxi_zone_df=taxi_zones_df,
+                                                           lon_var='dolongitude',
+                                                           lat_var='dolatitude',
+                                                           locid_var='dolocationid'),
                                                    meta=('dolocationid', int64))
+            df['pulocationid'] = df.map_partitions(partial(add_cab_zone,
+                                                           taxi_zone_df=taxi_zones_df,
+                                                           lon_var='pulongitude',
+                                                           lat_var='pulatitude',
+                                                           locid_var='pulocationid'),
+                                                   meta=('pulocationid', int64))
 
-        df = df[['dodatetime', 'dolocationid', 'passengers']]
-        #df = df.drop_duplicates()
-        #df = df.dropna()
+        df = df[['pudatetime', 'dodatetime', 'passengers', 'distance', 'pulocationid', 'dolocationid']]
+        df = df.drop_duplicates()
+        df = df.dropna()
         dd.to_parquet(df=df,
                       path=s3_out_url,
                       engine='fastparquet',
