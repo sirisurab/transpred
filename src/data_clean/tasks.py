@@ -344,8 +344,6 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
 
             del taxi_zones_df
         df = df[['dodatetime', 'passengers', 'distance', 'dolocationid']]
-        df = df.drop_duplicates()
-        df = df.dropna()
         dd.to_parquet(df=df,
                       path=s3_out_url,
                       engine='fastparquet',
