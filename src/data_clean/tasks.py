@@ -341,7 +341,7 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
             #                                               locid_var='pulocationid'),
             #                                       meta=('pulocationid', int64))
 
-        df = df[['pudatetime', 'dodatetime', 'passengers', 'distance', 'dolocationid']]
+        df = df[['dodatetime', 'passengers', 'distance', 'dolocationid']]
         df = df.drop_duplicates()
         df = df.dropna()
         dd.to_parquet(df=df,
@@ -397,12 +397,14 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                    s3_in_url=s3_in_url + '/special/',
                                    s3_out_url=s3_out_url + '/special/',
                                    s3_options=s3_options)
+                client.restart()
 
             if normal_case:
                 clean_cabs_at_path(special=False,
                                    s3_in_url=s3_in_url + '/normal/',
                                    s3_out_url=s3_out_url + '/normal/',
                                    s3_options=s3_options)
+                client.restart()
 
     except Exception as err:
         print('error in perform_cabs %s' % str(err))
