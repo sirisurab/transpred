@@ -345,7 +345,7 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
                                                                  'pulocationid': int64})
 
         df = df[['pudatetime', 'dodatetime', 'passengers', 'distance', 'pulocationid', 'dolocationid']]
-        df = df.drop_duplicates()
+        #df = df.drop_duplicates()
         df = df.dropna()
         dd.to_parquet(df=df,
                       path=s3_out_url,
