@@ -335,15 +335,15 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
                                                            lat_var='dolatitude',
                                                            locid_var='dolocationid'),
                                                    meta=('dolocationid', int64))
-            #df['pulocationid'] = df.map_partitions(partial(add_cab_zone,
-            #                                               taxi_zone_df=taxi_zones_df,
-            #                                               lon_var='pulongitude',
-            #                                               lat_var='pulatitude',
-            #                                               locid_var='pulocationid'),
-            #                                       meta=('pulocationid', int64))
+            df['pulocationid'] = df.map_partitions(partial(add_cab_zone,
+                                                           taxi_zone_df=taxi_zones_df,
+                                                           lon_var='pulongitude',
+                                                           lat_var='pulatitude',
+                                                           locid_var='pulocationid'),
+                                                   meta=('pulocationid', int64))
 
             del taxi_zones_df
-        df = df[['dodatetime', 'passengers', 'distance', 'dolocationid']]
+        df = df[['pudatetime', 'dodatetime', 'passengers', 'distance', 'dolocationid', 'pulocationid']]
         dd.to_parquet(df=df,
                       path=s3_out_url,
                       engine='fastparquet',
