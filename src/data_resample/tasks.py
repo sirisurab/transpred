@@ -159,62 +159,28 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
-    # cols: Dict[str, str] = task_type_map['cols']
-    date_cols: List[str] = task_type_map['date_cols']
-    diff: Dict = task_type_map['diff']
     group: Dict = task_type_map['group']
     filter_by_key: str = resample_map['filter_by']['key']
     filter_by_val: int = resample_map['filter_by']['value']
     resample_freq: str = resample_map['freq']
     aggr_func: Callable = task_type_map['aggr_func']
-
-    dtypes: Dict[str, str] = task_type_map['dtypes']
     index_col: str = task_type_map['index']['col']
 
-    s3 = ps.get_s3fs_client()
-    print('got s3fs client')
-
-    #s3_glob: Dict[str, List[str]] = get_s3_glob(bucket=in_bucket, years=years)
     s3_options: Dict = ps.fetch_s3_options()
 
-    client: Client = create_dask_client(num_workers=4)
-
+    client: Client = create_dask_client(num_workers=8)
 
     try:
         for year in years:
             s3_in_url: str = 's3://' + in_bucket + '/'+year+'/'
             print('s3 url %s' % s3_in_url)
-            #df = dd.read_csv(
-            #                #urlpath=s3_glob[year],
-            #                 urlpath=s3_in_url,
-            #                 storage_options=s3_options,
-            #                 header=0,
-            #                 usecols=dtypes.keys(),
-            #                 parse_dates=date_cols,
-            #                 dtype={key: dtypes[key] for key in dtypes.keys() if key not in date_cols},
-            #                 encoding='utf-8'
-            #                 )
             df = dd.read_parquet(path=s3_in_url,
                                  storage_options=s3_options,
                                  engine='fastparquet')
 
-            #df = client.persist(df)
-            #if diff['compute']:
-            #    df[diff['new_cols']] = df[diff['cols']].diff()
-            #    df = df.drop(diff['cols'], axis=1)
-
-            # specific processing for transit
-            #if task_type == 'rs-transit':
-            #    df = remove_outliers(df, cols=diff['new_cols'])
-
             # filter
             if filter_by_key == 'weekday':
                 df = df.loc[df[index_col].dt.weekday == filter_by_val]
-                   # .repartition(npartitions=df.npartitions // 7)
-                #df = client.persist(df)
-
-            #df = df.set_index(index_col, sorted=False)
-            #print('after set index ')
 
             if group['compute']:
                 grouper_cols = group['by_cols']
@@ -222,26 +188,16 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                 grouper_cols = []
 
             cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
-            meta_cols = {key: dtypes[key] for key in dtypes.keys() if key in cols}
+            #meta_cols = {key: dtypes[key] for key in dtypes.keys() if key in cols}
             print('cols %s' % cols)
-            print('meta_cols %s' % meta_cols)
-            #per_group = lambda grp: grp.groupby(index_col)[cols].resample(resample_freq, how='sum')
+            #print('meta_cols %s' % meta_cols)
 
             # resample using frequency and aggregate function specified
-            df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols].sum()
+            df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
             #df = df.resample(resample_freq).sum()
             #print('after resampling')
 
-            #df = df.groupby(grouper_cols)[cols].sum()
-            #df = df.groupby(grouper_cols).apply(per_group,
-            #                                    meta=meta_cols,
-            #                                    index_col=index_col,
-            #                                    cols=cols,
-            #                                    resample_freq=resample_freq,
-            #                                    level=len(grouper_cols))
             print('after grouping and resampling %s' % str(df.shape))
-            #print('after grouping and resampling %s' % str(df.head(compute=True)))
-            #print('after compute %s' % str(df.shape))
 
             # save in out bucket
             s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'

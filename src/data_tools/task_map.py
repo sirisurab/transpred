@@ -1,7 +1,7 @@
 # coding=utf-8
 from typing import Dict
 from data_tools import row_operations as row_ops
-from numpy import int64, float64
+from numpy import int64, float64, mean
 
 task_type_map: Dict = {
                   'dl-transit': {
@@ -181,18 +181,9 @@ task_type_map: Dict = {
                   'rs-gcabs': {
                                 'in': 'cl-gcabs',
                                 'out': 'rs-gcabs',
-                                'dtypes': {
-                                        'dodatetime': 'datetime64[ns]',
-                                        'passengers': 'int64',
-                                        'dolocationid': 'int64'
-                                        },
-                                'date_cols': ['dodatetime'],
                                 'index': {
                                         'col': 'dodatetime',
-                                        'sorted': True
-                                        },
-                                'diff': {
-                                        'compute': False
+                                        'sorted': False
                                         },
                                 'group': {
                                         'compute': True,
@@ -203,18 +194,9 @@ task_type_map: Dict = {
                   'rs-ycabs': {
                                 'in': 'cl-ycabs',
                                 'out': 'rs-ycabs',
-                                'dtypes': {
-                                        'dodatetime': 'datetime64[ns]',
-                                        'passengers': 'int64',
-                                        'dolocationid': 'int64'
-                                        },
-                                'date_cols': ['dodatetime'],
                                 'index': {
                                         'col': 'dodatetime',
-                                        'sorted': True
-                                        },
-                                'diff': {
-                                        'compute': False
+                                        'sorted': False
                                         },
                                 'group': {
                                         'compute': True,
@@ -225,27 +207,28 @@ task_type_map: Dict = {
                   'rs-transit': {
                                 'in': 'cl-transit',
                                 'out': 'rs-transit',
-                                'dtypes': {
-                                        'station': 'object',
-                                        'datetime': 'datetime64[ns]',
-                                        'entries': 'int64',
-                                        'exits': 'int64'
-                                        },
-                                'date_cols': ['datetime'],
                                 'index': {
                                         'col': 'datetime',
                                         'sorted': True
-                                        },
-                                'diff': {
-                                        'compute': True,
-                                        'cols': ['exits', 'entries'],
-                                        'new_cols': ['delex', 'delent']
                                         },
                                 'group': {
                                         'compute': True,
                                         'by_cols': ['station']
                                         },
                                 'aggr_func': sum
+                                },
+                  'rs-traffic': {
+                                'in': 'dl-traffic',
+                                'out': 'rs-traffic',
+                                'index': {
+                                        'col': 'datetime',
+                                        'sorted': False
+                                        },
+                                'group': {
+                                        'compute': True,
+                                        'by_cols': ['linkid']
+                                        },
+                                'aggr_func': mean
                                 },
                   'rg-transit': {
                                 'in': 'rs-transit',
