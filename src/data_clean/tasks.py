@@ -103,30 +103,22 @@ def remove_outliers(df, col):
     return df.loc[~discard]
 
 
-def add_cab_zone(df, lon_vars: List[str], lat_vars: List[str], locid_vars: List[str], taxi_zone_df: GeoDataFrame):
+def add_cab_zone(df, lon_var: str, lat_var: str, locid_var: str, taxi_zone_df: GeoDataFrame):
     try:
-        #if (lat_var in df.columns) and (lon_var in df.columns):
-        localdf = df[lon_vars + lat_vars].copy()
-        local_gdf: GeoDataFrame
-        crs: Dict[str, str] = {'init': 'epsg:4326'}
-        for i, locid in enumerate(locid_vars):
-            localdf[lon_vars[i]] = localdf[lon_vars[i]].fillna(value=0.)
-            localdf[lat_vars[i]] = localdf[lat_vars[i]].fillna(value=0.)
-            if i==0:
-                local_gdf = GeoDataFrame(localdf,
-                                         crs=crs,
-                                         geometry=[Point(xy) for xy in zip(localdf[lon_vars[i]], localdf[lat_vars[i]])])
-            else:
-                local_gdf['geometry'] = [Point(xy) for xy in zip(localdf[lon_vars[i]], localdf[lat_vars[i]])]
-                local_gdf = local_gdf.set_geometry('geometry')
+        if (lat_var in df.columns) and (lon_var in df.columns):
+            localdf = df[[lon_var, lat_var]].copy()
+            localdf[lon_var] = localdf[lon_var].fillna(value=0.)
+            localdf[lat_var] = localdf[lat_var].fillna(value=0.)
+            geometry: List[Point] = [Point(xy) for xy in zip(localdf[lon_var], localdf[lat_var])]
+            crs: Dict[str, str] = {'init': 'epsg:4326'}
+            local_gdf: GeoDataFrame = GeoDataFrame(localdf, crs=crs, geometry=geometry)
             local_gdf = sjoin(local_gdf, taxi_zone_df, how='left', op='within')
-            local_gdf = local_gdf.rename(columns={'LocationID': locid})
-        print('after spatial join with taxi zones ')
-        return local_gdf[locid_vars]
+            print('after spatial join with taxi zones ')
+            return local_gdf.LocationID.rename(locid_var)
 
-        #else:
-        #    print('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')
-        #    raise KeyError('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')
+        else:
+            print('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')
+            raise KeyError('Data clean tasks for cabs - fields dolocationid, dolatitude, dolongitude not found')
     except Exception as err:
         raise err
 
@@ -336,16 +328,21 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
             print('In data clean tasks for cabs. Field dolocationid not found')
             # fetch cab zones
             taxi_zones_df: GeoDataFrame = fetch_cab_zones()
-            df['dolocationid', 'pulocationid'] = df.map_partitions(partial(add_cab_zone,
+            df['dolocationid'] = df.map_partitions(partial(add_cab_zone,
                                                            taxi_zone_df=taxi_zones_df,
-                                                           lon_vars=['dolongitude', 'pulongitude'],
-                                                           lat_vars=['dolatitude', 'pulatitude'],
-                                                           locid_vars=['dolocationid', 'pulocationid']),
-                                                           meta={'dolocationid': int64,
-                                                                 'pulocationid': int64})
+                                                           lon_var='dolongitude',
+                                                           lat_var='dolatitude',
+                                                           locid_var='dolocationid'),
+                                                   meta=('dolocationid', int64))
+            #df['pulocationid'] = df.map_partitions(partial(add_cab_zone,
+            #                                               taxi_zone_df=taxi_zones_df,
+            #                                               lon_var='pulongitude',
+            #                                               lat_var='pulatitude',
+            #                                               locid_var='pulocationid'),
+            #                                       meta=('pulocationid', int64))
 
-        df = df[['pudatetime', 'dodatetime', 'passengers', 'distance', 'pulocationid', 'dolocationid']]
-        #df = df.drop_duplicates()
+        df = df[['pudatetime', 'dodatetime', 'passengers', 'distance', 'dolocationid']]
+        df = df.drop_duplicates()
         df = df.dropna()
         dd.to_parquet(df=df,
                       path=s3_out_url,
