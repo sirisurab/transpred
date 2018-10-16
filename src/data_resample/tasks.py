@@ -160,10 +160,10 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
     group: Dict = task_type_map['group']
+    aggr_func: Callable
     filter_by_key: str = resample_map['filter_by']['key']
     filter_by_val: int = resample_map['filter_by']['value']
     resample_freq: str = resample_map['freq']
-    aggr_func: Callable = task_type_map['aggr_func']
     index_col: str = task_type_map['index']['col']
 
     s3_options: Dict = ps.fetch_s3_options()
@@ -201,18 +201,16 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
             if group['compute']:
                 grouper_cols = group['by_cols']
-            else:
-                grouper_cols = []
+                aggr_func = group['aggr_func']
+                meta_cols = group['meta']
+                cols = list(meta_cols.keys())
+                print('meta_cols %s' % meta_cols)
 
-            cols = [col for col in df.columns if col not in grouper_cols + [index_col]]
-            #meta_cols = {key: dtypes[key] for key in dtypes.keys() if key in cols}
-            print('cols %s' % cols)
-            #print('meta_cols %s' % meta_cols)
-
-            # resample using frequency and aggregate function specified
-            df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols].apply(aggr_func)
-            #df = df.resample(resample_freq).sum()
-            #print('after resampling')
+                # resample using frequency and aggregate function specified
+                df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols].\
+                    apply(aggr_func, meta=meta_cols)
+                #df = df.resample(resample_freq).sum()
+                #print('after resampling')
 
             print('after grouping and resampling %s' % str(df.shape))
 

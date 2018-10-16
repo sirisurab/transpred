@@ -187,9 +187,13 @@ task_type_map: Dict = {
                                         },
                                 'group': {
                                         'compute': True,
-                                        'by_cols': ['dolocationid']
-                                },
-                                'aggr_func': sum
+                                        'by_cols': ['dolocationid', 'pulocationid'],
+                                        'aggr_func': sum,
+                                        'meta': {
+                                            'passengers': int64,
+                                            'distance': float64
+                                            }
+                                        }
                                 },
                   'rs-ycabs': {
                                 'in': 'cl-ycabs',
@@ -200,9 +204,13 @@ task_type_map: Dict = {
                                         },
                                 'group': {
                                         'compute': True,
-                                        'by_cols': ['dolocationid']
-                                },
-                                'aggr_func': sum
+                                        'by_cols': ['dolocationid', 'pulocationid'],
+                                        'aggr_func': sum,
+                                        'meta': {
+                                            'passengers': int64,
+                                            'distance': float64
+                                            }
+                                        }
                                 },
                   'rs-transit': {
                                 'in': 'cl-transit',
@@ -213,9 +221,13 @@ task_type_map: Dict = {
                                         },
                                 'group': {
                                         'compute': True,
-                                        'by_cols': ['station']
-                                        },
-                                'aggr_func': sum
+                                        'by_cols': ['station'],
+                                        'aggr_func': sum,
+                                        'meta': {
+                                            'delex': int64,
+                                            'delent': int64
+                                            }
+                                        }
                                 },
                   'rs-traffic': {
                                 'in': 'dl-traffic',
@@ -226,9 +238,13 @@ task_type_map: Dict = {
                                         },
                                 'group': {
                                         'compute': True,
-                                        'by_cols': ['linkid']
-                                        },
-                                'aggr_func': mean
+                                        'by_cols': ['linkid'],
+                                        'aggr_func': mean,
+                                        'meta': {
+                                            'speed': float64,
+                                            'traveltime': float64
+                                            }
+                                        }
                                 },
                   'rg-transit': {
                                 'in': 'rs-transit',

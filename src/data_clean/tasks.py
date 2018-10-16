@@ -388,12 +388,6 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                 normal_case = True
 
             if special_case:
-#                if task_type == 'cl-gcabs':
-#                    usecols = [2, 6, 7]
-#                    names = ['dodatetime', 'dolocationid', 'passengers']
-#                else:
-#                    usecols = [2, 3, 8]
-#                    names = ['dodatetime', 'passengers', 'dolocationid']
                 clean_cabs_at_path(special=True,
                                    s3_in_url=s3_in_url + '/special/',
                                    s3_out_url=s3_out_url + '/special/',
