@@ -439,19 +439,76 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
             df = df.drop(['exits', 'entries'], axis=1)
             df = df.dropna()
 
-            quantiles = df[['delex', 'delent']].quantile(q=[.25, .75]).compute()
-            iqr = quantiles.diff()[.75]
-            discard = (df['delex'] < quantiles['delex'][.25] - 1.5 * iqr['delex']) | \
-                      (df['delex'] > quantiles['delex'][.75] + 1.5 * iqr['delex']) | \
-                      (df['delent'] < quantiles['delent'][.25] - 1.5 * iqr['delent']) | \
-                      (df['delent'] > quantiles['delent'][.75] + 1.5 * iqr['delent'])
+            delex_lo_q = df['delex'].quantile(.25)
+            delent_lo_q = df['delent'].quantile(.25)
+            delex_hi_q = df['delex'].quantile(.75)
+            delent_hi_q = df['delent'].quantile(.75)
+            delex_iqr = delex_hi_q - delex_lo_q
+            delent_iqr = delent_hi_q - delent_lo_q
+            discard = (df['delex'] < delex_lo_q - 1.5 * delex_iqr) | \
+                      (df['delex'] > delex_hi_q + 1.5 * delex_iqr) | \
+                      (df['delent'] < delent_lo_q - 1.5 * delent_iqr) | \
+                      (df['delent'] > delent_hi_q + 1.5 * delent_iqr)
             df = df.loc[~discard]
+
             dd.to_parquet(df=df,
                           path=s3_out_url,
                           engine='fastparquet',
                           compute=True,
                           compression='lz4',
                           storage_options=s3_options)
+
+    except Exception as err:
+        print('error in perform_transit %s' % str(err))
+        client.close()
+        raise err
+
+    client.close()
+
+    return True
+
+
+def perform_transit_dask_test() -> bool:
+
+    client: Client = create_dask_client(num_workers=3)
+    try:
+        usecols = [3, 6, 7, 9, 10]
+        names = ['station', 'date', 'time', 'entries', 'exits']
+        url: str = '/home/siri/transpred/data/transit/turnstile_*.txt'
+
+        df = dd.read_csv(urlpath=url,
+                         header=None,
+                         usecols=usecols,
+                         names=names,
+                         parse_dates={'datetime': ['date', 'time']},
+                         date_parser=row_ops.clean_transit_date,
+                         skipinitialspace=True,
+                         skip_blank_lines=True,
+                         converters={
+                             'entries': row_ops.clean_num,
+                             'exits': row_ops.clean_num
+                         },
+                         encoding='utf-8'
+                         )
+
+        df['delex'] = df['exits'].diff()
+        df['delent'] = df['entries'].diff()
+        df = df.drop(['exits', 'entries'], axis=1)
+        df = df.dropna()
+
+        delex_lo_q = df['delex'].quantile(.25)
+        delent_lo_q = df['delent'].quantile(.25)
+        delex_hi_q = df['delex'].quantile(.75)
+        delent_hi_q = df['delent'].quantile(.75)
+        delex_iqr = delex_hi_q - delex_lo_q
+        delent_iqr = delent_hi_q - delent_lo_q
+        discard = (df['delex'] < delex_lo_q - 1.5 * delex_iqr) | \
+                  (df['delex'] > delex_hi_q + 1.5 * delex_iqr) | \
+                  (df['delent'] < delent_lo_q - 1.5 * delent_iqr) | \
+                  (df['delent'] > delent_hi_q + 1.5 * delent_iqr)
+        df = df.loc[~discard]
+
+        dd.to_csv(df=df, filename='/home/siri/transpred/data/transit/cl_turnstile_*.csv')
 
     except Exception as err:
         print('error in perform_transit %s' % str(err))

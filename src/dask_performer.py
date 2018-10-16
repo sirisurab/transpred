@@ -11,6 +11,7 @@ if __name__ == '__main__':
     years: List[str] = sys.argv[2:]
     # call pipeline function with task_type
     status: bool = ps.create_bucket(task_map.task_type_map[task_type]['out'])
+    #status = True
     if status:
 
         task_prefix: str = task_type.split('-', 1)[0]
@@ -21,6 +22,7 @@ if __name__ == '__main__':
             #status = cl_tasks.perform_dask_test()
         elif task_type == 'cl-transit':
             status = cl_tasks.perform_transit_dask(task_type, years)
+            #status = cl_tasks.perform_transit_dask_test()
         elif task_type in ['dl-gcabs', 'dl-ycabs']:
             status = dl_tasks.perform_cabs_dask(task_type, years)
         elif task_type == 'dl-transit':
