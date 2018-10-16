@@ -112,6 +112,7 @@ def add_cab_zone(df, lon_var: str, lat_var: str, locid_var: str, taxi_zone_df: G
             geometry: List[Point] = [Point(xy) for xy in zip(localdf[lon_var], localdf[lat_var])]
             crs: Dict[str, str] = {'init': 'epsg:4326'}
             local_gdf: GeoDataFrame = GeoDataFrame(localdf, crs=crs, geometry=geometry)
+            del localdf
             local_gdf = sjoin(local_gdf, taxi_zone_df, how='left', op='within')
             print('after spatial join with taxi zones ')
             return local_gdf.LocationID.rename(locid_var)
@@ -341,6 +342,7 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
             #                                               locid_var='pulocationid'),
             #                                       meta=('pulocationid', int64))
 
+            del taxi_zones_df
         df = df[['dodatetime', 'passengers', 'distance', 'dolocationid']]
         df = df.drop_duplicates()
         df = df.dropna()
@@ -350,6 +352,7 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
                       compute=True,
                       compression='lz4',
                       storage_options=s3_options)
+        del df
 
     except Exception as err:
         print('error in clean_cabs_at_path %s' % str(err))
@@ -397,14 +400,12 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
                                    s3_in_url=s3_in_url + '/special/',
                                    s3_out_url=s3_out_url + '/special/',
                                    s3_options=s3_options)
-                client.restart()
 
             if normal_case:
                 clean_cabs_at_path(special=False,
                                    s3_in_url=s3_in_url + '/normal/',
                                    s3_out_url=s3_out_url + '/normal/',
                                    s3_options=s3_options)
-                client.restart()
 
     except Exception as err:
         print('error in perform_cabs %s' % str(err))
