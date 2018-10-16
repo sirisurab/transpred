@@ -174,9 +174,26 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
         for year in years:
             s3_in_url: str = 's3://' + in_bucket + '/'+year+'/'
             print('s3 url %s' % s3_in_url)
-            df = dd.read_parquet(path=s3_in_url,
-                                 storage_options=s3_options,
-                                 engine='fastparquet')
+            if task_type in ['rs-gcabs', 'rs-ycabs']:
+                path: str = ''
+                if int(year) >= 2016:
+                    path = '/special/'
+                elif int(year) < 2016:
+                    path = '/normal/'
+                df = dd.read_parquet(path=s3_in_url+path,
+                                     storage_options=s3_options,
+                                     engine='fastparquet')
+
+                if int(year) == 2016:
+                    df_2 = dd.read_parquet(path=s3_in_url+'/normal/',
+                                     storage_options=s3_options,
+                                     engine='fastparquet')
+                    df = df.append(df_2)
+
+            else:
+                df = dd.read_parquet(path=s3_in_url,
+                                     storage_options=s3_options,
+                                     engine='fastparquet')
 
             # filter
             if filter_by_key == 'weekday':
