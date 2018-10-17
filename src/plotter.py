@@ -94,27 +94,25 @@ def plot(*args) -> bool:
                 gcabs_df = concat([read_csv(ps.get_file_stream(bucket=RGGCABS_BUCKET, filename=str(locationid)),
                                             header=0,
                                             usecols=cabs_datecols + list(cabs_dtypes.keys()),
-                                            index_col=False,
                                             parse_dates=cabs_datecols,
                                             encoding='utf-8', dtype=cabs_dtypes)
                                    for locationid in dolocationids],
                                    ignore_index=True)
 
                 gcabs_df = gcabs_df.groupby(cabs_datecols)[cabs_cols].apply(sum)
-                gcabs_df = gcabs_df.unstack().set_index(cabs_datecols)[start_date: end_date].\
+                gcabs_df = gcabs_df.unstack(cabs_datecols).set_index(cabs_datecols)[start_date: end_date].\
                     sort_index().reset_index()
 
                 ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
                                             header=0,
                                             usecols=cabs_datecols + cabs_cols,
-                                            index_col=False,
                                             parse_dates=cabs_datecols,
                                             encoding='utf-8', dtype=cabs_dtypes)
                                    for locationid in dolocationids],
                                   ignore_index=True)
 
                 ycabs_df = ycabs_df.groupby(cabs_datecols)[cabs_cols].apply(sum)
-                ycabs_df = ycabs_df.unstack().set_index(cabs_datecols)[start_date: end_date]. \
+                ycabs_df = ycabs_df.unstack(cabs_datecols).set_index(cabs_datecols)[start_date: end_date]. \
                     sort_index().reset_index()
 
             # determine relevant traffic files
@@ -131,14 +129,13 @@ def plot(*args) -> bool:
                 traffic_df = concat([read_csv(ps.get_file_stream(bucket=RGTRAFFIC_BUCKET, filename=str(int(linkid))),
                                               header=0,
                                               usecols=traffic_datecols + traffic_cols,
-                                              index_col=False,
                                               parse_dates=traffic_datecols,
                                               encoding='utf-8', dtype=traffic_dtypes)
                                     for linkid in linkids],
                                   ignore_index=True)
 
                 traffic_df = traffic_df.groupby(traffic_datecols)[traffic_cols].apply(mean)
-                traffic_df = traffic_df.unstack().set_index(traffic_datecols)[start_date: end_date]. \
+                traffic_df = traffic_df.unstack(traffic_datecols).set_index(traffic_datecols)[start_date: end_date]. \
                     sort_index().reset_index()
 
             # create plots
