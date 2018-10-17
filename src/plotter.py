@@ -35,6 +35,7 @@ def plot(*args) -> bool:
         'locationid': 'int64'
     }
     geomerged_cabs_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
+    geomerged_cabs_df = geomerged_cabs_df[~geomerged_cabs_df['locationid'].isna()]
     filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=geomerged_traffic)
     dtypes = {
         'stop_name': 'object',
@@ -42,6 +43,7 @@ def plot(*args) -> bool:
         'linkid': 'float64'
     }
     geomerged_traffic_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
+    geomerged_traffic_df = geomerged_traffic_df[~geomerged_traffic_df['linkid'].isna()]
 
     # for plotting
     plot_filepath: str = task + '/' + str(buffer) + '/'
