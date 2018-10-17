@@ -10,19 +10,25 @@ from dask.distributed import Client
 from functools import partial
 
 
-def regroup(task_type: str) -> bool:
+def regroup(task_type: str, years: List[str], resample_freq: str, filter_key: str, filter_val: str) -> bool:
     try:
         # determine in and out buckets
         # and split_by from task type map
         in_bucket: str = task_map.task_type_map[task_type]['in']
         out_bucket: str = task_map.task_type_map[task_type]['out']
         split_by: List[str] = task_map.task_type_map[task_type]['split_by']
+        date_cols: List[str] = task_map.task_type_map[task_type]['date_cols']
         dtypes: Dict[str, str] = task_map.task_type_map[task_type]['dtypes']
         print('fetched in out and split_by for task_type %(task)s' % {'task': task_type})
 
         # read files from in bucket and concat into one df
         filestreams: List[HTTPResponse] = ps.get_all_filestreams(bucket=in_bucket)
-        df = pd.concat([pd.read_csv(stream, encoding='utf-8', dtype=dtypes) for stream in filestreams], ignore_index=True)
+        s3_in_url: str = 's3://' + in_bucket + '/'
+        s3_in_sub_path: str = '/' + resample_freq + '/' + filter_key+filter_val + '/*'
+        df = pd.concat([pd.read_csv(s3_in_url+year+s3_in_sub_path,
+                                    encoding='utf-8',
+                                    parse_dates=date_cols,
+                                    dtype=dtypes) for year in years], ignore_index=True)
         print('read files from in bucket and concat-ted into one df')
 
         # group by split_by and write each group to a separate file
@@ -50,7 +56,8 @@ def regroup(task_type: str) -> bool:
 
 def write_group_to_csv(group, split_by: str, out_bucket: str) -> int:
     filename: str
-    name: str = str(group[split_by].iloc[0]).lstrip(split_by).strip()
+    #name: str = str(group[split_by].iloc[0]).lstrip(split_by).strip()
+    name: str = group.unstack(split_by)[split_by].iloc[0]
     if isinstance(name, int):
         filename = str(name)
     elif isinstance(name, float):
@@ -107,5 +114,5 @@ if __name__ == '__main__':
     filter_val: str = sys.argv[4]
     years: List[str] = list(sys.argv[5:])
     print('regrouping for task type %s' % task_type)
-    #status: bool = regroup(task_type)
-    status: bool = regroup_dask(task_type, years, resample_freq, filter_key, filter_val)
+    status: bool = regroup(task_type, years, resample_freq, filter_key, filter_val)
+    #status: bool = regroup_dask(task_type, years, resample_freq, filter_key, filter_val)
