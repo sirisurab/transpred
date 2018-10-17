@@ -16,6 +16,23 @@ REFBASE_BUCKET: str = 'ref-base'
 GEOMERGED_PATH: str = 'geo-merged/'
 PLOTS_BUCKET: str = 'plots'
 
+
+def create_transit_plot(station: str, transit_df: DataFrame, datecols: List[str]) -> figure:
+    p = figure(title='plot for station ' + station,
+                x_axis_label='datetime', x_axis_type='datetime',
+                y_axis_label='')
+
+    transit_hq = transit_df['delent'].quantile(.75)
+    transit_lq = transit_df['delent'].quantile(.25)
+    transit_iqr = (transit_hq - transit_lq) * 1.5
+    p.y_range = Range1d(start=transit_lq - transit_iqr, end=transit_hq + transit_iqr)
+    p.line(transit_df[datecols[0]], transit_df['delex'],
+            legend='transit exits', line_width=2, line_color='blue')
+    p.line(transit_df[datecols[0]], transit_df['delent'],
+            legend='transit entries', line_width=2, line_color='red')
+    return p
+
+
 def plot(*args) -> bool:
     inputs: List[str] = list(*args)
     task: str = inputs[0]
@@ -138,44 +155,48 @@ def plot(*args) -> bool:
 
             # create plots
 
-            p = figure(title='plot for station '+station,
-                       x_axis_label='datetime', x_axis_type='datetime',
-                       y_axis_label='')
-
-            transit_hq = transit_df['delent'].quantile(.75)
-            transit_lq = transit_df['delent'].quantile(.25)
-            transit_iqr = (transit_hq - transit_lq) * 1.5
-            p.y_range = Range1d(start=transit_lq-transit_iqr, end=transit_hq+transit_iqr)
-            p.line(transit_df[ts_datecols[0]], transit_df['delex'],
-                   legend='transit exits', line_width=2, line_color='blue')
-            p.line(transit_df[ts_datecols[0]], transit_df['delent'],
-                   legend='transit entries', line_width=2, line_color='red')
+            p1 = create_transit_plot(station=station, transit_df=transit_df, datecols=ts_datecols)
+            if len(dolocationids) == 0 or gcabs_df.size == 0:
+                show(p1)
 
             if len(dolocationids) > 0:
                 if gcabs_df.size > 0:
-                    p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'],
-                           legend='green cab passengers', line_width=2, line_color='green')
-                    p.line(gcabs_df[cabs_datecols[0]], gcabs_df['distance'],
-                           legend='green cab trip length', line_width=1, line_color='green')
+                    gcabs_hq = gcabs_df['passengers'].quantile(.75)
+                    gcabs_lq = gcabs_df['passengers'].quantile(.25)
+                    gcabs_iqr = (gcabs_hq - gcabs_lq) * 1.5
+                    p1.extra_y_ranges = {'gcabs': Range1d(start=gcabs_lq-gcabs_iqr, end=gcabs_hq+gcabs_iqr)}
+                    p1.add_layout(LinearAxis(y_range_name='gcabs'), 'right')
+                    p1.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'],
+                           legend='green cab passengers', line_width=2, line_color='green', y_range_name='gcabs')
+                    p1.line(gcabs_df[cabs_datecols[0]], gcabs_df['distance'],
+                           legend='green cab trip length', line_width=1, line_color='green', y_range_name='gcabs')
+                    show(p1)
 
                 if ycabs_df.size > 0:
+                    p2 = create_transit_plot(station=station, transit_df=transit_df, datecols=ts_datecols)
                     ycabs_hq = ycabs_df['passengers'].quantile(.75)
                     ycabs_lq = ycabs_df['passengers'].quantile(.25)
                     ycabs_iqr = (ycabs_hq - ycabs_lq) * 1.5
-                    p.extra_y_ranges = {'ycabs': Range1d(start=ycabs_lq-ycabs_iqr, end=ycabs_hq+ycabs_iqr)}
-                    p.add_layout(LinearAxis(y_range_name='ycabs'), 'right')
-                    p.line(ycabs_df[cabs_datecols[0]], ycabs_df['passengers'],
+                    p2.extra_y_ranges = {'ycabs': Range1d(start=ycabs_lq-ycabs_iqr, end=ycabs_hq+ycabs_iqr)}
+                    p2.add_layout(LinearAxis(y_range_name='ycabs'), 'right')
+                    p2.line(ycabs_df[cabs_datecols[0]], ycabs_df['passengers'],
                            legend='yellow cab passengers', line_width=2, line_color='yellow', y_range_name='ycabs')
-                    p.line(ycabs_df[cabs_datecols[0]], ycabs_df['distance'],
+                    p2.line(ycabs_df[cabs_datecols[0]], ycabs_df['distance'],
                            legend='yellow cab trip length', line_width=1, line_color='yellow', y_range_name='ycabs')
+                    show(p2)
 
             if len(linkids) > 0 and transit_df.size > 0:
-                p.line(traffic_df[traffic_datecols[0]], traffic_df['speed'],
-                       legend='traffic speed', line_width=2, line_color='magenta')
-                p.line(traffic_df[traffic_datecols[0]], traffic_df['traveltime'],
-                       legend='traffic travel time', line_width=1, line_color='magenta')
-
-            show(p)
+                p3 = create_transit_plot(station=station, transit_df=transit_df, datecols=ts_datecols)
+                traffic_hq = traffic_df['speed'].quantile(.75)
+                traffic_lq = traffic_df['speed'].quantile(.25)
+                traffic_iqr = (traffic_hq - traffic_lq) * 1.5
+                p3.extra_y_ranges = {'traffic': Range1d(start=traffic_lq-traffic_iqr, end=traffic_hq+traffic_iqr)}
+                p3.add_layout(LinearAxis(y_range_name='traffic'), 'right')
+                p3.line(traffic_df[traffic_datecols[0]], traffic_df['speed'],
+                       legend='traffic speed', line_width=2, line_color='magenta', y_range_name='traffic')
+                p3.line(traffic_df[traffic_datecols[0]], traffic_df['traveltime'],
+                       legend='traffic travel time', line_width=1, line_color='magenta', y_range_name='traffic')
+                show(p3)
 
         except Exception as err:
             print('Error in plotting task %(task)s for station %(station)s'
