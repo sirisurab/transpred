@@ -91,17 +91,19 @@ def plot(*args) -> bool:
                     'distance': 'float64'
                 }
                 gcabs_df = concat([read_csv(ps.get_file_stream(bucket=RGGCABS_BUCKET, filename=str(locationid)),
-                                                       usecols=cabs_datecols + list(cabs_dtypes.keys()),
-                                                       parse_dates=cabs_datecols,
-                                                       encoding='utf-8', dtype=cabs_dtypes)
-                                              for locationid in dolocationids],
-                                             ignore_index=True)
+                                            usecols=cabs_datecols + list(cabs_dtypes.keys()),
+                                            index_col=False,
+                                            parse_dates=cabs_datecols,
+                                            encoding='utf-8', dtype=cabs_dtypes)
+                                   for locationid in dolocationids],
+                                   ignore_index=True)
 
                 gcabs_df = gcabs_df.groupby(cabs_datecols).apply(sum).loc[start_date: end_date].\
                     sort_index().reset_index()
 
                 ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
                                             usecols=cabs_datecols + list(cabs_dtypes.keys()),
+                                            index_col=False,
                                             parse_dates=cabs_datecols,
                                             encoding='utf-8', dtype=cabs_dtypes)
                                    for locationid in dolocationids],
@@ -121,10 +123,11 @@ def plot(*args) -> bool:
                     'traveltime': 'float64'
                 }
                 traffic_df = concat([read_csv(ps.get_file_stream(bucket=RGTRAFFIC_BUCKET, filename=str(int(linkid))),
-                                            usecols=traffic_datecols + list(traffic_dtypes.keys()),
-                                            parse_dates=traffic_datecols,
-                                            encoding='utf-8', dtype=traffic_dtypes)
-                                   for linkid in linkids],
+                                              usecols=traffic_datecols + list(traffic_dtypes.keys()),
+                                              index_col=False,
+                                              parse_dates=traffic_datecols,
+                                              encoding='utf-8', dtype=traffic_dtypes)
+                                    for linkid in linkids],
                                   ignore_index=True)
 
                 traffic_df = traffic_df.groupby(traffic_datecols).apply(mean).loc[start_date: end_date]. \
