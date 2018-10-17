@@ -264,7 +264,9 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                 cols = [col for col in meta_cols.keys() if col not in grouper_cols+[index_col]]
                 meta_types = [meta_cols[key] for key in meta_cols.keys() if key not in grouper_cols+[index_col]]
                 print('meta_cols %s' % meta_cols)
-                meta: pd.DataFrame = pd.DataFrame(columns=cols, index=pd.MultiIndex([[],[]], [[],[]], names=[index_col]+grouper_cols))
+                index = [index_col]+grouper_cols
+                index_levels: List[List] = [[] for level in index]
+                meta: pd.DataFrame = pd.DataFrame(columns=cols, index=pd.MultiIndex(index_levels, index_levels, names=index))
 
                 # resample using frequency and aggregate function specified
                 df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols]. \
