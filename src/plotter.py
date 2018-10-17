@@ -142,8 +142,8 @@ def plot(*args) -> bool:
                        x_axis_label='datetime', x_axis_type='datetime',
                        y_axis_label='')
 
-            transit_hq = transit_df['passengers'].quantile(.75)
-            transit_lq = transit_df['passengers'].quantile(.25)
+            transit_hq = transit_df['delent'].quantile(.75)
+            transit_lq = transit_df['delent'].quantile(.25)
             transit_iqr = (transit_hq - transit_lq) * 1.5
             p.y_range = Range1d(start=transit_lq-transit_iqr, end=transit_hq+transit_iqr)
             p.line(transit_df[ts_datecols[0]], transit_df['delex'],
