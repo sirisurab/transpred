@@ -408,7 +408,12 @@ def perform_traffic_dask(task_type: str, years: List[str]) -> bool:
                              encoding='utf-8'
                              )
 
-            to_parquet(df=df, out_bucket=out_bucket, folder=year + '/', compute=True)
+            #to_parquet(df=df, out_bucket=out_bucket, folder=year + '/', compute=True)
+
+            dd.to_csv(df=df,
+                      filename='s3://'+out_bucket+'/'+year+'/',
+                      #name_function=lambda i: out_file_prefix + '_' + str(i),
+                      storage_options=s3_options)
 
     except Exception as err:
         raise err
