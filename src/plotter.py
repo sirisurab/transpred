@@ -97,8 +97,8 @@ def plot(*args) -> bool:
                                               for locationid in dolocationids],
                                              ignore_index=True)
 
-                gcabs_df = gcabs_df.groupby(cabs_datecols).apply(sum).\
-                    sort_index()[start_date: end_date].reset_index()
+                gcabs_df = gcabs_df.groupby(cabs_datecols).apply(sum)[start_date: end_date].\
+                    sort_index().reset_index()
 
                 ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
                                             usecols=cabs_datecols + list(cabs_dtypes.keys()),
@@ -107,8 +107,8 @@ def plot(*args) -> bool:
                                    for locationid in dolocationids],
                                   ignore_index=True)
 
-                ycabs_df = ycabs_df.groupby(cabs_datecols).apply(sum). \
-                    sort_index()[start_date: end_date].reset_index()
+                ycabs_df = ycabs_df.groupby(cabs_datecols).apply(sum)[start_date: end_date]. \
+                    sort_index().reset_index()
 
             # determine relevant traffic files
             # by finding linkids corresponding
@@ -127,8 +127,8 @@ def plot(*args) -> bool:
                                    for linkid in linkids],
                                   ignore_index=True)
 
-                traffic_df = traffic_df.groupby(traffic_datecols).apply(mean). \
-                    sort_index()[start_date: end_date].reset_index()
+                traffic_df = traffic_df.groupby(traffic_datecols).apply(mean)[start_date: end_date]. \
+                    sort_index().reset_index()
 
             # create plots
 
