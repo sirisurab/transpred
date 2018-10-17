@@ -220,7 +220,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     try:
         for year in years:
             s3_in_url: str = 's3://' + in_bucket + '/'+year+'/'
-            s3_out_url: str = 's3://' + out_bucket + '/' + year + '/*.csv'
+            s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
             path: str = ''
             print('s3 url %s' % s3_in_url)
             if task_type in ['rs-gcabs', 'rs-ycabs']:
