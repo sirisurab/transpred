@@ -50,13 +50,13 @@ def regroup(task_type: str) -> bool:
 
 def write_group_to_csv(group, split_by: str, out_bucket: str) -> int:
     filename: str
-    name: str = group[split_by].iloc[0]
+    name: str = str(group[split_by].iloc[0]).lstrip(split_by).strip()
     if isinstance(name, int):
         filename = str(name)
     elif isinstance(name, float):
         filename = str(int(name))
     else:
-        filename = str(name).strip().replace('/', ' ')
+        filename = str(name).replace('/', ' ')
     #group.to_csv(s3.open('s3://'+out_bucket+'/'+filename, 'w'))
     file_io.write_csv(df=group, bucket=out_bucket, filename=filename)
     print('wrote file %(file)s' % {'file': filename})
