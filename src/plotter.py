@@ -39,7 +39,7 @@ def plot(*args) -> bool:
     dtypes = {
         'stop_name': 'object',
         'tsstation': 'object',
-        'linkid': 'int64'
+        'linkid': 'float64'
     }
     geomerged_traffic_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
 
@@ -114,7 +114,7 @@ def plot(*args) -> bool:
                 'speed': 'float64',
                 'traveltime': 'float64'
             }
-            traffic_df = concat([read_csv(ps.get_file_stream(bucket=RGTRAFFIC_BUCKET, filename=str(linkid)),
+            traffic_df = concat([read_csv(ps.get_file_stream(bucket=RGTRAFFIC_BUCKET, filename=str(int(linkid))),
                                         usecols=traffic_datecols + list(traffic_dtypes.keys()),
                                         parse_dates=traffic_datecols,
                                         encoding='utf-8', dtype=traffic_dtypes)
