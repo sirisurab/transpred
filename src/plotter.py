@@ -81,48 +81,50 @@ def plot(*args) -> bool:
             # to current station from ref-base geomerged df
             dolocationids = geomerged_cabs_df.loc[geomerged_cabs_df.tsstation == station]['locationid']
 
-            cabs_dtypes = {
-                'passengers': 'int64',
-                'distance': 'float64'
-            }
-            gcabs_df = concat([read_csv(ps.get_file_stream(bucket=RGGCABS_BUCKET, filename=str(locationid)),
-                                                   usecols=cabs_datecols + list(cabs_dtypes.keys()),
-                                                   parse_dates=cabs_datecols,
-                                                   encoding='utf-8', dtype=cabs_dtypes)
-                                          for locationid in dolocationids],
-                                         ignore_index=True)
+            if len(dolocationids) > 0:
+                cabs_dtypes = {
+                    'passengers': 'int64',
+                    'distance': 'float64'
+                }
+                gcabs_df = concat([read_csv(ps.get_file_stream(bucket=RGGCABS_BUCKET, filename=str(locationid)),
+                                                       usecols=cabs_datecols + list(cabs_dtypes.keys()),
+                                                       parse_dates=cabs_datecols,
+                                                       encoding='utf-8', dtype=cabs_dtypes)
+                                              for locationid in dolocationids],
+                                             ignore_index=True)
 
-            gcabs_df = gcabs_df.groupby(cabs_datecols).apply(sum).\
-                sort_index().reset_index()
+                gcabs_df = gcabs_df.groupby(cabs_datecols).apply(sum).\
+                    sort_index().reset_index()
 
-            ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
-                                        usecols=cabs_datecols + list(cabs_dtypes.keys()),
-                                        parse_dates=cabs_datecols,
-                                        encoding='utf-8', dtype=cabs_dtypes)
-                               for locationid in dolocationids],
-                              ignore_index=True)
+                ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
+                                            usecols=cabs_datecols + list(cabs_dtypes.keys()),
+                                            parse_dates=cabs_datecols,
+                                            encoding='utf-8', dtype=cabs_dtypes)
+                                   for locationid in dolocationids],
+                                  ignore_index=True)
 
-            ycabs_df = ycabs_df.groupby(cabs_datecols).apply(sum). \
-                sort_index().reset_index()
+                ycabs_df = ycabs_df.groupby(cabs_datecols).apply(sum). \
+                    sort_index().reset_index()
 
             # determine relevant traffic files
             # by finding linkids corresponding
             # to current station from ref-base geomerged traffic df
             linkids = geomerged_traffic_df.loc[geomerged_traffic_df.tsstation == station]['linkid']
 
-            traffic_dtypes = {
-                'speed': 'float64',
-                'traveltime': 'float64'
-            }
-            traffic_df = concat([read_csv(ps.get_file_stream(bucket=RGTRAFFIC_BUCKET, filename=str(int(linkid))),
-                                        usecols=traffic_datecols + list(traffic_dtypes.keys()),
-                                        parse_dates=traffic_datecols,
-                                        encoding='utf-8', dtype=traffic_dtypes)
-                               for linkid in linkids],
-                              ignore_index=True)
+            if len(linkids) > 0:
+                traffic_dtypes = {
+                    'speed': 'float64',
+                    'traveltime': 'float64'
+                }
+                traffic_df = concat([read_csv(ps.get_file_stream(bucket=RGTRAFFIC_BUCKET, filename=str(int(linkid))),
+                                            usecols=traffic_datecols + list(traffic_dtypes.keys()),
+                                            parse_dates=traffic_datecols,
+                                            encoding='utf-8', dtype=traffic_dtypes)
+                                   for linkid in linkids],
+                                  ignore_index=True)
 
-            traffic_df = traffic_df.groupby(traffic_datecols).apply(mean). \
-                sort_index().reset_index()
+                traffic_df = traffic_df.groupby(traffic_datecols).apply(mean). \
+                    sort_index().reset_index()
 
             # create plots
 
@@ -134,18 +136,22 @@ def plot(*args) -> bool:
                    legend='transit exits', line_width=2, line_color='blue')
             p.line(transit_df[ts_datecols[0]], transit_df['delent'],
                    legend='transit entries', line_width=2, line_color='red')
-            p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'],
-                   legend='green cab passengers', line_width=2, line_color='green')
-            p.line(gcabs_df[cabs_datecols[0]], gcabs_df['distance'],
-                   legend='green cab trip length', line_width=1, line_color='green')
-            p.line(ycabs_df[cabs_datecols[0]], ycabs_df['passengers'],
-                   legend='yellow cab passengers', line_width=2, line_color='yellow')
-            p.line(ycabs_df[cabs_datecols[0]], ycabs_df['distance'],
-                   legend='yellow cab trip length', line_width=1, line_color='yellow')
-            p.line(traffic_df[traffic_datecols[0]], traffic_df['speed'],
-                   legend='traffic speed', line_width=2, line_color='magenta')
-            p.line(traffic_df[traffic_datecols[0]], traffic_df['traveltime'],
-                   legend='traffic travel time', line_width=1, line_color='magenta')
+
+            if len(dolocationids) > 0:
+                p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'],
+                       legend='green cab passengers', line_width=2, line_color='green')
+                p.line(gcabs_df[cabs_datecols[0]], gcabs_df['distance'],
+                       legend='green cab trip length', line_width=1, line_color='green')
+                p.line(ycabs_df[cabs_datecols[0]], ycabs_df['passengers'],
+                       legend='yellow cab passengers', line_width=2, line_color='yellow')
+                p.line(ycabs_df[cabs_datecols[0]], ycabs_df['distance'],
+                       legend='yellow cab trip length', line_width=1, line_color='yellow')
+
+            if len(linkids) > 0:
+                p.line(traffic_df[traffic_datecols[0]], traffic_df['speed'],
+                       legend='traffic speed', line_width=2, line_color='magenta')
+                p.line(traffic_df[traffic_datecols[0]], traffic_df['traveltime'],
+                       legend='traffic travel time', line_width=1, line_color='magenta')
 
             show(p)
 
