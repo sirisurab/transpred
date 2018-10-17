@@ -163,7 +163,8 @@ def resample_at_path(s3_in_url, s3_out_url, s3_options, group, index_col, out_fi
 
     df = dd.read_parquet(path=s3_in_url,
                          storage_options=s3_options,
-                         engine='fastparquet')
+                         engine='fastparquet',
+                         verify=False)
 
     # filter
     if filter_by_key == 'weekday':
