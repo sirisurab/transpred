@@ -268,25 +268,25 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
                 # resample using frequency and aggregate function specified
                 df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols]. \
-                    apply(aggr_func, meta=meta).reset_index().compute()
+                    apply(aggr_func, meta=meta).reset_index()
                 # df = df.resample(resample_freq).sum()
                 # print('after resampling')
 
             print('after grouping and resampling %s' % str(df.shape))
 
             # save in out bucket
-            #dd.to_csv(df=df,
-            #          filename=s3_out_url,
-            #          #name_function=lambda i: out_file_prefix + '_' + str(i),
-            #          storage_options=s3_options)
+            dd.to_csv(df=df,
+                      filename=s3_out_url,
+                      #name_function=lambda i: out_file_prefix + '_' + str(i),
+                      storage_options=s3_options)
 
-            dd.to_parquet(df=df,
-                          path=s3_out_url,
-                          engine='fastparquet',
-                          #compute=True,
-                          #write_index=True,
-                          compression='GZIP',
-                          storage_options=s3_options)
+            #dd.to_parquet(df=df,
+            #              path=s3_out_url,
+            #              engine='fastparquet',
+            #              #compute=True,
+            #              #write_index=True,
+            #              compression='GZIP',
+            #             storage_options=s3_options)
 
     except Exception as err:
         print('error in perform_cabs %s')
