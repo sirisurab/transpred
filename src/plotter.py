@@ -148,22 +148,24 @@ def plot(*args) -> bool:
                    legend='transit entries', line_width=2, line_color='red')
 
             if len(dolocationids) > 0:
-                p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'],
-                       legend='green cab passengers', line_width=2, line_color='green')
-                p.line(gcabs_df[cabs_datecols[0]], gcabs_df['distance'],
-                       legend='green cab trip length', line_width=1, line_color='green')
+                if gcabs_df.size > 0:
+                    p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'],
+                           legend='green cab passengers', line_width=2, line_color='green')
+                    p.line(gcabs_df[cabs_datecols[0]], gcabs_df['distance'],
+                           legend='green cab trip length', line_width=1, line_color='green')
 
-                ycabs_hq = ycabs_df['passengers'].quantile(.75)
-                ycabs_lq = ycabs_df['passengers'].quantile(.25)
-                ycabs_iqr = (ycabs_hq - ycabs_lq) * 1.5
-                p.extra_y_ranges = {'ycabs': Range1d(start=ycabs_lq-ycabs_iqr, end=ycabs_hq+ycabs_iqr)}
-                p.add_layout(LinearAxis(y_range_name='ycabs'), 'right')
-                p.line(ycabs_df[cabs_datecols[0]], ycabs_df['passengers'],
-                       legend='yellow cab passengers', line_width=2, line_color='yellow', y_range_name='ycabs')
-                p.line(ycabs_df[cabs_datecols[0]], ycabs_df['distance'],
-                       legend='yellow cab trip length', line_width=1, line_color='yellow', y_range_name='ycabs')
+                if ycabs_df.size > 0:
+                    ycabs_hq = ycabs_df['passengers'].quantile(.75)
+                    ycabs_lq = ycabs_df['passengers'].quantile(.25)
+                    ycabs_iqr = (ycabs_hq - ycabs_lq) * 1.5
+                    p.extra_y_ranges = {'ycabs': Range1d(start=ycabs_lq-ycabs_iqr, end=ycabs_hq+ycabs_iqr)}
+                    p.add_layout(LinearAxis(y_range_name='ycabs'), 'right')
+                    p.line(ycabs_df[cabs_datecols[0]], ycabs_df['passengers'],
+                           legend='yellow cab passengers', line_width=2, line_color='yellow', y_range_name='ycabs')
+                    p.line(ycabs_df[cabs_datecols[0]], ycabs_df['distance'],
+                           legend='yellow cab trip length', line_width=1, line_color='yellow', y_range_name='ycabs')
 
-            if len(linkids) > 0:
+            if len(linkids) > 0 and transit_df.size > 0:
                 p.line(traffic_df[traffic_datecols[0]], traffic_df['speed'],
                        legend='traffic speed', line_width=2, line_color='magenta')
                 p.line(traffic_df[traffic_datecols[0]], traffic_df['traveltime'],
