@@ -1,5 +1,5 @@
 import sys
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from data_tools import task_map
 from utils import persistence as ps
 from urllib3.response import HTTPResponse
@@ -17,15 +17,19 @@ GEOMERGED_PATH: str = 'geo-merged/'
 PLOTS_BUCKET: str = 'plots'
 
 
+def get_axis_range(df: DataFrame, cols: List[str]) -> Tuple:
+    l_ext = [df[col].max for col in cols]
+    h_ext = [df[col].min for col in cols]
+    return min(l_ext), max(h_ext)
+
+
 def create_transit_plot(station: str, transit_df: DataFrame, datecols: List[str]) -> figure:
     p = figure(title='plot for station ' + station,
                 x_axis_label='datetime', x_axis_type='datetime',
                 y_axis_label='')
 
-    transit_hq = transit_df['delent'].quantile(.75)
-    transit_lq = transit_df['delent'].quantile(.25)
-    transit_iqr = (transit_hq - transit_lq) * 1.5
-    p.y_range = Range1d(start=transit_lq - transit_iqr, end=transit_hq + transit_iqr)
+    axis_range: Tuple = get_axis_range(df=transit_df, cols=['delent', 'delex'])
+    p.y_range = Range1d(start=axis_range[0], end=axis_range[1])
     p.line(transit_df[datecols[0]], transit_df['delex'],
             legend='transit exits', line_width=2, line_color='blue')
     p.line(transit_df[datecols[0]], transit_df['delent'],
@@ -161,10 +165,8 @@ def plot(*args) -> bool:
 
             if len(dolocationids) > 0:
                 if gcabs_df.size > 0:
-                    gcabs_hq = gcabs_df['passengers'].quantile(.75)
-                    gcabs_lq = gcabs_df['passengers'].quantile(.25)
-                    gcabs_iqr = (gcabs_hq - gcabs_lq) * 1.5
-                    p1.extra_y_ranges = {'gcabs': Range1d(start=gcabs_lq-gcabs_iqr, end=gcabs_hq+gcabs_iqr)}
+                    axis_range = get_axis_range(df=gcabs_df, cols=['passengers', 'distance'])
+                    p1.extra_y_ranges = {'gcabs': Range1d(start=axis_range[0], end=axis_range[1])}
                     p1.add_layout(LinearAxis(y_range_name='gcabs'), 'right')
                     p1.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'],
                            legend='green cab passengers', line_width=2, line_color='green', y_range_name='gcabs')
@@ -174,10 +176,8 @@ def plot(*args) -> bool:
 
                 if ycabs_df.size > 0:
                     p2 = create_transit_plot(station=station, transit_df=transit_df, datecols=ts_datecols)
-                    ycabs_hq = ycabs_df['passengers'].quantile(.75)
-                    ycabs_lq = ycabs_df['passengers'].quantile(.25)
-                    ycabs_iqr = (ycabs_hq - ycabs_lq) * 1.5
-                    p2.extra_y_ranges = {'ycabs': Range1d(start=ycabs_lq-ycabs_iqr, end=ycabs_hq+ycabs_iqr)}
+                    axis_range = get_axis_range(df=ycabs_df, cols=['passengers', 'distance'])
+                    p2.extra_y_ranges = {'ycabs': Range1d(start=axis_range[0], end=axis_range[1])}
                     p2.add_layout(LinearAxis(y_range_name='ycabs'), 'right')
                     p2.line(ycabs_df[cabs_datecols[0]], ycabs_df['passengers'],
                            legend='yellow cab passengers', line_width=2, line_color='yellow', y_range_name='ycabs')
@@ -187,10 +187,8 @@ def plot(*args) -> bool:
 
             if len(linkids) > 0 and transit_df.size > 0:
                 p3 = create_transit_plot(station=station, transit_df=transit_df, datecols=ts_datecols)
-                traffic_hq = traffic_df['speed'].quantile(.75)
-                traffic_lq = traffic_df['speed'].quantile(.25)
-                traffic_iqr = (traffic_hq - traffic_lq) * 1.5
-                p3.extra_y_ranges = {'traffic': Range1d(start=traffic_lq-traffic_iqr, end=traffic_hq+traffic_iqr)}
+                axis_range = get_axis_range(df=traffic_df, cols=['speed', 'traveltime'])
+                p3.extra_y_ranges = {'traffic': Range1d(start=axis_range[0], end=axis_range[1])}
                 p3.add_layout(LinearAxis(y_range_name='traffic'), 'right')
                 p3.line(traffic_df[traffic_datecols[0]], traffic_df['speed'],
                        legend='traffic speed', line_width=2, line_color='magenta', y_range_name='traffic')
