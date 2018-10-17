@@ -108,12 +108,10 @@ def plot(*args) -> bool:
                                   ignore_index=True)
                 print(ycabs_df.head())
 
-                gcabs_df = gcabs_df.groupby(cabs_datecols)[cabs_cols].apply(sum)
-                gcabs_df = gcabs_df.unstack(cabs_datecols).set_index(cabs_datecols)[start_date: end_date].\
-                    sort_index().reset_index()
-                ycabs_df = ycabs_df.groupby(cabs_datecols)[cabs_cols].apply(sum)
-                ycabs_df = ycabs_df.unstack(cabs_datecols).set_index(cabs_datecols)[start_date: end_date]. \
-                    sort_index().reset_index()
+                gcabs_df = gcabs_df.set_index(cabs_datecols).sort_index().resample('1D')[cabs_cols].apply(sum)
+                gcabs_df = gcabs_df.loc[start_date: end_date].reset_index()
+                ycabs_df = ycabs_df.set_index(cabs_datecols).sort_index().resample('1D')[cabs_cols].apply(sum)
+                ycabs_df = ycabs_df.loc[start_date: end_date].reset_index()
 
             # determine relevant traffic files
             # by finding linkids corresponding
@@ -135,9 +133,8 @@ def plot(*args) -> bool:
                                   ignore_index=True)
 
                 print(traffic_df.head())
-                traffic_df = traffic_df.groupby(traffic_datecols)[traffic_cols].apply(mean)
-                traffic_df = traffic_df.unstack(traffic_datecols).set_index(traffic_datecols)[start_date: end_date]. \
-                    sort_index().reset_index()
+                traffic_df = traffic_df.set_index(traffic_datecols).sort_index().resample('1D')[traffic_cols].apply(mean)
+                traffic_df = traffic_df.loc[start_date: end_date].reset_index()
 
             # create plots
 
