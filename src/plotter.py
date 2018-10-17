@@ -18,8 +18,8 @@ PLOTS_BUCKET: str = 'plots'
 
 
 def get_axis_range(df: DataFrame, cols: List[str]) -> Tuple:
-    l_ext = [df[col].max() for col in cols]
-    h_ext = [df[col].min() for col in cols]
+    l_ext = [df[col].min() for col in cols]
+    h_ext = [df[col].max() for col in cols]
     return min(l_ext), max(h_ext)
 
 
