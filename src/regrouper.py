@@ -84,7 +84,7 @@ def regroup_dask(task_type: str, years: List[str], resample_freq: str, filter_ke
                                      engine='fastparquet') for year in years])
 
         print('read files from in bucket and concat-ted into one df')
-        df.reset_index().groupby(split_by).apply(partial(write_group_to_csv, split_by=split_by, out_bucket=out_bucket), meta=('int')).compute()
+        df.groupby(split_by).apply(partial(write_group_to_csv, split_by=split_by, out_bucket=out_bucket), meta=('int')).compute()
 
     except Exception as err:
         print('Error: %(error)s in regrouper for task_type %(task)s' % {'error': err, 'task': task_type})
