@@ -348,7 +348,7 @@ def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_option
                       path=s3_out_url,
                       engine='fastparquet',
                       compute=True,
-                      compression='lz4',
+                      compression='snappy',
                       storage_options=s3_options)
         del df
 
