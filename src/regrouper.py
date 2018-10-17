@@ -114,5 +114,5 @@ if __name__ == '__main__':
     filter_val: str = sys.argv[4]
     years: List[str] = list(sys.argv[5:])
     print('regrouping for task type %s' % task_type)
-    status: bool = regroup(task_type, years, resample_freq, filter_key, filter_val)
-    #status: bool = regroup_dask(task_type, years, resample_freq, filter_key, filter_val)
+    #status: bool = regroup(task_type, years, resample_freq, filter_key, filter_val)
+    status: bool = regroup_dask(task_type, years, resample_freq, filter_key, filter_val)
