@@ -252,27 +252,46 @@ task_type_map: Dict = {
                                 'in': 'rs-transit',
                                 'out': 'rg-transit',
                                 'split_by': ['station'],
-                                'index': {
-                                        'col': 'datetime',
-                                        'sorted': True
-                                        },
+                                'date_cols': ['datetime'],
                                 'dtypes': {
                                         'station': object,
-                                        'entries': int64,
-                                        'exits': int64
+                                        'delex': int64,
+                                        'delent': int64
                                         }
                                 },
                   'rg-gcabs': {
                                 'in': 'rs-gcabs',
                                 'out': 'rg-gcabs',
                                 'split_by': ['dolocationid'],
-                                'index': {
-                                        'col': 'dodatetime',
-                                        'sorted': True
-                                        },
+                                'date_cols': ['dodatetime'],
                                 'dtypes': {
                                         'passengers': int64,
-                                        'dolocationid': int64
+                                        'dolocationid': int64,
+                                        'pulocationid': int64,
+                                        'distance': float64
+                                        }
+                                },
+                  'rg-ycabs': {
+                                'in': 'rs-ycabs',
+                                'out': 'rg-ycabs',
+                                'split_by': ['dolocationid'],
+                                'date_cols': ['dodatetime'],
+                                'dtypes': {
+                                        'passengers': int64,
+                                        'dolocationid': int64,
+                                        'pulocationid': int64,
+                                        'distance': float64
+                                        }
+                                },
+                  'rg-traffic': {
+                                'in': 'rs-traffic',
+                                'out': 'rg-traffic',
+                                'split_by': ['linkid'],
+                                'date_cols': ['datetime'],
+                                'dtypes': {
+                                        'speed': float64,
+                                        'traveltime': float64,
+                                        'linkid': int64
                                         }
                                 },
                   'pl-1M-16-17':      {

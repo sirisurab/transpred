@@ -71,6 +71,8 @@ def regroup_dask(task_type: str, years: List[str], resample_freq: str, filter_ke
         in_bucket: str = task_map.task_type_map[task_type]['in']
         out_bucket: str = task_map.task_type_map[task_type]['out']
         split_by: List[str] = task_map.task_type_map[task_type]['split_by']
+        date_cols: List[str] = task_map.task_type_map[task_type]['date_cols']
+        dtypes: Dict = task_map.task_type_map[task_type]['dtypes']
         print('fetched in out and split_by for task_type %(task)s' % {'task': task_type})
 
         # read files from in bucket and concat into one df
@@ -79,9 +81,11 @@ def regroup_dask(task_type: str, years: List[str], resample_freq: str, filter_ke
 
         s3_in_url: str = 's3://' + in_bucket + '/'
         s3_in_sub_path: str = '/' + resample_freq + '/' + filter_key+filter_val + '/'
-        df = dd.concat([dd.read_parquet(path=s3_in_url + year + s3_in_sub_path,
+        df = dd.concat([dd.read_csv(urlpath=s3_in_url+year+s3_in_sub_path,
                                      storage_options=s3_options,
-                                     engine='fastparquet') for year in years])
+                                     parse_dates=date_cols,
+                                     dtype=dtypes
+                                     ) for year in years])
 
         print('read files from in bucket and concat-ted into one df')
         df.groupby(split_by).apply(partial(write_group_to_csv, split_by=split_by, out_bucket=out_bucket), meta=('int')).compute()
