@@ -92,6 +92,7 @@ def plot(*args) -> bool:
                 }
                 cabs_cols = list(cabs_dtypes.keys())
                 gcabs_df = concat([read_csv(ps.get_file_stream(bucket=RGGCABS_BUCKET, filename=str(locationid)),
+                                            header=0,
                                             usecols=cabs_datecols + list(cabs_dtypes.keys()),
                                             index_col=False,
                                             parse_dates=cabs_datecols,
@@ -104,6 +105,7 @@ def plot(*args) -> bool:
                     sort_index().reset_index()
 
                 ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
+                                            header=0,
                                             usecols=cabs_datecols + cabs_cols,
                                             index_col=False,
                                             parse_dates=cabs_datecols,
@@ -127,6 +129,7 @@ def plot(*args) -> bool:
                 }
                 traffic_cols = list(traffic_dtypes.keys())
                 traffic_df = concat([read_csv(ps.get_file_stream(bucket=RGTRAFFIC_BUCKET, filename=str(int(linkid))),
+                                              header=0,
                                               usecols=traffic_datecols + traffic_cols,
                                               index_col=False,
                                               parse_dates=traffic_datecols,
