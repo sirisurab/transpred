@@ -262,11 +262,12 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                 aggr_func = group['aggr_func']
                 meta_cols = group['meta']
                 cols = [col for col in meta_cols.keys() if col not in grouper_cols+[index_col]]
+                meta_cols = {key: meta_cols[key] for key in meta_cols.keys() if key not in grouper_cols+[index_col]}
                 print('meta_cols %s' % meta_cols)
 
                 # resample using frequency and aggregate function specified
                 df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols]. \
-                    apply(aggr_func, meta=meta_cols).reset_index()
+                    apply(aggr_func, meta=meta_cols)
                 # df = df.resample(resample_freq).sum()
                 # print('after resampling')
 
@@ -282,6 +283,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                           path=s3_out_url,
                           engine='fastparquet',
                           compute=True,
+                          write_index=True,
                           compression='GZIP',
                           storage_options=s3_options)
 
