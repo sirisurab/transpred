@@ -5,8 +5,12 @@ from utils import persistence as ps
 from urllib3.response import HTTPResponse
 from pandas import DataFrame, read_csv, concat
 from bokeh.plotting import figure, output_file, show
+from numpy import mean
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
+RGGCABS_BUCKET: str = 'rg-gcabs'
+RGYCABS_BUCKET: str = 'rg-ycabs'
+RGTRAFFIC_BUCKET: str = 'rg-traffic'
 REFBASE_BUCKET: str = 'ref-base'
 GEOMERGED_PATH: str = 'geo-merged/'
 PLOTS_BUCKET: str = 'plots'
@@ -18,21 +22,26 @@ def plot(*args) -> bool:
     print('plotting task %(task)s and buffer-radius %(buffer)s for stations %(stations)s'
           % {'task': task, 'buffer': buffer, 'stations': inputs[2:]})
     # read in and out buckets, freq and range for task from task_map
-    in_buckets: List[str] = task_map.task_type_map[task]['in']
-    #out_bucket: str = task_map.task_type_map[task]['out']
     freq: str = task_map.task_type_map[task]['freq']
     range: List[str] = task_map.task_type_map[task]['range']
-    geomerged_filename: str = GEOMERGED_PATH+str(buffer)+'.csv'
+    geomerged_cabs: str = GEOMERGED_PATH+str(buffer)+'/cabs.csv'
+    geomerged_traffic: str = GEOMERGED_PATH+str(buffer)+'/traffic.csv'
 
-    # load ref-base geomerged file
-    filestream: HTTPResponse = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=geomerged_filename)
+    # load ref-base geomerged files
+    filestream: HTTPResponse = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=geomerged_cabs)
     dtypes: Dict[str, str] = {
-        #'stationid': 'int64',
         'stop_name': 'object',
         'tsstation': 'object',
-        'dolocationid': 'int64'
+        'locationid': 'int64'
     }
-    geomerged_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
+    geomerged_cabs_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
+    filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=geomerged_traffic)
+    dtypes = {
+        'stop_name': 'object',
+        'tsstation': 'object',
+        'linkid': 'int64'
+    }
+    geomerged_traffic_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
 
     # for plotting
     plot_filepath: str = task + '/' + str(buffer) + '/'
@@ -51,11 +60,9 @@ def plot(*args) -> bool:
             filestream = ps.get_file_stream(bucket=RGTRANSIT_BUCKET, filename=ts_filename)
             ts_datecols = ['datetime']
             dtypes = {
-                                     #'datetime': 'datetime64',
-                                     #'station': 'object',
-                                     'delex': 'int64',
-                                     'delent': 'int64'
-                                    }
+                     'delex': 'int64',
+                     'delent': 'int64'
+                    }
             transit_df: DataFrame = read_csv(filestream, usecols=ts_datecols + list(dtypes.keys()),
                                              parse_dates=ts_datecols,
                                              encoding='utf-8', dtype=dtypes)
@@ -64,30 +71,58 @@ def plot(*args) -> bool:
 
             # read data from other in buckets
             gcabs_df: DataFrame
+            ycabs_df: DataFrame
             cabs_datecols = ['dodatetime']
-            for bucket in in_buckets:
-                if bucket == 'rg-gcabs':
-                    # determine relevant cabs files
-                    # by finding dolocationids corresponding
-                    # to current station from ref-base geomerged df
-                    dolocationids = geomerged_df.loc[geomerged_df.tsstation == station]['dolocationid']
+            traffic_df: DataFrame
+            traffic_datecols = ['datetime']
 
-                    #for zone in dolocationids:
-                    #filestream = ps.get_file_stream(bucket=bucket, filename=zone)
-                    dtypes = {
-                        #'dodatetime': 'datetime64',
-                        #'dolocationid': 'int64',
-                        'passengers': 'int64'
-                    }
-                    gcabs_df = concat([read_csv(ps.get_file_stream(bucket=bucket, filename=str(locationid)),
-                                                           usecols=cabs_datecols + list(dtypes.keys()),
-                                                           parse_dates=cabs_datecols,
-                                                           encoding='utf-8', dtype=dtypes)
-                                                  for locationid in dolocationids],
-                                                 ignore_index=True)
+            # determine relevant cabs files
+            # by finding dolocationids corresponding
+            # to current station from ref-base geomerged df
+            dolocationids = geomerged_cabs_df.loc[geomerged_cabs_df.tsstation == station]['dolocationid']
 
-                    gcabs_df = gcabs_df.groupby(cabs_datecols).apply(sum).\
-                        sort_index().reset_index()
+            cabs_dtypes = {
+                'passengers': 'int64',
+                'distance': 'float64'
+            }
+            gcabs_df = concat([read_csv(ps.get_file_stream(bucket=RGGCABS_BUCKET, filename=str(locationid)),
+                                                   usecols=cabs_datecols + list(cabs_dtypes.keys()),
+                                                   parse_dates=cabs_datecols,
+                                                   encoding='utf-8', dtype=cabs_dtypes)
+                                          for locationid in dolocationids],
+                                         ignore_index=True)
+
+            gcabs_df = gcabs_df.groupby(cabs_datecols).apply(sum).\
+                sort_index().reset_index()
+
+            ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
+                                        usecols=cabs_datecols + list(cabs_dtypes.keys()),
+                                        parse_dates=cabs_datecols,
+                                        encoding='utf-8', dtype=cabs_dtypes)
+                               for locationid in dolocationids],
+                              ignore_index=True)
+
+            ycabs_df = ycabs_df.groupby(cabs_datecols).apply(sum). \
+                sort_index().reset_index()
+
+            # determine relevant traffic files
+            # by finding linkids corresponding
+            # to current station from ref-base geomerged traffic df
+            linkids = geomerged_traffic_df.loc[geomerged_traffic_df.tsstation == station]['linkid']
+
+            traffic_dtypes = {
+                'speed': 'float64',
+                'traveltime': 'float64'
+            }
+            traffic_df = concat([read_csv(ps.get_file_stream(bucket=RGTRAFFIC_BUCKET, filename=str(linkid)),
+                                        usecols=traffic_datecols + list(traffic_dtypes.keys()),
+                                        parse_dates=traffic_datecols,
+                                        encoding='utf-8', dtype=traffic_dtypes)
+                               for linkid in linkids],
+                              ignore_index=True)
+
+            traffic_df = traffic_df.groupby(traffic_datecols).apply(mean). \
+                sort_index().reset_index()
 
             # create plots
 
@@ -98,9 +133,19 @@ def plot(*args) -> bool:
             p.line(transit_df[ts_datecols[0]], transit_df['delex'],
                    legend='transit exits', line_width=2, line_color='blue')
             p.line(transit_df[ts_datecols[0]], transit_df['delent'],
-                   legend='transit entries', line_width=2, line_color='green')
+                   legend='transit entries', line_width=2, line_color='red')
             p.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'],
-                   legend='cab droppoffs', line_width=2, line_color='red')
+                   legend='green cab passengers', line_width=2, line_color='green')
+            p.line(gcabs_df[cabs_datecols[0]], gcabs_df['distance'],
+                   legend='green cab trip length', line_width=1, line_color='green')
+            p.line(ycabs_df[cabs_datecols[0]], ycabs_df['passengers'],
+                   legend='yellow cab passengers', line_width=2, line_color='yellow')
+            p.line(ycabs_df[cabs_datecols[0]], ycabs_df['distance'],
+                   legend='yellow cab trip length', line_width=1, line_color='yellow')
+            p.line(traffic_df[traffic_datecols[0]], traffic_df['speed'],
+                   legend='traffic speed', line_width=2, line_color='magenta')
+            p.line(traffic_df[traffic_datecols[0]], traffic_df['traveltime'],
+                   legend='traffic travel time', line_width=1, line_color='magenta')
 
             show(p)
 
