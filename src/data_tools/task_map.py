@@ -298,5 +298,10 @@ task_type_map: Dict = {
                                 'in': ['rg-gcabs'],
                                 'freq': '1M',
                                 'range': ['2016', '2017']
+                                },
+                  'pl-1W-16-17':      {
+                                'in': ['rg-gcabs', 'rg-traffic', 'rg-gcabs', 'rg-ycabs'],
+                                'freq': '1W',
+                                'range': ['2016', '2017']
                                 }
                   }
