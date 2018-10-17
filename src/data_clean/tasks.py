@@ -4,6 +4,7 @@ from pandas.io.parsers import TextFileReader
 import dask.dataframe as dd
 from data_tools import task_map
 from utils import persistence as ps
+from utils import dask
 from data_load import tasks as dl_tasks
 from geopandas import GeoDataFrame, sjoin
 from shapely.geometry import Point
@@ -12,8 +13,6 @@ from data_tools import file_io
 from functools import partial
 from numpy import int64
 from dask.distributed import Client
-from distributed.deploy.local import LocalCluster
-import time
 #from numba import jit
 
 
@@ -154,28 +153,6 @@ def get_s3_paths_for_cabs(bucket: str, years: List[str]) -> Dict[str, Dict[str, 
     return {'special': special, 'other': other}
 
 
-def create_dask_client(num_workers: int) -> Client:
-    # initialize distributed client
-    # while True:
-    #    try:
-    #       client: Client = Client('dscheduler:8786')
-    #    except (TimeoutError, OSError, IOError):
-    #        time.sleep(2)
-    #        pass
-    #    except Exception as err:
-    #        raise err
-    #    else:
-    #        break
-    cluster = LocalCluster(n_workers=num_workers, ip='')
-    return Client(cluster)
-
-
-def perform_dask_test() -> bool :
-    client = create_dask_client(4)
-    time.sleep(3000)
-    return True
-
-
 def clean_cabs_at_path(special: bool, s3_in_url: str, s3_out_url: str, s3_options: Dict) -> bool:
 
     try:
@@ -225,7 +202,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
 
-    client: Client = create_dask_client(num_workers=8)
+    client: Client = dask.create_dask_client(num_workers=8)
     special_case: bool = False
     normal_case: bool = False
     s3_in_prefix: str = 's3://' + in_bucket + '/'
@@ -273,7 +250,7 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
 
-    client: Client = create_dask_client(num_workers=8)
+    client: Client = dask.create_dask_client(num_workers=8)
     s3_in_prefix: str = 's3://' + in_bucket + '/'
     try:
         s3_options: Dict = ps.fetch_s3_options()
@@ -323,7 +300,7 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
 
 def perform_transit_dask_test() -> bool:
 
-    client: Client = create_dask_client(num_workers=3)
+    client: Client = dask.create_dask_client(num_workers=3)
     try:
         usecols = [3, 6, 7, 9, 10]
         names = ['station', 'date', 'time', 'entries', 'exits']

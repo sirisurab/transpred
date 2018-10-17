@@ -3,9 +3,10 @@ import pandas as pd
 import dask.dataframe as dd
 from data_tools import task_map
 from utils import persistence as ps
+from utils import dask
 from functools import reduce, partial
 from data_load import tasks as dl_tasks
-from data_clean.tasks import get_cab_months, get_cab_filenames, create_dask_client
+from data_clean.tasks import get_cab_filenames
 from toolz.functoolz import compose
 from dask.distributed import Client
 resample_map: Dict = {
@@ -215,7 +216,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
 
     s3_options: Dict = ps.fetch_s3_options()
 
-    client: Client = create_dask_client(num_workers=8)
+    client: Client = dask.create_dask_client(num_workers=8)
 
     try:
         for year in years:

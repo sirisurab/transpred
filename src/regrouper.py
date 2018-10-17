@@ -4,9 +4,9 @@ import sys
 from data_tools import task_map, file_io
 from typing import List, Dict
 from utils import persistence as ps
+from utils import dask
 from urllib3.response import HTTPResponse
 from dask.distributed import Client
-from data_clean import tasks as cl_tasks
 from functools import partial
 
 
@@ -75,7 +75,7 @@ def regroup_dask(task_type: str, years: List[str], resample_freq: str, filter_ke
 
         # read files from in bucket and concat into one df
         s3_options: Dict = ps.fetch_s3_options()
-        client: Client = cl_tasks.create_dask_client(num_workers=8)
+        client: Client = dask.create_dask_client(num_workers=8)
 
         s3_in_url: str = 's3://' + in_bucket + '/'
         s3_in_sub_path: str = '/' + resample_freq + '/' + filter_key+filter_val + '/'

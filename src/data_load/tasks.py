@@ -2,13 +2,13 @@
 from typing import List, Tuple, Dict, Union, Optional, Callable
 from functools import reduce, partial
 from utils import persistence as ps, http
+from utils import dask
 import os
 import urllib.error as u_err
 import datetime as dt
 from error_handling import errors
 import dask.dataframe as dd
 from data_tools import task_map
-from data_clean.tasks import create_dask_client
 from dask.distributed import Client
 from data_tools import row_operations as row_ops
 import calendar as cal
@@ -213,7 +213,7 @@ def perform_cabs_dask(task_type: str, years: List[str]) -> bool:
 
     status: bool = False
     try:
-        client: Client = create_dask_client(num_workers=8)
+        client: Client = dask.create_dask_client(num_workers=8)
         special_case: bool = False
         normal_case: bool = False
         month_st_sp: int
@@ -315,7 +315,7 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
 
     status: bool = False
     try:
-        client: Client = create_dask_client(num_workers=8)
+        client: Client = dask.create_dask_client(num_workers=8)
         s3_options: Dict = ps.fetch_s3_options()
         month_st: int = 1
         month_end: int = 13
@@ -366,7 +366,7 @@ def perform_traffic_dask(task_type: str, years: List[str]) -> bool:
 
     status: bool = False
     try:
-        client: Client = create_dask_client(num_workers=8)
+        client: Client = dask.create_dask_client(num_workers=8)
         s3_options: Dict = ps.fetch_s3_options()
         month_st: int = 1
         month_end: int = 13
