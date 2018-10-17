@@ -188,7 +188,8 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                     df_2 = dd.read_parquet(path=s3_in_url+'/normal/',
                                      storage_options=s3_options,
                                      engine='fastparquet')
-                    df = df.append(df_2)
+                    #df = df.append(df_2)
+                    df = dd.concat([df, df_2], axis=0, interleave_partitions=True)
 
             else:
                 df = dd.read_parquet(path=s3_in_url,
