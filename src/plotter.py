@@ -5,6 +5,7 @@ from utils import persistence as ps
 from urllib3.response import HTTPResponse
 from pandas import DataFrame, read_csv, concat
 from bokeh.plotting import figure, output_file, show
+from bokeh.models import Range1d, LinearAxis
 from numpy import mean
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
@@ -24,6 +25,8 @@ def plot(*args) -> bool:
     # read in and out buckets, freq and range for task from task_map
     freq: str = task_map.task_type_map[task]['freq']
     range: List[str] = task_map.task_type_map[task]['range']
+    start_date = range[0]
+    end_date = range[1]
     geomerged_cabs: str = GEOMERGED_PATH+str(buffer)+'/cabs.csv'
     geomerged_traffic: str = GEOMERGED_PATH+str(buffer)+'/traffic.csv'
 
@@ -68,8 +71,7 @@ def plot(*args) -> bool:
             transit_df: DataFrame = read_csv(filestream, usecols=ts_datecols + list(dtypes.keys()),
                                              parse_dates=ts_datecols,
                                              encoding='utf-8', dtype=dtypes)
-
-            #transit_df = transit_df.set_index('datetime').sort_index().reset_index()
+            transit_df = transit_df.set_index('datetime')[start_date: end_date].reset_index()
 
             # read data from other in buckets
             gcabs_df: DataFrame
@@ -96,7 +98,7 @@ def plot(*args) -> bool:
                                              ignore_index=True)
 
                 gcabs_df = gcabs_df.groupby(cabs_datecols).apply(sum).\
-                    sort_index().reset_index()
+                    sort_index()[start_date: end_date].reset_index()
 
                 ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
                                             usecols=cabs_datecols + list(cabs_dtypes.keys()),
@@ -106,7 +108,7 @@ def plot(*args) -> bool:
                                   ignore_index=True)
 
                 ycabs_df = ycabs_df.groupby(cabs_datecols).apply(sum). \
-                    sort_index().reset_index()
+                    sort_index()[start_date: end_date].reset_index()
 
             # determine relevant traffic files
             # by finding linkids corresponding
@@ -126,7 +128,7 @@ def plot(*args) -> bool:
                                   ignore_index=True)
 
                 traffic_df = traffic_df.groupby(traffic_datecols).apply(mean). \
-                    sort_index().reset_index()
+                    sort_index()[start_date: end_date].reset_index()
 
             # create plots
 
@@ -144,10 +146,16 @@ def plot(*args) -> bool:
                        legend='green cab passengers', line_width=2, line_color='green')
                 p.line(gcabs_df[cabs_datecols[0]], gcabs_df['distance'],
                        legend='green cab trip length', line_width=1, line_color='green')
+
+                ycabs_hq = ycabs_df['passengers'].quantile(.75)
+                ycabs_lq = ycabs_df['passengers'].quantile(.25)
+                ycabs_iqr = (ycabs_hq - ycabs_lq) * 1.5
+                p.extra_y_ranges = {'ycabs': Range1d(start=ycabs_lq-ycabs_iqr, end=ycabs_hq+ycabs_iqr)}
+                p.add_layout(LinearAxis(y_range_name='ycabs'), 'right')
                 p.line(ycabs_df[cabs_datecols[0]], ycabs_df['passengers'],
-                       legend='yellow cab passengers', line_width=2, line_color='yellow')
+                       legend='yellow cab passengers', line_width=2, line_color='yellow', y_range_name='ycabs')
                 p.line(ycabs_df[cabs_datecols[0]], ycabs_df['distance'],
-                       legend='yellow cab trip length', line_width=1, line_color='yellow')
+                       legend='yellow cab trip length', line_width=1, line_color='yellow', y_range_name='ycabs')
 
             if len(linkids) > 0:
                 p.line(traffic_df[traffic_datecols[0]], traffic_df['speed'],
