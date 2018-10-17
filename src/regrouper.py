@@ -56,7 +56,7 @@ def write_group_to_csv(group, split_by: str, out_bucket: str) -> int:
     elif isinstance(name, float):
         filename = str(int(name))
     else:
-        filename = str(name).replace('/', ' ')
+        filename = str(name).strip().replace('/', ' ')
     #group.to_csv(s3.open('s3://'+out_bucket+'/'+filename, 'w'))
     file_io.write_csv(df=group, bucket=out_bucket, filename=filename)
     print('wrote file %(file)s' % {'file': filename})
@@ -78,6 +78,9 @@ def regroup_dask(task_type: str, years: List[str], resample_freq: str, filter_ke
         # read files from in bucket and concat into one df
         s3_options: Dict = ps.fetch_s3_options()
         client: Client = dask.create_dask_client(num_workers=8)
+
+        # create out bucket
+        ps.create_bucket(out_bucket)
 
         s3_in_url: str = 's3://' + in_bucket + '/'
         s3_in_sub_path: str = '/' + resample_freq + '/' + filter_key+filter_val + '/*'

@@ -16,8 +16,6 @@ def fetch_geodf_from_zip(filename: str, zipname: str, bucket: str) -> GeoDataFra
 def write_csv(df: DataFrame, bucket: str, filename: str) -> bool:
     try:
         s3: s3fs = ps.get_s3fs_client()
-        # create out bucket
-        ps.create_bucket(bucket)
         df.to_csv(s3.open('s3://' + bucket + '/' + filename, 'w'))
     except Exception as err:
         print('Error in write csv %(file)s to %(bucket)s' % {'file': filename, 'bucket': bucket})
