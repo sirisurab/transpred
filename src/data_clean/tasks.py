@@ -316,6 +316,7 @@ def perform_traffic_dask(task_type: str, years: List[str]) -> bool:
             s3_in_url: str = s3_in_prefix + '*'+year+'.csv'
 
             df = dd.read_csv(urlpath=s3_in_url,
+                             storage_options=s3_options,
                              header=None,
                              usecols=usecols,
                              names=names,
