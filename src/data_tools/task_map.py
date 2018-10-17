@@ -232,7 +232,7 @@ task_type_map: Dict = {
                                         }
                                 },
                   'rs-traffic': {
-                                'in': 'dl-traffic',
+                                'in': 'cl-traffic',
                                 'out': 'rs-traffic',
                                 'index': {
                                         'col': 'datetime',

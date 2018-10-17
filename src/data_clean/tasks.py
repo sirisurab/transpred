@@ -298,47 +298,45 @@ def perform_transit_dask(task_type: str, years: List[str]) -> bool:
     return True
 
 
-def perform_transit_dask_test() -> bool:
+def perform_traffic_dask(task_type: str, years: List[str]) -> bool:
+    task_type_map: Dict = task_map.task_type_map[task_type]
+    in_bucket: str = task_type_map['in']
+    out_bucket: str = task_type_map['out']
 
-    client: Client = dask.create_dask_client(num_workers=3)
+    client: Client = dask.create_dask_client(num_workers=8)
+    s3_in_prefix: str = 's3://' + in_bucket + '/'
     try:
-        usecols = [3, 6, 7, 9, 10]
-        names = ['station', 'date', 'time', 'entries', 'exits']
-        url: str = '/home/siri/transpred/data/transit/turnstile_*.txt'
+        s3_options: Dict = ps.fetch_s3_options()
+        usecols = [1, 2, 4, 5]
+        names = ['speed', 'traveltime', 'datetime', 'linkid']
 
-        df = dd.read_csv(urlpath=url,
-                         header=None,
-                         usecols=usecols,
-                         names=names,
-                         parse_dates={'datetime': ['date', 'time']},
-                         date_parser=row_ops.clean_transit_date,
-                         skipinitialspace=True,
-                         skip_blank_lines=True,
-                         converters={
-                             'entries': row_ops.clean_num,
-                             'exits': row_ops.clean_num
-                         },
-                         encoding='utf-8'
-                         )
+        for year in years:
 
-        df['delex'] = df['exits'].diff()
-        df['delent'] = df['entries'].diff()
-        df = df.drop(['exits', 'entries'], axis=1)
-        df = df.dropna()
+            s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
+            s3_in_url: str = s3_in_prefix + '*'+year+'.csv'
 
-        delex_lo_q = df['delex'].quantile(.25)
-        delent_lo_q = df['delent'].quantile(.25)
-        delex_hi_q = df['delex'].quantile(.75)
-        delent_hi_q = df['delent'].quantile(.75)
-        delex_iqr = delex_hi_q - delex_lo_q
-        delent_iqr = delent_hi_q - delent_lo_q
-        discard = (df['delex'] < delex_lo_q - 1.5 * delex_iqr) | \
-                  (df['delex'] > delex_hi_q + 1.5 * delex_iqr) | \
-                  (df['delent'] < delent_lo_q - 1.5 * delent_iqr) | \
-                  (df['delent'] > delent_hi_q + 1.5 * delent_iqr)
-        df = df.loc[~discard]
+            df = dd.read_csv(urlpath=s3_in_url,
+                             header=None,
+                             usecols=usecols,
+                             names=names,
+                             parse_dates=['datetime'],
+                             date_parser=row_ops.clean_traffic_date,
+                             skipinitialspace=True,
+                             skip_blank_lines=True,
+                             converters={
+                                 'speed': row_ops.clean_num,
+                                 'traveltime': row_ops.clean_num,
+                                 'linkid': row_ops.clean_num
+                             },
+                             encoding='utf-8'
+                             )
 
-        dd.to_csv(df=df, filename='/home/siri/transpred/data/transit/cl_turnstile_*.csv')
+            dd.to_parquet(df=df,
+                          path=s3_out_url,
+                          engine='fastparquet',
+                          compute=True,
+                          compression='GZIP',
+                          storage_options=s3_options)
 
     except Exception as err:
         print('error in perform_transit %s' % str(err))
