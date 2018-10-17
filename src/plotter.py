@@ -79,7 +79,7 @@ def plot(*args) -> bool:
             # determine relevant cabs files
             # by finding dolocationids corresponding
             # to current station from ref-base geomerged df
-            dolocationids = geomerged_cabs_df.loc[geomerged_cabs_df.tsstation == station]['dolocationid']
+            dolocationids = geomerged_cabs_df.loc[geomerged_cabs_df.tsstation == station]['locationid']
 
             cabs_dtypes = {
                 'passengers': 'int64',
