@@ -261,7 +261,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                 grouper_cols = group['by_cols']
                 aggr_func = group['aggr_func']
                 meta_cols = group['meta']
-                cols = list(meta_cols.keys())
+                cols = [col for col in meta_cols.keys() if col not in grouper_cols+[index_col]]
                 print('meta_cols %s' % meta_cols)
 
                 # resample using frequency and aggregate function specified
