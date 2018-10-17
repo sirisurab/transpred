@@ -154,16 +154,58 @@ def get_s3_glob(bucket: str, years: List[str]) -> Dict[str, List[str]]:
     return glob_str
 
 
+def resample_at_path(s3_in_url, s3_out_url, s3_options, group, index_col, out_file_prefix='out'):
+
+    aggr_func: Callable
+    filter_by_key: str = resample_map['filter_by']['key']
+    filter_by_val: int = resample_map['filter_by']['value']
+    resample_freq: str = resample_map['freq']
+
+    df = dd.read_parquet(path=s3_in_url,
+                         storage_options=s3_options,
+                         engine='fastparquet')
+
+    # filter
+    if filter_by_key == 'weekday':
+        df = df.loc[df[index_col].dt.weekday == filter_by_val]
+
+    if group['compute']:
+        grouper_cols = group['by_cols']
+        aggr_func = group['aggr_func']
+        meta_cols = group['meta']
+        cols = list(meta_cols.keys())
+        print('meta_cols %s' % meta_cols)
+
+        # resample using frequency and aggregate function specified
+        df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols]. \
+            apply(aggr_func, meta=meta_cols)
+        # df = df.resample(resample_freq).sum()
+        # print('after resampling')
+
+    print('after grouping and resampling %s' % str(df.shape))
+
+    # save in out bucket
+    dd.to_csv(df=df,
+              filename=s3_out_url,
+              name_function=lambda i: out_file_prefix+'_'+str(i),
+              storage_options=s3_options)
+
+    # s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
+    # dd.to_parquet(df=df,
+    #              path=s3_out_url,
+    #              engine='fastparquet',
+    #              compute=True,
+    #              compression='lz4',
+    #              storage_options=s3_options)
+    return
+
+
 def perform_dask(task_type: str, years: List[str]) -> bool:
 
     task_type_map: Dict = task_map.task_type_map[task_type]
     in_bucket: str = task_type_map['in']
     out_bucket: str = task_type_map['out']
     group: Dict = task_type_map['group']
-    aggr_func: Callable
-    filter_by_key: str = resample_map['filter_by']['key']
-    filter_by_val: int = resample_map['filter_by']['value']
-    resample_freq: str = resample_map['freq']
     index_col: str = task_type_map['index']['col']
 
     s3_options: Dict = ps.fetch_s3_options()
@@ -173,61 +215,28 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     try:
         for year in years:
             s3_in_url: str = 's3://' + in_bucket + '/'+year+'/'
+            s3_out_url: str = 's3://' + out_bucket + '/' + year + '/*.csv'
+            path: str = ''
             print('s3 url %s' % s3_in_url)
             if task_type in ['rs-gcabs', 'rs-ycabs']:
-                path: str = ''
                 if int(year) >= 2016:
                     path = '/special/'
                 elif int(year) < 2016:
                     path = '/normal/'
-                df = dd.read_parquet(path=s3_in_url+path,
-                                     storage_options=s3_options,
-                                     engine='fastparquet')
 
-                if int(year) == 2016:
-                    df_2 = dd.read_parquet(path=s3_in_url+'/normal/',
-                                     storage_options=s3_options,
-                                     engine='fastparquet')
-                    #df = df.append(df_2)
-                    df = dd.concat([df, df_2], axis=0, interleave_partitions=True)
+            resample_at_path(s3_in_url+path,
+                             s3_out_url,
+                             s3_options,
+                             group,
+                             index_col)
 
-            else:
-                df = dd.read_parquet(path=s3_in_url,
-                                     storage_options=s3_options,
-                                     engine='fastparquet')
-
-            # filter
-            if filter_by_key == 'weekday':
-                df = df.loc[df[index_col].dt.weekday == filter_by_val]
-
-            if group['compute']:
-                grouper_cols = group['by_cols']
-                aggr_func = group['aggr_func']
-                meta_cols = group['meta']
-                cols = list(meta_cols.keys())
-                print('meta_cols %s' % meta_cols)
-
-                # resample using frequency and aggregate function specified
-                df = df.groupby([pd.Grouper(key=index_col, freq=resample_freq)] + grouper_cols)[cols].\
-                    apply(aggr_func, meta=meta_cols)
-                #df = df.resample(resample_freq).sum()
-                #print('after resampling')
-
-            print('after grouping and resampling %s' % str(df.shape))
-
-            # save in out bucket
-            s3_out_url: str = 's3://'+out_bucket+'/'+year+'/*.csv'
-            dd.to_csv(df=df,
-                      filename=s3_out_url,
-                      storage_options=s3_options)
-
-            #s3_out_url: str = 's3://' + out_bucket + '/' + year + '/'
-            #dd.to_parquet(df=df,
-            #              path=s3_out_url,
-            #              engine='fastparquet',
-            #              compute=True,
-            #              compression='lz4',
-            #              storage_options=s3_options)
+            if int(year) == 2016:
+                resample_at_path(s3_in_url + '/normal/',
+                                 s3_out_url,
+                                 s3_options,
+                                 group,
+                                 index_col,
+                                 'out2')
 
     except Exception as err:
         print('error in perform_cabs %s')
@@ -237,7 +246,3 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
     client.close()
 
     return True
-
-
-def per_group(grp, index_col, cols, resample_freq, level):
-    return grp.groupby(index_col)[cols].resample(resample_freq, level=level, how='sum')
