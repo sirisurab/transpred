@@ -229,7 +229,7 @@ def plot(*args) -> bool:
                             var1_datecol=ts_datecols[0],
                             var1_col=var1_col,
                             var2_df=traffic_df,
-                            var2_datecol=cabs_datecols[0],
+                            var2_datecol=traffic_datecols[0],
                             var2_col=var2_col,
                             ax=axes[4])
 
@@ -238,7 +238,7 @@ def plot(*args) -> bool:
                             var1_datecol=ts_datecols[0],
                             var1_col=var1_col,
                             var2_df=traffic_df,
-                            var2_datecol=cabs_datecols[0],
+                            var2_datecol=traffic_datecols[0],
                             var2_col=var2_col,
                             ax=axes[5])
 
