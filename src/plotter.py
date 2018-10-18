@@ -189,7 +189,7 @@ def plot(*args) -> bool:
                                 var2_df=gcabs_df,
                                 var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
-                                ax=axes[0])
+                                ax=axes[0, 0])
 
                     var1_col = 'delent'
                     create_plot(var1_df=transit_df,
@@ -198,7 +198,7 @@ def plot(*args) -> bool:
                                 var2_df=gcabs_df,
                                 var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
-                                ax=axes[1])
+                                ax=axes[0, 1])
 
                 if ycabs_df.size > 0:
                     var1_col = 'delex'
@@ -210,7 +210,7 @@ def plot(*args) -> bool:
                                 var2_df=ycabs_df,
                                 var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
-                                ax=axes[2])
+                                ax=axes[1, 0])
 
                     var1_col = 'delent'
                     create_plot(var1_df=transit_df,
@@ -219,7 +219,7 @@ def plot(*args) -> bool:
                                 var2_df=ycabs_df,
                                 var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
-                                ax=axes[3])
+                                ax=axes[1, 1])
 
             if len(linkids) > 0 and transit_df.size > 0:
                 var1_col = 'delex'
@@ -231,7 +231,7 @@ def plot(*args) -> bool:
                             var2_df=traffic_df,
                             var2_datecol=traffic_datecols[0],
                             var2_col=var2_col,
-                            ax=axes[4])
+                            ax=axes[2, 0])
 
                 var1_col = 'delent'
                 create_plot(var1_df=transit_df,
@@ -240,7 +240,7 @@ def plot(*args) -> bool:
                             var2_df=traffic_df,
                             var2_datecol=traffic_datecols[0],
                             var2_col=var2_col,
-                            ax=axes[5])
+                            ax=axes[2, 1])
 
             plot_filename = station + '.png'
             outfile = tmp_filepath + plot_filename
