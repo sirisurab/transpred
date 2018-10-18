@@ -23,12 +23,12 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
     return df[col].min(), df[col].max()
 
 
-def create_plot(var1_df: DataFrame, var1_datecol: str, var1_col: str, var2_df: DataFrame, var2_datecol: str, var2_col: str, outfile: str) -> plt.axis:
-    sns.lineplot(x=var1_datecol, y=var1_col, data=var1_df, sort=False, legend='full')
-    ax = plt.twinx()
-    sns_plot: plt.Axes = sns.lineplot(x=var2_datecol, y=var2_col, data=var2_df, sort=False, legend='full', ax=ax)
-    fig: plt.figure = sns_plot.get_figure()
-    fig.savefig(outfile)
+def create_plot(var1_df: DataFrame, var1_datecol: str, var1_col: str, var2_df: DataFrame, var2_datecol: str, var2_col: str, ax):
+    sns.lineplot(x=var1_datecol, y=var1_col, data=var1_df, sort=False, legend='full', ax=ax)
+    ax1 = plt.twinx()
+    sns_plot: plt.Axes = sns.lineplot(x=var2_datecol, y=var2_col, data=var2_df, sort=False, legend='full', ax=ax1)
+    #fig: plt.figure = sns_plot.get_figure()
+    #fig.savefig(outfile)
     return
 
 
@@ -176,94 +176,77 @@ def plot(*args) -> bool:
                 traffic_df = traffic_df.loc[start_date: end_date].reset_index()
 
             # create plots
+            fig, axes = plt.subplots(nrows=3, ncols=2)
 
             if len(dolocationids) > 0:
                 if gcabs_df.size > 0:
                     var1_col = 'delex'
                     var2 = 'gcabs'
                     var2_col = 'passengers'
-                    plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
-                    outfile = tmp_filepath+plot_filename
                     create_plot(var1_df=transit_df,
                                 var1_datecol=ts_datecols[0],
                                 var1_col=var1_col,
                                 var2_df=gcabs_df,
                                 var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
-                                outfile=outfile)
-                    # save plots in out bucket
-                    ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
+                                ax=axes[0])
 
                     var1_col = 'delent'
-                    plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
-                    outfile = tmp_filepath+plot_filename
                     create_plot(var1_df=transit_df,
                                 var1_datecol=ts_datecols[0],
                                 var1_col=var1_col,
                                 var2_df=gcabs_df,
                                 var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
-                                outfile=outfile)
-                    # save plots in out bucket
-                    ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
+                                ax=axes[1])
 
                 if ycabs_df.size > 0:
                     var1_col = 'delex'
                     var2 = 'ycabs'
                     var2_col = 'passengers'
-                    plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
-                    outfile = tmp_filepath+plot_filename
                     create_plot(var1_df=transit_df,
                                 var1_datecol=ts_datecols[0],
                                 var1_col=var1_col,
                                 var2_df=ycabs_df,
                                 var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
-                                outfile=outfile)
-                    # save plots in out bucket
-                    ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
+                                ax=axes[2])
 
                     var1_col = 'delent'
-                    plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
-                    outfile = tmp_filepath+plot_filename
                     create_plot(var1_df=transit_df,
                                 var1_datecol=ts_datecols[0],
                                 var1_col=var1_col,
                                 var2_df=ycabs_df,
                                 var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
-                                outfile=outfile)
-                    # save plots in out bucket
-                    ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
+                                ax=axes[3])
 
             if len(linkids) > 0 and transit_df.size > 0:
                 var1_col = 'delex'
                 var2 = 'traffic'
                 var2_col = 'speed'
-                plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
-                outfile = tmp_filepath+plot_filename
                 create_plot(var1_df=transit_df,
                             var1_datecol=ts_datecols[0],
                             var1_col=var1_col,
                             var2_df=traffic_df,
                             var2_datecol=cabs_datecols[0],
                             var2_col=var2_col,
-                            outfile=outfile)
-                # save plots in out bucket
-                ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
+                            ax=axes[4])
 
                 var1_col = 'delent'
-                plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
-                outfile = tmp_filepath+plot_filename
                 create_plot(var1_df=transit_df,
                             var1_datecol=ts_datecols[0],
                             var1_col=var1_col,
                             var2_df=traffic_df,
                             var2_datecol=cabs_datecols[0],
                             var2_col=var2_col,
-                            outfile=outfile)
-                # save plots in out bucket
-                ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
+                            ax=axes[5])
+
+            plot_filename = station + '.png'
+            outfile = tmp_filepath + plot_filename
+            fig.savefig(outfile)
+            # save plots in out bucket
+            ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
 
         except Exception as err:
             print('Error in plotting task %(task)s for station %(station)s'
