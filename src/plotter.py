@@ -7,6 +7,8 @@ from pandas import DataFrame, read_csv, concat
 from bokeh.plotting import figure, output_file, show
 from bokeh.models import Range1d, LinearAxis
 from numpy import mean
+#import matplotlib.pyplot as plt
+#import seaborn as sns
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
 RGGCABS_BUCKET: str = 'rg-gcabs'
@@ -17,23 +19,28 @@ GEOMERGED_PATH: str = 'geo-merged/'
 PLOTS_BUCKET: str = 'plots'
 
 
-def get_axis_range(df: DataFrame, cols: List[str]) -> Tuple:
-    l_ext = [df[col].min() for col in cols]
-    h_ext = [df[col].max() for col in cols]
-    return min(l_ext), max(h_ext)
+def get_axis_range(df: DataFrame, col: str) -> Tuple:
+    return df[col].min(), df[col].max()
 
 
-def create_transit_plot(station: str, transit_df: DataFrame, datecols: List[str]) -> figure:
+def create_base_plot(station: str, base_df: DataFrame, datecol: str, varcol: str, varname: str, color: str ='red') -> figure:
     p = figure(title='plot for station ' + station,
                 x_axis_label='datetime', x_axis_type='datetime',
-                y_axis_label='')
+                y_axis_label=varname)
 
-    axis_range: Tuple = get_axis_range(df=transit_df, cols=['delent', 'delex'])
+    axis_range: Tuple = get_axis_range(df=base_df, col=varcol)
     p.y_range = Range1d(start=axis_range[0], end=axis_range[1])
-    p.line(transit_df[datecols[0]], transit_df['delex'],
-            legend='transit exits', line_width=2, line_color='blue')
-    p.line(transit_df[datecols[0]], transit_df['delent'],
-            legend='transit entries', line_width=2, line_color='red')
+    p.line(base_df[datecol], base_df[varcol],
+            legend=varname, line_width=2, line_color=color)
+    return p
+
+
+def add_variable_to_plot(p: figure, var_df: DataFrame, datecol: str, varcol: str, varname: str, color: str='green') -> figure:
+    axis_range = get_axis_range(df=var_df, col=varcol)
+    p.extra_y_ranges = {'extra': Range1d(start=axis_range[0], end=axis_range[1])}
+    p.add_layout(LinearAxis(y_range_name='extra', axis_label=varname), 'right')
+    p.line(var_df[datecol], var_df[varcol],
+            legend=varname, line_width=2, line_color=color, y_range_name='extra')
     return p
 
 
@@ -159,42 +166,93 @@ def plot(*args) -> bool:
 
             # create plots
 
-            p1 = create_transit_plot(station=station, transit_df=transit_df, datecols=ts_datecols)
-            if len(dolocationids) == 0 or gcabs_df.size == 0:
-                show(p1)
-
             if len(dolocationids) > 0:
                 if gcabs_df.size > 0:
-                    axis_range = get_axis_range(df=gcabs_df, cols=['passengers', 'distance'])
-                    p1.extra_y_ranges = {'gcabs': Range1d(start=axis_range[0], end=axis_range[1])}
-                    p1.add_layout(LinearAxis(y_range_name='gcabs'), 'right')
-                    p1.line(gcabs_df[cabs_datecols[0]], gcabs_df['passengers'],
-                           legend='green cab passengers', line_width=2, line_color='green', y_range_name='gcabs')
-                    p1.line(gcabs_df[cabs_datecols[0]], gcabs_df['distance'],
-                           legend='green cab trip length', line_width=1, line_color='green', y_range_name='gcabs')
+                    p1 = create_base_plot(station=station,
+                                          base_df=transit_df,
+                                          datecol=ts_datecols[0],
+                                          varcol='delex',
+                                          varname='transit exits',
+                                          color='red')
+                    p1 = add_variable_to_plot(p=p1,
+                                              var_df=gcabs_df,
+                                              datecol=cabs_datecols[0],
+                                              varcol='passengers',
+                                              varname='green cab passengers',
+                                              color='green')
                     show(p1)
 
-                if ycabs_df.size > 0:
-                    p2 = create_transit_plot(station=station, transit_df=transit_df, datecols=ts_datecols)
-                    axis_range = get_axis_range(df=ycabs_df, cols=['passengers', 'distance'])
-                    p2.extra_y_ranges = {'ycabs': Range1d(start=axis_range[0], end=axis_range[1])}
-                    p2.add_layout(LinearAxis(y_range_name='ycabs'), 'right')
-                    p2.line(ycabs_df[cabs_datecols[0]], ycabs_df['passengers'],
-                           legend='yellow cab passengers', line_width=2, line_color='yellow', y_range_name='ycabs')
-                    p2.line(ycabs_df[cabs_datecols[0]], ycabs_df['distance'],
-                           legend='yellow cab trip length', line_width=1, line_color='yellow', y_range_name='ycabs')
+                    p2 = create_base_plot(station=station,
+                                          base_df=transit_df,
+                                          datecol=ts_datecols[0],
+                                          varcol='delent',
+                                          varname='transit entries',
+                                          color='blue')
+                    p2 = add_variable_to_plot(p=p2,
+                                              var_df=gcabs_df,
+                                              datecol=cabs_datecols[0],
+                                              varcol='passengers',
+                                              varname='green cab passengers',
+                                              color='green')
                     show(p2)
 
+                if ycabs_df.size > 0:
+                    p3 = create_base_plot(station=station,
+                                          base_df=transit_df,
+                                          datecol=ts_datecols[0],
+                                          varcol='delex',
+                                          varname='transit exits',
+                                          color='red')
+                    p3 = add_variable_to_plot(p=p3,
+                                              var_df=ycabs_df,
+                                              datecol=cabs_datecols[0],
+                                              varcol='passengers',
+                                              varname='yellow cab passengers',
+                                              color='orange')
+                    show(p3)
+
+                    p4 = create_base_plot(station=station,
+                                          base_df=transit_df,
+                                          datecol=ts_datecols[0],
+                                          varcol='delent',
+                                          varname='transit entries',
+                                          color='blue')
+                    p4 = add_variable_to_plot(p=p4,
+                                              var_df=ycabs_df,
+                                              datecol=cabs_datecols[0],
+                                              varcol='passengers',
+                                              varname='yellow cab passengers',
+                                              color='orange')
+                    show(p4)
+
             if len(linkids) > 0 and transit_df.size > 0:
-                p3 = create_transit_plot(station=station, transit_df=transit_df, datecols=ts_datecols)
-                axis_range = get_axis_range(df=traffic_df, cols=['speed', 'traveltime'])
-                p3.extra_y_ranges = {'traffic': Range1d(start=axis_range[0], end=axis_range[1])}
-                p3.add_layout(LinearAxis(y_range_name='traffic'), 'right')
-                p3.line(traffic_df[traffic_datecols[0]], traffic_df['speed'],
-                       legend='traffic speed', line_width=2, line_color='magenta', y_range_name='traffic')
-                p3.line(traffic_df[traffic_datecols[0]], traffic_df['traveltime'],
-                       legend='traffic travel time', line_width=1, line_color='magenta', y_range_name='traffic')
-                show(p3)
+                p5 = create_base_plot(station=station,
+                                      base_df=transit_df,
+                                      datecol=ts_datecols[0],
+                                      varcol='delex',
+                                      varname='transit exits',
+                                      color='red')
+                p5 = add_variable_to_plot(p=p5,
+                                          var_df=traffic_df,
+                                          datecol=traffic_datecols[0],
+                                          varcol='speed',
+                                          varname='traffic speed',
+                                          color='magenta')
+                show(p5)
+
+                p6 = create_base_plot(station=station,
+                                      base_df=transit_df,
+                                      datecol=ts_datecols[0],
+                                      varcol='delent',
+                                      varname='transit entries',
+                                      color='blue')
+                p6 = add_variable_to_plot(p=p6,
+                                          var_df=traffic_df,
+                                          datecol=traffic_datecols[0],
+                                          varcol='speed',
+                                          varname='traffic speed',
+                                          color='magenta')
+                show(p6)
 
         except Exception as err:
             print('Error in plotting task %(task)s for station %(station)s'

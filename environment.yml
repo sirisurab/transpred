@@ -20,3 +20,4 @@ dependencies:
     - chardet
     - requests
     - matplotlib
+    - seaborn
