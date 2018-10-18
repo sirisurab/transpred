@@ -23,8 +23,11 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     fig, ax = plt.subplots(1, figsize=(9, 9), clear=True)
     # taxi zones plot
     taxi_zone_df.plot(ax=ax, facecolor='#F9DA95', edgecolor='#F9DA95', linewidth=0.)
+
     stations_geodf.plot(ax=ax, color='#F9393B', column='circle', alpha=0.4)
-    stations_geodf.plot(ax=ax, column='point')
+    stations_points_geodf = stations_geodf['point'].copy()
+    stations_points_geodf.set_geometry('point', inplace=True)
+    stations_points_geodf.plot(ax=ax)
     # plot
     links_df.plot(ax=ax, color='#AE4B16', linewidth=0.2)
 
