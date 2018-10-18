@@ -1,9 +1,9 @@
 import pandas as pd
 import dask.dataframe as dd
 import sys
-from data_tools import task_map, file_io
+from data_tools import task_map
 from typing import List, Dict
-from utils import persistence as ps
+from utils import persistence as ps, file_io
 from utils import dask
 from urllib3.response import HTTPResponse
 from dask.distributed import Client

@@ -707,7 +707,7 @@ def parse_date_3(date):
 
 
 #weather data
-file = root + 'weather/1409973.csv'
+file = root + 'weather/weather.csv'
 weather_df = pd.read_csv(file,header=0,parse_dates=['DATE'],
                          usecols=['DATE','PRCP','SNOW','TMAX','TMIN'],
                          skipinitialspace=True,
@@ -744,7 +744,7 @@ weather_df['TAVG'] = (weather_df['TMIN'] + weather_df['TMAX']) / 2
 # In[23]:
 
 
-file = root + 'gas/2018-2008_monthly_gas_NYC.csv'
+file = root + 'gas/gas.csv'
 gas_df = pd.read_csv(file, header=0, skipinitialspace=True)
 gas_df.info()
 gas_df

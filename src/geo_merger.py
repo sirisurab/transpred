@@ -1,12 +1,8 @@
 import sys
-from data_tools import file_io
 from geopandas import GeoDataFrame, sjoin
-from pandas import DataFrame
 from math import sin, pi
-from bokeh.plotting import figure, output_file, show
-from bokeh.models import GeoJSONDataSource
 import matplotlib.pyplot as plt
-from utils import persistence as ps
+from utils import persistence as ps, file_io
 from typing import List
 
 GEOMERGED_PATH: str = 'geo-merged/'

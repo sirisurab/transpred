@@ -64,6 +64,8 @@ def plot(*args) -> bool:
     end_date = range[1]
     geomerged_cabs: str = GEOMERGED_PATH+str(buffer)+'/cabs.csv'
     geomerged_traffic: str = GEOMERGED_PATH+str(buffer)+'/traffic.csv'
+    gas_file: str ='gas.csv'
+    weather_file: str ='weather.csv'
 
     # load ref-base geomerged files
     filestream: HTTPResponse = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=geomerged_cabs)
@@ -82,6 +84,22 @@ def plot(*args) -> bool:
     }
     geomerged_traffic_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
     geomerged_traffic_df = geomerged_traffic_df[~geomerged_traffic_df['linkid'].isna()]
+
+    filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=gas_file)
+    dtypes = {
+        'stop_name': 'object',
+        'tsstation': 'object',
+        'linkid': 'float64'
+    }
+    gas_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
+
+    filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=weather_file)
+    dtypes = {
+        'stop_name': 'object',
+        'tsstation': 'object',
+        'linkid': 'float64'
+    }
+    weather_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
 
     # for plotting
     plot_filepath: str = task + '/' + str(buffer) + '/'

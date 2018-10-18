@@ -1,7 +1,7 @@
 import sys
 from error_handling import errors
 from utils import persistence as ps
-from utils import http
+from utils import http, file_io
 from urllib3.response import HTTPResponse
 from typing import Tuple, List, Dict, Callable
 from zipfile import ZipFile
@@ -18,6 +18,7 @@ from data_tools import row_operations as row_ops
 
 REFBASE_BUCKET: str = 'ref-base'
 TRANSIT_BUCKET: str = 'transit'
+OTHERS_BUCKET: str = 'others'
 
 float_pattern = re.compile('^-?\d*\.\d{4,}$')
 
@@ -92,7 +93,7 @@ def load_ref_files(*args) -> bool:
     for task in list(*args):
         print('loading ref files for %s' % task)
 
-        if task in ['cabs', 'transit', 'traffic']:
+        if task in ['cabs', 'transit', 'traffic', 'gas', 'weather']:
             # create ref-base bucket
             ps.create_bucket(REFBASE_BUCKET)
             crs: Dict[str, str] = {'init': 'epsg:4326'}
@@ -189,6 +190,48 @@ def load_ref_files(*args) -> bool:
                     for file in links_files:
                         zipfile.write(file.rsplit('/', 1)[1])
                 ps.copy_file(dest_bucket=REFBASE_BUCKET, source=links_out_path+'traffic_links.zip', file='traffic_links.zip')
+
+            elif task == 'gas':
+                # load gas data file
+                filename: str ='gas.csv'
+                cols: List[int] = [0, 1]
+                names: List[str] = ['date', 'price']
+                converters: Dict[str, Callable] = {
+                                        'price': row_ops.clean_num
+                                        }
+                gas_df: pd.DataFrame = pd.read_csv(ps.get_file_stream(bucket=OTHERS_BUCKET, filename=filename),
+                                                        header=None,
+                                                        usecols=cols,
+                                                        parse_dates=['date'],
+                                                        skiprows=2,
+                                                        names=names,
+                                                        converters=converters,
+                                                        encoding='utf-8')
+
+                file_io.write_csv(df=gas_df, bucket=REFBASE_BUCKET, filename=filename)
+
+            elif task == 'weather':
+                # load gas data file
+                filename: str ='weather.csv'
+                cols: List[int] = [5, 8, 9, 12, 13]
+                names: List[str] = ['date', 'prcp', 'snow', 'tmax', 'tmin']
+                converters: Dict[str, Callable] = {
+                                        'prcp': row_ops.clean_num,
+                                        'snow': row_ops.clean_num,
+                                        'tmax': row_ops.clean_num,
+                                        'tmin': row_ops.clean_num
+                                        }
+                weather_df: pd.DataFrame = pd.read_csv(ps.get_file_stream(bucket=OTHERS_BUCKET, filename=filename),
+                                                        header=None,
+                                                        usecols=cols,
+                                                        parse_dates=['date'],
+                                                        skiprows=1,
+                                                        names=names,
+                                                        converters=converters,
+                                                        encoding='utf-8')
+                weather_df['temp'] = (weather_df['tmax']+weather_df['tmin'])/2
+                weather_df = weather_df.drop(columns=['tmax', 'tmin'])
+                file_io.write_csv(df=weather_df, bucket=REFBASE_BUCKET, filename=filename)
 
         else:
             print('unrecognized ref-base load task %s' % task)
