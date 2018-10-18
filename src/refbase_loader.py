@@ -2,7 +2,6 @@ import sys
 from error_handling import errors
 from utils import persistence as ps
 from utils import http, file_io
-from urllib3.response import HTTPResponse
 from typing import Tuple, List, Dict, Callable
 from zipfile import ZipFile
 from geopandas import GeoDataFrame, read_file
@@ -194,9 +193,9 @@ def load_ref_files(*args) -> bool:
             elif task == 'gas':
                 # load gas data file
                 filename: str ='gas.csv'
-                cols: List[int] = [0, 1]
-                names: List[str] = ['date', 'price']
-                converters: Dict[str, Callable] = {
+                cols = [0, 1]
+                names = ['date', 'price']
+                converters = {
                                         'price': row_ops.clean_num
                                         }
                 gas_df: pd.DataFrame = pd.read_csv(ps.get_file_stream(bucket=OTHERS_BUCKET, filename=filename),
@@ -212,10 +211,10 @@ def load_ref_files(*args) -> bool:
 
             elif task == 'weather':
                 # load gas data file
-                filename: str ='weather.csv'
-                cols: List[int] = [5, 8, 9, 12, 13]
-                names: List[str] = ['date', 'prcp', 'snow', 'tmax', 'tmin']
-                converters: Dict[str, Callable] = {
+                filename ='weather.csv'
+                cols = [5, 8, 9, 12, 13]
+                names = ['date', 'prcp', 'snow', 'tmax', 'tmin']
+                converters = {
                                         'prcp': row_ops.clean_num,
                                         'snow': row_ops.clean_num,
                                         'tmax': row_ops.clean_num,
