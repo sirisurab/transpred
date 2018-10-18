@@ -20,13 +20,13 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     sns.set()
     sns.set_style('darkgrid')
     # create plots
-    fig, ax = plt.subplots(1, figsize=(9, 9), clear=True)
+    fig, ax = plt.subplots(1, figsize=(18, 18), clear=True)
     # taxi zones plot
-    taxi_zone_df.plot(ax=ax, facecolor='#F9DA95', edgecolor='#FFFFFF', linewidth=0.2)
+    taxi_zone_df.plot(ax=ax, facecolor='#F9DA95', edgecolor='#FFFFFF', linewidth=0.5)
 
-    stations_geodf.plot(ax=ax, facecolor='#618A98', edgecolor='#618A98', alpha=0.2)
+    stations_geodf.plot(ax=ax, facecolor='#618A98', edgecolor='#618A98', alpha=0.2/buffer_radius_miles)
     stations_points_geodf = stations_geodf.copy().set_geometry('point').drop(columns=['circle'])
-    stations_points_geodf.plot(ax=ax, markersize=.2)
+    stations_points_geodf.plot(ax=ax, color='#787064', markersize=.5)
     links_df.plot(ax=ax, color='#AE4B16', linewidth=0.5)
 
     # save plots
