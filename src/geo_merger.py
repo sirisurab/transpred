@@ -62,10 +62,12 @@ def create_spatial_joins(buffer_radius_miles: float, stations_geodf: GeoDataFram
     linkids: List = [linkid for _, linkid in prev_buffer_ids[1].items()]
     stations_traffic_df = stations_traffic_df.loc[~stations_traffic_df['linkid'].isin(linkids)]
     # write files
-    geomerged_file: str = GEOMERGED_PATH + str(buffer_radius_miles) + '/cabs.csv'
-    status_1: bool = file_io.write_csv(df=stations_cabs_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
-    geomerged_file = GEOMERGED_PATH + str(buffer_radius_miles) + '/traffic.csv'
-    status_2: bool = file_io.write_csv(df=stations_traffic_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
+    if stations_cabs_df.size > 0:
+        geomerged_file = GEOMERGED_PATH + str(buffer_radius_miles) + '/cabs.csv'
+        status_1 = file_io.write_csv(df=stations_cabs_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
+    if stations_traffic_df.size > 0:
+        geomerged_file = GEOMERGED_PATH + str(buffer_radius_miles) + '/traffic.csv'
+        status_2 = file_io.write_csv(df=stations_traffic_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
 
     return new_buffer_ids
 
