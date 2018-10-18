@@ -89,9 +89,8 @@ def plot(*args) -> bool:
     plot_filepath: str = task + '/' + str(buffer) + '/'
     tmp_filepath: str = '/tmp/'
     #output_file(tmp_filepath)
-
+    sns.set()
     sns.set_style('darkgrid')
-    sns.set_context('paper')
 
     for station in inputs[2:]:
         try:
@@ -176,7 +175,7 @@ def plot(*args) -> bool:
                 traffic_df = traffic_df.loc[start_date: end_date].reset_index()
 
             # create plots
-            fig, axes = plt.subplots(nrows=3, ncols=2)
+            fig, axes = plt.subplots(nrows=3, ncols=2, clear=True)
 
             if len(dolocationids) > 0:
                 if gcabs_df.size > 0:
