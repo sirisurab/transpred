@@ -24,9 +24,9 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
 
 
 def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax):
-    sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1)
+    sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
     ax1 = ax.twinx()
-    sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2)
+    sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
     return
 
 
@@ -87,19 +87,21 @@ def plot(*args) -> bool:
 
     filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=gas_file)
     dtypes = {
-        'stop_name': 'object',
-        'tsstation': 'object',
-        'linkid': 'float64'
+        'price': 'float64'
     }
-    gas_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
+    gas_datecols = ['date']
+    gas_df: DataFrame = read_csv(filestream, usecols=dtypes.keys()+gas_datecols, parse_dates=gas_datecols, encoding='utf-8', dtype=dtypes)
+    gas_df = gas_df.set_index(gas_datecols)[start_date: end_date]
 
     filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=weather_file)
     dtypes = {
-        'stop_name': 'object',
-        'tsstation': 'object',
-        'linkid': 'float64'
+            'prcp': 'float64',
+            'snow': 'float64',
+            'temp': 'float64'
     }
-    weather_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
+    weather_datecols = ['date']
+    weather_df: DataFrame = read_csv(filestream, usecols=dtypes.keys()+weather_datecols, parse_dates=weather_datecols, encoding='utf-8', dtype=dtypes)
+    weather_df = weather_df.set_index(weather_datecols)[start_date: end_date]
 
     # for plotting
     plot_filepath: str = task + '/' + str(buffer) + '/'
@@ -195,7 +197,7 @@ def plot(*args) -> bool:
 
             # create plots
             plt.close('all')
-            fig, axes = plt.subplots(nrows=3, ncols=2, clear=True, figsize=(18, 10))
+            fig, axes = plt.subplots(nrows=5, ncols=2, clear=True, figsize=(18, 15))
 
             if len(dolocationids) > 0:
                 if gcabs_df.size > 0:
@@ -263,6 +265,50 @@ def plot(*args) -> bool:
                             varcol2=varcol2,
                             label2=var2+varcol2,
                             ax=axes[2, 1])
+
+            # gas
+            varcol1 = 'delex'
+            var1 = 'transit '
+            var2 = 'gas '
+            varcol2 = 'price'
+            create_plot(df1=transit_df,
+                        varcol1=varcol1,
+                        label1=var1 + varcol1,
+                        df2=gas_df,
+                        varcol2=varcol2,
+                        label2=var2 + varcol2,
+                        ax=axes[3, 0])
+
+            varcol1 = 'delent'
+            create_plot(df1=transit_df,
+                        varcol1=varcol1,
+                        label1=var1 + varcol1,
+                        df2=gas_df,
+                        varcol2=varcol2,
+                        label2=var2 + varcol2,
+                        ax=axes[3, 1])
+
+            # weather
+            varcol1 = 'delex'
+            var1 = 'transit '
+            var2 = 'weather '
+            varcol2 = 'temp'
+            create_plot(df1=transit_df,
+                        varcol1=varcol1,
+                        label1=var1 + varcol1,
+                        df2=weather_df,
+                        varcol2=varcol2,
+                        label2=var2 + varcol2,
+                        ax=axes[4, 0])
+
+            varcol1 = 'delent'
+            create_plot(df1=transit_df,
+                        varcol1=varcol1,
+                        label1=var1 + varcol1,
+                        df2=weather_df,
+                        varcol2=varcol2,
+                        label2=var2 + varcol2,
+                        ax=axes[4, 1])
 
             plot_filename = station + '.png'
             outfile = tmp_filepath + plot_filename
