@@ -26,8 +26,10 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
 def create_plot(var1_df: DataFrame, var1_datecol: str, var1_col: str, var2_df: DataFrame, var2_datecol: str, var2_col: str, outfile: str) -> plt.axis:
     sns.lineplot(x=var1_datecol, y=var1_col, data=var1_df, sort=False, legend='full')
     ax = plt.twinx()
-    sns_plot = sns.lineplot(x=var2_datecol, y=var2_col, data=var2_df, sort=False, legend='full', ax=ax)
-    sns_plot.savefig(outfile)
+    sns_plot: plt.Axes = sns.lineplot(x=var2_datecol, y=var2_col, data=var2_df, sort=False, legend='full', ax=ax)
+    fig: plt.figure = sns_plot.get_figure()
+    fig.savefig(outfile)
+    return
 
 
 def create_base_plot_bokeh(station: str, base_df: DataFrame, datecol: str, varcol: str, varname: str, color: str ='red') -> figure:
