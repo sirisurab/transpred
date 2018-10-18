@@ -191,7 +191,7 @@ def plot(*args) -> bool:
                                 varcol1=varcol1,
                                 df2=gcabs_df,
                                 varcol2=varcol2,
-                                ax=axes[0, 0])
+                                ax=axes[0, 1])
 
                 if ycabs_df.size > 0:
                     varcol1 = 'delex'
@@ -200,14 +200,14 @@ def plot(*args) -> bool:
                                 varcol1=varcol1,
                                 df2=ycabs_df,
                                 varcol2=varcol2,
-                                ax=axes[0, 0])
+                                ax=axes[1, 0])
 
                     varcol1 = 'delent'
                     create_plot(df1=transit_df,
                                 varcol1=varcol1,
                                 df2=ycabs_df,
                                 varcol2=varcol2,
-                                ax=axes[0, 0])
+                                ax=axes[1, 1])
 
             if len(linkids) > 0 and transit_df.size > 0:
                 varcol1 = 'delex'
@@ -216,14 +216,14 @@ def plot(*args) -> bool:
                             varcol1=varcol1,
                             df2=traffic_df,
                             varcol2=varcol2,
-                            ax=axes[0, 0])
+                            ax=axes[2, 0])
 
                 varcol1 = 'delent'
                 create_plot(df1=transit_df,
                             varcol1=varcol1,
                             df2=traffic_df,
                             varcol2=varcol2,
-                            ax=axes[0, 0])
+                            ax=axes[2, 1])
 
             plot_filename = station + '.png'
             outfile = tmp_filepath + plot_filename
