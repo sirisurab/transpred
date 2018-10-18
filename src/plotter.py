@@ -7,8 +7,8 @@ from pandas import DataFrame, read_csv, concat
 from bokeh.plotting import figure, output_file, show
 from bokeh.models import Range1d, LinearAxis
 from numpy import mean
-#import matplotlib.pyplot as plt
-#import seaborn as sns
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
 RGGCABS_BUCKET: str = 'rg-gcabs'
@@ -23,7 +23,14 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
     return df[col].min(), df[col].max()
 
 
-def create_base_plot(station: str, base_df: DataFrame, datecol: str, varcol: str, varname: str, color: str ='red') -> figure:
+def create_plot(var1_df: DataFrame, var1_datecol: str, var1_col: str, var2_df: DataFrame, var2_datecol: str, var2_col: str, outfile: str) -> plt.axis:
+    sns.lineplot(x=var1_datecol, y=var1_col, data=var1_df, sort=False, kind='line', legend='full')
+    ax = plt.twinx()
+    sns_plot = sns.lineplot(x=var2_datecol, y=var2_col, data=var2_df, sort=False, kind='line', legend='full', ax=ax)
+    sns_plot.savefig(outfile)
+
+
+def create_base_plot_bokeh(station: str, base_df: DataFrame, datecol: str, varcol: str, varname: str, color: str ='red') -> figure:
     p = figure(title='plot for station ' + station,
                 x_axis_label='datetime', x_axis_type='datetime',
                 y_axis_label=varname)
@@ -35,7 +42,7 @@ def create_base_plot(station: str, base_df: DataFrame, datecol: str, varcol: str
     return p
 
 
-def add_variable_to_plot(p: figure, var_df: DataFrame, datecol: str, varcol: str, varname: str, color: str='green') -> figure:
+def add_variable_to_plot_bokeh(p: figure, var_df: DataFrame, datecol: str, varcol: str, varname: str, color: str='green') -> figure:
     axis_range = get_axis_range(df=var_df, col=varcol)
     p.extra_y_ranges = {'extra': Range1d(start=axis_range[0], end=axis_range[1])}
     p.add_layout(LinearAxis(y_range_name='extra', axis_label=varname), 'right')
@@ -78,9 +85,11 @@ def plot(*args) -> bool:
 
     # for plotting
     plot_filepath: str = task + '/' + str(buffer) + '/'
-    plot_filename: str = 'EDA.html'
-    tmp_filepath: str = '/tmp/' + plot_filename
-    output_file(tmp_filepath)
+    tmp_filepath: str = '/tmp/'
+    #output_file(tmp_filepath)
+
+    sns.set_style('darkgrid')
+    sns.set_context('paper')
 
     for station in inputs[2:]:
         try:
@@ -168,99 +177,98 @@ def plot(*args) -> bool:
 
             if len(dolocationids) > 0:
                 if gcabs_df.size > 0:
-                    p1 = create_base_plot(station=station,
-                                          base_df=transit_df,
-                                          datecol=ts_datecols[0],
-                                          varcol='delex',
-                                          varname='transit exits',
-                                          color='red')
-                    p1 = add_variable_to_plot(p=p1,
-                                              var_df=gcabs_df,
-                                              datecol=cabs_datecols[0],
-                                              varcol='passengers',
-                                              varname='green cab passengers',
-                                              color='green')
-                    show(p1)
+                    var1_col = 'delex'
+                    var2 = 'gcabs'
+                    var2_col = 'passengers'
+                    plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
+                    outfile = tmp_filepath+plot_filename
+                    create_plot(var1_df=transit_df,
+                                var1_datecol=ts_datecols[0],
+                                var1_col=var1_col,
+                                var2_df=gcabs_df,
+                                var2_datecol=cabs_datecols[0],
+                                var2_col=var2_col,
+                                outfile=outfile)
+                    # save plots in out bucket
+                    ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
 
-                    p2 = create_base_plot(station=station,
-                                          base_df=transit_df,
-                                          datecol=ts_datecols[0],
-                                          varcol='delent',
-                                          varname='transit entries',
-                                          color='blue')
-                    p2 = add_variable_to_plot(p=p2,
-                                              var_df=gcabs_df,
-                                              datecol=cabs_datecols[0],
-                                              varcol='passengers',
-                                              varname='green cab passengers',
-                                              color='green')
-                    show(p2)
+                    var1_col = 'delent'
+                    plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
+                    outfile = tmp_filepath+plot_filename
+                    create_plot(var1_df=transit_df,
+                                var1_datecol=ts_datecols[0],
+                                var1_col=var1_col,
+                                var2_df=gcabs_df,
+                                var2_datecol=cabs_datecols[0],
+                                var2_col=var2_col,
+                                outfile=outfile)
+                    # save plots in out bucket
+                    ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
 
                 if ycabs_df.size > 0:
-                    p3 = create_base_plot(station=station,
-                                          base_df=transit_df,
-                                          datecol=ts_datecols[0],
-                                          varcol='delex',
-                                          varname='transit exits',
-                                          color='red')
-                    p3 = add_variable_to_plot(p=p3,
-                                              var_df=ycabs_df,
-                                              datecol=cabs_datecols[0],
-                                              varcol='passengers',
-                                              varname='yellow cab passengers',
-                                              color='orange')
-                    show(p3)
+                    var1_col = 'delex'
+                    var2 = 'ycabs'
+                    var2_col = 'passengers'
+                    plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
+                    outfile = tmp_filepath+plot_filename
+                    create_plot(var1_df=transit_df,
+                                var1_datecol=ts_datecols[0],
+                                var1_col=var1_col,
+                                var2_df=ycabs_df,
+                                var2_datecol=cabs_datecols[0],
+                                var2_col=var2_col,
+                                outfile=outfile)
+                    # save plots in out bucket
+                    ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
 
-                    p4 = create_base_plot(station=station,
-                                          base_df=transit_df,
-                                          datecol=ts_datecols[0],
-                                          varcol='delent',
-                                          varname='transit entries',
-                                          color='blue')
-                    p4 = add_variable_to_plot(p=p4,
-                                              var_df=ycabs_df,
-                                              datecol=cabs_datecols[0],
-                                              varcol='passengers',
-                                              varname='yellow cab passengers',
-                                              color='orange')
-                    show(p4)
+                    var1_col = 'delent'
+                    plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
+                    outfile = tmp_filepath+plot_filename
+                    create_plot(var1_df=transit_df,
+                                var1_datecol=ts_datecols[0],
+                                var1_col=var1_col,
+                                var2_df=ycabs_df,
+                                var2_datecol=cabs_datecols[0],
+                                var2_col=var2_col,
+                                outfile=outfile)
+                    # save plots in out bucket
+                    ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
 
             if len(linkids) > 0 and transit_df.size > 0:
-                p5 = create_base_plot(station=station,
-                                      base_df=transit_df,
-                                      datecol=ts_datecols[0],
-                                      varcol='delex',
-                                      varname='transit exits',
-                                      color='red')
-                p5 = add_variable_to_plot(p=p5,
-                                          var_df=traffic_df,
-                                          datecol=traffic_datecols[0],
-                                          varcol='speed',
-                                          varname='traffic speed',
-                                          color='magenta')
-                show(p5)
+                var1_col = 'delex'
+                var2 = 'traffic'
+                var2_col = 'speed'
+                plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
+                outfile = tmp_filepath+plot_filename
+                create_plot(var1_df=transit_df,
+                            var1_datecol=ts_datecols[0],
+                            var1_col=var1_col,
+                            var2_df=traffic_df,
+                            var2_datecol=cabs_datecols[0],
+                            var2_col=var2_col,
+                            outfile=outfile)
+                # save plots in out bucket
+                ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
 
-                p6 = create_base_plot(station=station,
-                                      base_df=transit_df,
-                                      datecol=ts_datecols[0],
-                                      varcol='delent',
-                                      varname='transit entries',
-                                      color='blue')
-                p6 = add_variable_to_plot(p=p6,
-                                          var_df=traffic_df,
-                                          datecol=traffic_datecols[0],
-                                          varcol='speed',
-                                          varname='traffic speed',
-                                          color='magenta')
-                show(p6)
+                var1_col = 'delent'
+                plot_filename=station+'_'+var1_col+'_'+var2+'_'+var2_col+'.png'
+                outfile = tmp_filepath+plot_filename
+                create_plot(var1_df=transit_df,
+                            var1_datecol=ts_datecols[0],
+                            var1_col=var1_col,
+                            var2_df=traffic_df,
+                            var2_datecol=cabs_datecols[0],
+                            var2_col=var2_col,
+                            outfile=outfile)
+                # save plots in out bucket
+                ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
 
         except Exception as err:
             print('Error in plotting task %(task)s for station %(station)s'
                   % {'task': task, 'station': station})
             raise err
 
-    # save plots in out bucket
-    ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=tmp_filepath)
+
 
     return True
 
