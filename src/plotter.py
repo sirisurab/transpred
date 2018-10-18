@@ -23,10 +23,10 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
     return df[col].min(), df[col].max()
 
 
-def create_plot(df1: DataFrame, datecol1: str, varcol1: str, df2: DataFrame, datecol2: str, varcol2: str, ax):
-    sns.relplot(x=datecol1, y=varcol1, data=df1, kind='line', ax=ax, color='blue')
+def create_plot(df1: DataFrame, varcol1: str, df2: DataFrame, varcol2: str, ax):
+    sns.lineplot(data=df1[varcol1], ax=ax, color='blue')
     ax1 = ax.twinx()
-    sns.relplot(x=datecol2, y=varcol2, data=df2, kind='line', ax=ax1, color='red')
+    sns.lineplot(data=df2[varcol2], ax=ax1, color='red')
     return
 
 
@@ -107,7 +107,7 @@ def plot(*args) -> bool:
             transit_df: DataFrame = read_csv(filestream, usecols=ts_datecols + list(dtypes.keys()),
                                              parse_dates=ts_datecols,
                                              encoding='utf-8', dtype=dtypes)
-            transit_df = transit_df.set_index('datetime')[start_date: end_date].reset_index()
+            transit_df = transit_df.set_index('datetime')[start_date: end_date]
 
             # read data from other in buckets
             gcabs_df: DataFrame
@@ -145,9 +145,9 @@ def plot(*args) -> bool:
                 print(ycabs_df.head())
 
                 gcabs_df = gcabs_df.set_index(cabs_datecols).sort_index().resample('1D')[cabs_cols].apply(sum)
-                gcabs_df = gcabs_df.loc[start_date: end_date].reset_index()
+                gcabs_df = gcabs_df.loc[start_date: end_date]
                 ycabs_df = ycabs_df.set_index(cabs_datecols).sort_index().resample('1D')[cabs_cols].apply(sum)
-                ycabs_df = ycabs_df.loc[start_date: end_date].reset_index()
+                ycabs_df = ycabs_df.loc[start_date: end_date]
 
             # determine relevant traffic files
             # by finding linkids corresponding
@@ -170,7 +170,7 @@ def plot(*args) -> bool:
 
                 print(traffic_df.head())
                 traffic_df = traffic_df.set_index(traffic_datecols).sort_index().resample('1D')[traffic_cols].apply(mean)
-                traffic_df = traffic_df.loc[start_date: end_date].reset_index()
+                traffic_df = traffic_df.loc[start_date: end_date]
 
             # create plots
             plt.close('all')
@@ -181,19 +181,15 @@ def plot(*args) -> bool:
                     varcol1 = 'delex'
                     varcol2 = 'passengers'
                     create_plot(df1=transit_df,
-                                datecol1=ts_datecols[0],
                                 varcol1=varcol1,
                                 df2=gcabs_df,
-                                datecol2=cabs_datecols[0],
                                 varcol2=varcol2,
                                 ax=axes[0, 0])
 
                     varcol1 = 'delent'
                     create_plot(df1=transit_df,
-                                datecol1=ts_datecols[0],
                                 varcol1=varcol1,
                                 df2=gcabs_df,
-                                datecol2=cabs_datecols[0],
                                 varcol2=varcol2,
                                 ax=axes[0, 0])
 
@@ -201,19 +197,15 @@ def plot(*args) -> bool:
                     varcol1 = 'delex'
                     varcol2 = 'passengers'
                     create_plot(df1=transit_df,
-                                datecol1=ts_datecols[0],
                                 varcol1=varcol1,
                                 df2=ycabs_df,
-                                datecol2=cabs_datecols[0],
                                 varcol2=varcol2,
                                 ax=axes[0, 0])
 
                     varcol1 = 'delent'
                     create_plot(df1=transit_df,
-                                datecol1=ts_datecols[0],
                                 varcol1=varcol1,
                                 df2=ycabs_df,
-                                datecol2=cabs_datecols[0],
                                 varcol2=varcol2,
                                 ax=axes[0, 0])
 
@@ -221,19 +213,15 @@ def plot(*args) -> bool:
                 varcol1 = 'delex'
                 varcol2 = 'speed'
                 create_plot(df1=transit_df,
-                            datecol1=ts_datecols[0],
                             varcol1=varcol1,
                             df2=traffic_df,
-                            datecol2=traffic_datecols[0],
                             varcol2=varcol2,
                             ax=axes[0, 0])
 
                 varcol1 = 'delent'
                 create_plot(df1=transit_df,
-                            datecol1=ts_datecols[0],
                             varcol1=varcol1,
                             df2=traffic_df,
-                            datecol2=traffic_datecols[0],
                             varcol2=varcol2,
                             ax=axes[0, 0])
 
