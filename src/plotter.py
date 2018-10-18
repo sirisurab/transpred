@@ -23,10 +23,10 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
     return df[col].min(), df[col].max()
 
 
-def create_plot(var1_df: DataFrame, var1_datecol: str, var1_col: str, var2_df: DataFrame, var2_datecol: str, var2_col: str, ax):
-    sns.lineplot(x=var1_datecol, y=var1_col, data=var1_df, sort=False, legend='full', ax=ax)
+def create_plot(df: DataFrame, datecol: str, var1_col: str, var2_col: str, ax):
+    sns.relplot(x=datecol, y=var1_col, data=df, kind='line', ax=ax, color='blue')
     ax1 = ax.twinx()
-    sns.lineplot(x=var2_datecol, y=var2_col, data=var2_df, sort=False, legend='full', ax=ax1)
+    sns.relplot(x=datecol, y=var2_col, data=df, kind='line', ax=ax1, color='red')
     return
 
 
@@ -173,7 +173,7 @@ def plot(*args) -> bool:
                 traffic_df = traffic_df.loc[start_date: end_date].reset_index()
 
             # create plots
-            plt.tight_layout()
+            plt.close('all')
             fig, axes = plt.subplots(nrows=3, ncols=2, clear=True)
 
             if len(dolocationids) > 0:
@@ -181,20 +181,18 @@ def plot(*args) -> bool:
                     var1_col = 'delex'
                     var2 = 'gcabs'
                     var2_col = 'passengers'
-                    create_plot(var1_df=transit_df,
-                                var1_datecol=ts_datecols[0],
+                    #concat transit and gcabs data
+                    df = concat([transit_df, gcabs_df], axis=1)
+                    create_plot(df=df,
+                                datecol=ts_datecols[0],
                                 var1_col=var1_col,
-                                var2_df=gcabs_df,
-                                var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
                                 ax=axes[0, 0])
 
                     var1_col = 'delent'
-                    create_plot(var1_df=transit_df,
-                                var1_datecol=ts_datecols[0],
+                    create_plot(df=df,
+                                datecol=ts_datecols[0],
                                 var1_col=var1_col,
-                                var2_df=gcabs_df,
-                                var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
                                 ax=axes[0, 1])
 
@@ -202,20 +200,17 @@ def plot(*args) -> bool:
                     var1_col = 'delex'
                     var2 = 'ycabs'
                     var2_col = 'passengers'
-                    create_plot(var1_df=transit_df,
-                                var1_datecol=ts_datecols[0],
+                    df = concat([transit_df, ycabs_df], axis=1)
+                    create_plot(df=df,
+                                datecol=ts_datecols[0],
                                 var1_col=var1_col,
-                                var2_df=ycabs_df,
-                                var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
                                 ax=axes[1, 0])
 
                     var1_col = 'delent'
-                    create_plot(var1_df=transit_df,
-                                var1_datecol=ts_datecols[0],
+                    create_plot(df=df,
+                                datecol=ts_datecols[0],
                                 var1_col=var1_col,
-                                var2_df=ycabs_df,
-                                var2_datecol=cabs_datecols[0],
                                 var2_col=var2_col,
                                 ax=axes[1, 1])
 
@@ -223,25 +218,23 @@ def plot(*args) -> bool:
                 var1_col = 'delex'
                 var2 = 'traffic'
                 var2_col = 'speed'
-                create_plot(var1_df=transit_df,
-                            var1_datecol=ts_datecols[0],
+                df = concat([transit_df, traffic_df], axis=1)
+                create_plot(df=df,
+                            datecol=ts_datecols[0],
                             var1_col=var1_col,
-                            var2_df=traffic_df,
-                            var2_datecol=traffic_datecols[0],
                             var2_col=var2_col,
                             ax=axes[2, 0])
 
                 var1_col = 'delent'
-                create_plot(var1_df=transit_df,
-                            var1_datecol=ts_datecols[0],
+                create_plot(df=df,
+                            datecol=ts_datecols[0],
                             var1_col=var1_col,
-                            var2_df=traffic_df,
-                            var2_datecol=traffic_datecols[0],
                             var2_col=var2_col,
                             ax=axes[2, 1])
 
             plot_filename = station + '.png'
             outfile = tmp_filepath + plot_filename
+            plt.tight_layout()
             fig.savefig(outfile)
             # save plots in out bucket
             ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
