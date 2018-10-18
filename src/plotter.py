@@ -25,10 +25,8 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
 
 def create_plot(var1_df: DataFrame, var1_datecol: str, var1_col: str, var2_df: DataFrame, var2_datecol: str, var2_col: str, ax):
     sns.lineplot(x=var1_datecol, y=var1_col, data=var1_df, sort=False, legend='full', ax=ax)
-    ax1 = plt.twinx()
-    sns_plot: plt.Axes = sns.lineplot(x=var2_datecol, y=var2_col, data=var2_df, sort=False, legend='full', ax=ax1)
-    #fig: plt.figure = sns_plot.get_figure()
-    #fig.savefig(outfile)
+    ax1 = ax.twinx()
+    sns.lineplot(x=var2_datecol, y=var2_col, data=var2_df, sort=False, legend='full', ax=ax1)
     return
 
 
@@ -175,6 +173,7 @@ def plot(*args) -> bool:
                 traffic_df = traffic_df.loc[start_date: end_date].reset_index()
 
             # create plots
+            plt.tight_layout()
             fig, axes = plt.subplots(nrows=3, ncols=2, clear=True)
 
             if len(dolocationids) > 0:
