@@ -174,7 +174,7 @@ def plot(*args) -> bool:
 
             # create plots
             plt.close('all')
-            fig, axes = plt.subplots(nrows=3, ncols=2, clear=True)
+            fig, axes = plt.subplots(nrows=3, ncols=2, clear=True, figsize=(18, 8))
 
             if len(dolocationids) > 0:
                 if gcabs_df.size > 0:
@@ -227,7 +227,7 @@ def plot(*args) -> bool:
 
             plot_filename = station + '.png'
             outfile = tmp_filepath + plot_filename
-            plt.tight_layout()
+            fig.tight_layout()
             fig.savefig(outfile)
             # save plots in out bucket
             ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
