@@ -90,7 +90,7 @@ def plot(*args) -> bool:
         'price': 'float64'
     }
     gas_datecols = ['date']
-    gas_df: DataFrame = read_csv(filestream, usecols=dtypes.keys()+gas_datecols, parse_dates=gas_datecols, encoding='utf-8', dtype=dtypes)
+    gas_df: DataFrame = read_csv(filestream, usecols=list(dtypes.keys())+gas_datecols, parse_dates=gas_datecols, encoding='utf-8', dtype=dtypes)
     gas_df = gas_df.set_index(gas_datecols)[start_date: end_date]
 
     filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=weather_file)
@@ -100,7 +100,7 @@ def plot(*args) -> bool:
             'temp': 'float64'
     }
     weather_datecols = ['date']
-    weather_df: DataFrame = read_csv(filestream, usecols=dtypes.keys()+weather_datecols, parse_dates=weather_datecols, encoding='utf-8', dtype=dtypes)
+    weather_df: DataFrame = read_csv(filestream, usecols=list(dtypes.keys())+weather_datecols, parse_dates=weather_datecols, encoding='utf-8', dtype=dtypes)
     weather_df = weather_df.set_index(weather_datecols)[start_date: end_date]
 
     # for plotting
