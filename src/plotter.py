@@ -23,10 +23,10 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
     return df[col].min(), df[col].max()
 
 
-def create_plot(df1: DataFrame, varcol1: str, df2: DataFrame, varcol2: str, ax):
-    sns.lineplot(data=df1[varcol1], ax=ax, color='blue')
+def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax):
+    sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1)
     ax1 = ax.twinx()
-    sns.lineplot(data=df2[varcol2], ax=ax1, color='red')
+    sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2)
     return
 
 
@@ -88,7 +88,7 @@ def plot(*args) -> bool:
     tmp_filepath: str = '/tmp/'
     #output_file(tmp_filepath)
     sns.set()
-    sns.set_style('darkgrid')
+    sns.set_style('dark')
 
     for station in inputs[2:]:
         try:
@@ -144,10 +144,12 @@ def plot(*args) -> bool:
                                   ignore_index=True)
                 print(ycabs_df.head())
 
-                gcabs_df = gcabs_df.set_index(cabs_datecols).sort_index().resample('1D')[cabs_cols].apply(sum)
-                gcabs_df = gcabs_df.loc[start_date: end_date]
-                ycabs_df = ycabs_df.set_index(cabs_datecols).sort_index().resample('1D')[cabs_cols].apply(sum)
-                ycabs_df = ycabs_df.loc[start_date: end_date]
+                #gcabs_df = gcabs_df.set_index(cabs_datecols).sort_index().resample('1D')[cabs_cols].apply(sum)
+                #gcabs_df = gcabs_df.loc[start_date: end_date]
+                #ycabs_df = ycabs_df.set_index(cabs_datecols).sort_index().resample('1D')[cabs_cols].apply(sum)
+                #ycabs_df = ycabs_df.loc[start_date: end_date]
+                gcabs_df = gcabs_df.set_index(cabs_datecols)[start_date: end_date]
+                ycabs_df = ycabs_df.set_index(cabs_datecols)[start_date: end_date]
 
             # determine relevant traffic files
             # by finding linkids corresponding
@@ -169,60 +171,79 @@ def plot(*args) -> bool:
                                   ignore_index=True)
 
                 print(traffic_df.head())
-                traffic_df = traffic_df.set_index(traffic_datecols).sort_index().resample('1D')[traffic_cols].apply(mean)
-                traffic_df = traffic_df.loc[start_date: end_date]
+                #traffic_df = traffic_df.set_index(traffic_datecols).sort_index().resample('1D')[traffic_cols].apply(mean)
+                #traffic_df = traffic_df.loc[start_date: end_date]
+                traffic_df = traffic_df.set_index(traffic_datecols)[start_date: end_date]
 
             # create plots
             plt.close('all')
-            fig, axes = plt.subplots(nrows=3, ncols=2, clear=True, figsize=(18, 8))
+            fig, axes = plt.subplots(nrows=3, ncols=2, clear=True, figsize=(18, 10))
 
             if len(dolocationids) > 0:
                 if gcabs_df.size > 0:
                     varcol1 = 'delex'
+                    var1 = 'transit '
+                    var2 = 'gcabs '
                     varcol2 = 'passengers'
                     create_plot(df1=transit_df,
                                 varcol1=varcol1,
+                                label1=var1+varcol1,
                                 df2=gcabs_df,
                                 varcol2=varcol2,
+                                label2=var2+varcol2,
                                 ax=axes[0, 0])
 
                     varcol1 = 'delent'
                     create_plot(df1=transit_df,
                                 varcol1=varcol1,
+                                label1=var1+varcol1,
                                 df2=gcabs_df,
                                 varcol2=varcol2,
+                                label2=var2+varcol2,
                                 ax=axes[0, 1])
 
                 if ycabs_df.size > 0:
                     varcol1 = 'delex'
+                    var1 = 'transit '
+                    var2 = 'ycabs '
                     varcol2 = 'passengers'
                     create_plot(df1=transit_df,
                                 varcol1=varcol1,
+                                label1=var1+varcol1,
                                 df2=ycabs_df,
                                 varcol2=varcol2,
+                                label2=var2+varcol2,
                                 ax=axes[1, 0])
 
                     varcol1 = 'delent'
                     create_plot(df1=transit_df,
                                 varcol1=varcol1,
+                                label1=var1+varcol1,
                                 df2=ycabs_df,
                                 varcol2=varcol2,
+                                label2=var2+varcol2,
                                 ax=axes[1, 1])
 
             if len(linkids) > 0 and transit_df.size > 0:
                 varcol1 = 'delex'
+                var1 = 'transit '
+                var2 = 'traffic '
                 varcol2 = 'speed'
                 create_plot(df1=transit_df,
                             varcol1=varcol1,
+                            label1=var1+varcol1,
                             df2=traffic_df,
                             varcol2=varcol2,
+                            label2=var2+varcol2,
                             ax=axes[2, 0])
 
                 varcol1 = 'delent'
                 create_plot(df1=transit_df,
                             varcol1=varcol1,
+                            label1=var1+varcol1,
                             df2=traffic_df,
                             varcol2=varcol2,
+                            label2=var2+varcol2,
                             ax=axes[2, 1])
 
             plot_filename = station + '.png'
