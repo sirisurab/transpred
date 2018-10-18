@@ -24,10 +24,10 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     # taxi zones plot
     taxi_zone_df.plot(ax=ax, facecolor='#F9DA95', edgecolor='#FFFFFF', linewidth=0.2)
 
-    stations_geodf.plot(ax=ax, facecolor='#618A98', edgecolor='#618A98', column='circle', alpha=0.2)
-    links_df.plot(ax=ax, color='#AE4B16', linewidth=0.5)
+    stations_geodf.plot(ax=ax, facecolor='#618A98', edgecolor='#618A98', alpha=0.2)
     stations_points_geodf = stations_geodf.copy().set_geometry('point').drop(columns=['circle'])
     stations_points_geodf.plot(ax=ax, markersize=.2)
+    links_df.plot(ax=ax, color='#AE4B16', linewidth=0.5)
 
     # save plots
     plt.show()
@@ -114,8 +114,7 @@ def geo_merge(buffer_radii: ndarray) -> bool:
                 stations_geodf['circle'] = stations_geodf.geometry.apply(propagate, angle=angles, d=distance)
                 stations_geodf['circle'] = stations_geodf['circle'].apply(Polygon)
 
-                stations_geodf.rename(columns={'geometry': 'point'}, inplace=True)
-                stations_geodf.set_geometry('circle', inplace=True)
+                stations_geodf = stations_geodf.rename(columns={'geometry': 'point'}).set_geometry('circle')
 
                 # create plots
                 status_2: bool = make_plots(buffer_radius_miles=buffer_radius_miles,
