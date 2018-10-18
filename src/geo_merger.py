@@ -6,6 +6,7 @@ from utils import persistence as ps, file_io
 from geog import propagate
 from numpy import linspace, arange, ndarray
 import seaborn as sns
+from shapely.geometry import Polygon
 
 GEOMERGED_PATH: str = 'geo-merged/'
 REFBASE_BUCKET: str = 'ref-base'
@@ -110,6 +111,7 @@ def geo_merge(buffer_radii: ndarray) -> bool:
                 distance: float = buffer_radius_miles * METERS_PER_MILE
                 angles = linspace(0, 360, GEOG_N_POINTS)
                 stations_geodf['circle'] = stations_geodf.geometry.apply(propagate, angle=angles, d=distance)
+                stations_geodf['circle'] = stations_geodf['circle'].apply(Polygon)
 
                 stations_geodf.rename(columns={'geometry': 'point'}, inplace=True)
                 stations_geodf.set_geometry('circle', inplace=True)
