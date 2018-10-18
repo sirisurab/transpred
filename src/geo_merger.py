@@ -7,7 +7,7 @@ from geog import propagate
 from numpy import linspace, arange, ndarray
 import seaborn as sns
 from shapely.geometry import Polygon
-from typing import Tuple
+from typing import Tuple, List
 from pandas import Series
 
 GEOMERGED_PATH: str = 'geo-merged/'
@@ -57,8 +57,10 @@ def create_spatial_joins(buffer_radius_miles: float, stations_geodf: GeoDataFram
     new_buffer_ids: Tuple[Series, Series] = (stations_cabs_df['locationid'], stations_traffic_df['linkid'])
 
     # exclude previous buffer cab location ids and traffic link ids from current buffer circle, before writing to file
-    stations_cabs_df = stations_cabs_df[stations_cabs_df['locationid'] not in prev_buffer_ids[0]]
-    stations_traffic_df = stations_traffic_df[stations_traffic_df['linkid'] not in prev_buffer_ids[1]]
+    locationids: List = [locid for _, locid in prev_buffer_ids[0].items()]
+    stations_cabs_df = stations_cabs_df[stations_cabs_df['locationid'] not in locationids]
+    linkids: List = [linkid for _, linkid in prev_buffer_ids[1].items()]
+    stations_traffic_df = stations_traffic_df[stations_traffic_df['linkid'] not in linkids]
     # write files
     geomerged_file: str = GEOMERGED_PATH + str(buffer_radius_miles) + '/cabs.csv'
     status_1: bool = file_io.write_csv(df=stations_cabs_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
