@@ -34,7 +34,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
             df = group.set_index(datecol)
             #weight = df[weight_col].iloc[0]
             df['size'] = 1 / (2 * weight)
-            sns.lineplot(data=df[varcol2], ax=ax1, color='coral', size=df['size'],
+            sns.lineplot(data=df, y=varcol2, ax=ax1, color='coral', size='size',
                          ci=None)
     else:
         sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
