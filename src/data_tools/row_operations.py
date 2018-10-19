@@ -27,6 +27,7 @@ def clean_transit(row: pd.Series) -> pd.Series:
     row['EXITS'] = pd.to_numeric(row['EXITS'], errors='coerce')
     return row
 
-#TODO
-def clean_traffic():
-    return
+def parse_rg_dt(x):
+    return pd.to_datetime(x,
+                     format="%Y-%m-%d",
+                     errors='coerce')

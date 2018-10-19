@@ -1,6 +1,6 @@
 import sys
 from typing import List, Dict, Tuple
-from data_tools import task_map
+from data_tools import task_map, row_operations
 from utils import persistence as ps
 from urllib3.response import HTTPResponse
 from pandas import DataFrame, read_csv, concat
@@ -127,6 +127,7 @@ def plot(*args) -> bool:
                     }
             transit_df = read_csv(filestream, usecols=ts_datecols + list(dtypes.keys()),
                                              parse_dates=ts_datecols,
+                                             date_parser=row_operations.parse_rg_dt,
                                              encoding='utf-8', dtype=dtypes)
             print(transit_df.head())
             transit_df = transit_df.set_index('datetime')[start_date: end_date]
