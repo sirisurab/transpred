@@ -125,9 +125,10 @@ def plot(*args) -> bool:
                      'delex': 'int64',
                      'delent': 'int64'
                     }
-            transit_df: DataFrame = read_csv(filestream, usecols=ts_datecols + list(dtypes.keys()),
+            transit_df = read_csv(filestream, usecols=ts_datecols + list(dtypes.keys()),
                                              parse_dates=ts_datecols,
                                              encoding='utf-8', dtype=dtypes)
+            print(transit_df.head())
             transit_df = transit_df.set_index('datetime')[start_date: end_date]
             print(transit_df.head())
 
