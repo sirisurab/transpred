@@ -175,7 +175,6 @@ task_type_map: Dict = {
                   'cl-traffic': {
                                 'in': 'dl-traffic',
                                 'out': 'cl-traffic',
-                                'row_op': row_ops.clean_traffic,
                                 'aggr_func': ''
                                 },
                   'rs-gcabs': {
