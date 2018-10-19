@@ -49,8 +49,8 @@ def add_weight(row, id_col, prev_buffer_df, buffer_radius):
         return buffer_radius
     df_row: DataFrame = prev_buffer_df.loc[(prev_buffer_df[id_col] == row[id_col]) & (prev_buffer_df['station_id'] == row['station_id'])]
     if df_row.size > 0:
-        print('row in add_weight for %(id_col)s %(buffer)s' % {'id_col': id_col, 'buffer': str(buffer_radius)})
-        print(row)
+        #print('row in add_weight for %(id_col)s %(buffer)s' % {'id_col': id_col, 'buffer': str(buffer_radius)})
+        #print(row)
         return df_row['weight']
     else:
         return buffer_radius
@@ -79,6 +79,10 @@ def create_spatial_joins(buffer_radius_miles: float, stations_geodf: GeoDataFram
                                                                            prev_buffer_df=prev_buffer_ids[1],
                                                                            buffer_radius=buffer_radius_miles),
                                                               axis=1)
+    print('stations_cabs for buffer %s' % str(buffer_radius_miles))
+    print(stations_cabs_df.head(1))
+    print('stations_traffic for buffer %s' % str(buffer_radius_miles))
+    print(stations_traffic_df.head(1))
 
     return stations_cabs_df, stations_traffic_df
 
