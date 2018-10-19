@@ -42,6 +42,7 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
 
 
 def add_weight(row, id_col, prev_buffer_df, buffer_radius):
+    print(row)
     if row[id_col] == '' or row[id_col] is None:
         row['weight'] = ''
         return row
