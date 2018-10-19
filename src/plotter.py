@@ -6,7 +6,7 @@ from urllib3.response import HTTPResponse
 from pandas import DataFrame, read_csv, concat
 from bokeh.plotting import figure, output_file, show
 from bokeh.models import Range1d, LinearAxis
-from numpy import NaN
+from numpy import NaN, mean
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 import seaborn as sns
@@ -28,8 +28,11 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
     ax1 = ax.twinx()
     if weighted:
-        sns.lineplot(data=df2, x=df2.index, y=varcol2, ax=ax1, label=label2, legend='brief',
-                     hue=weight_col, hue_norm=Normalize())
+        for _, group in df2.reset_index().groupby([datecol, weight_col]):
+            df = group[varcol2].apply(mean).unstack(weight_col)
+            weight = df[weight_col].iloc[0]
+            size = 1 / 2 / weight
+            sns.lineplot(data=df[varcol2], ax=ax1, color='coral', size=size)
     else:
         sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
     return
