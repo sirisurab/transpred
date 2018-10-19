@@ -25,8 +25,8 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
 
 def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax):
     sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
-    ax1 = ax.twinx()
-    sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
+    #ax1 = ax.twinx()
+    #sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
     return
 
 
@@ -129,6 +129,7 @@ def plot(*args) -> bool:
                                              parse_dates=ts_datecols,
                                              encoding='utf-8', dtype=dtypes)
             transit_df = transit_df.set_index('datetime')[start_date: end_date]
+            print(transit_df.head())
 
             # read data from other in buckets
             gcabs_df: DataFrame
@@ -141,8 +142,6 @@ def plot(*args) -> bool:
             # by finding dolocationids corresponding
             # to current station from ref-base geomerged df
             dolocationids = geomerged_cabs_df.loc[geomerged_cabs_df.tsstation == station][['locationid', 'weight']]
-            for locationid in dolocationids['locationid']:
-                print(locationid)
 
             if dolocationids.size > 0:
                 cabs_dtypes = {
@@ -161,7 +160,6 @@ def plot(*args) -> bool:
                                    ignore_index=True)
                 gcabs_df = gcabs_df.merge(dolocationids, left_on='dolocationid', right_on='locationid', how='left', copy=False).\
                     drop(columns=['dolocationid', 'locationid']).drop_duplicates()
-                print(gcabs_df.head())
                 ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
                                             header=0,
                                             usecols=cabs_datecols + cabs_cols,
@@ -172,9 +170,10 @@ def plot(*args) -> bool:
                                   ignore_index=True)
                 ycabs_df = ycabs_df.merge(dolocationids, left_on='dolocationid', right_on='locationid', how='left', copy=False).\
                     drop(columns=['dolocationid', 'locationid']).drop_duplicates()
-                print(ycabs_df.head())
                 gcabs_df = gcabs_df.set_index(cabs_datecols)[start_date: end_date]
                 ycabs_df = ycabs_df.set_index(cabs_datecols)[start_date: end_date]
+                print(gcabs_df.head())
+                print(ycabs_df.head())
 
             # determine relevant traffic files
             # by finding linkids corresponding
@@ -197,8 +196,8 @@ def plot(*args) -> bool:
                                    if str(int(linkid)) in ps.get_all_filenames(bucket=RGTRAFFIC_BUCKET, path='/')],
                                   ignore_index=True)
                 traffic_df = traffic_df.merge(linkids, on='linkid', how='left', copy=False).drop(columns=['linkid']).drop_duplicates()
-                print(traffic_df.head())
                 traffic_df = traffic_df.set_index(traffic_datecols)[start_date: end_date]
+                print(traffic_df.head())
 
             # create plots
             plt.close('all')
