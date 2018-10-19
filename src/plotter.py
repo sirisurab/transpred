@@ -29,7 +29,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     ax1 = ax.twinx()
     if weighted:
         for _, group in df2.reset_index().groupby([datecol, weight_col]):
-            df = group[varcol2].apply(mean).unstack(weight_col)
+            df = group.unstack(weight_col)
             weight = df[weight_col].iloc[0]
             size = 1 / (2 * weight)
             sns.lineplot(data=df[varcol2], ax=ax1, color='coral', size=size)
