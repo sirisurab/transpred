@@ -44,17 +44,14 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
 def add_weight(row, id_col, prev_buffer_df, buffer_radius):
     #print(row)
     if row[id_col] == '' or row[id_col] is None:
-        row['weight'] = ''
-        return row
+        return ''
     if prev_buffer_df.size == 0:
-        row['weight'] = buffer_radius
-        return row
+        return buffer_radius
     df_row: DataFrame = prev_buffer_df.loc[(prev_buffer_df[id_col] == row[id_col]) & (prev_buffer_df['station_id'] == row['station_id'])]
     if df_row.size > 0:
-        row['weight'] = df_row['weight']
+        return df_row['weight']
     else:
-        row['weight'] = buffer_radius
-    return row
+        return buffer_radius
 
 
 def create_spatial_joins(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zone_df: GeoDataFrame, links_df: GeoDataFrame, prev_buffer_ids: Tuple[DataFrame, DataFrame]) -> Tuple[DataFrame, DataFrame]:
@@ -69,12 +66,12 @@ def create_spatial_joins(buffer_radius_miles: float, stations_geodf: GeoDataFram
     stations_traffic_df = stations_traffic_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'linkid']]
 
     # exclude previous buffer cab location ids and traffic link ids from current buffer circle, before writing to file
-    stations_cabs_df = stations_cabs_df.apply(func=add_weight,
+    stations_cabs_df['weight'] = stations_cabs_df.apply(func=add_weight,
                                               axis=1,
                                               id_col='locationid',
                                               prev_buffer_df=prev_buffer_ids[0],
                                               buffer_radius=buffer_radius_miles)
-    stations_traffic_df = stations_traffic_df.apply(func=add_weight,
+    stations_traffic_df['weight'] = stations_traffic_df.apply(func=add_weight,
                                                     axis=1,
                                                     id_col='linkid',
                                                     prev_buffer_df=prev_buffer_ids[1],
