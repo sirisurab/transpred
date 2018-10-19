@@ -24,15 +24,13 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
     return df[col].min(), df[col].max()
 
 
-def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax, weighted: bool=False, weight_col: str=None, datecol: str=None):
+def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None, datecol: str=None):
     sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
     ax1 = ax.twinx()
     if weighted:
         for name, group in df2.reset_index().groupby(weight_col):
             weight = float(name)
-            #print(group.head())
             df = group.set_index(datecol)
-            #weight = df[weight_col].iloc[0]
             size = 1 / weight
             sns.lineplot(data=df[varcol2], ax=ax1, color='coral',
                          ci=None, linewidth=size)
@@ -216,6 +214,8 @@ def plot(*args) -> bool:
             # create plots
             plt.close('all')
             fig, axes = plt.subplots(nrows=5, ncols=2, clear=True, figsize=(18, 15))
+            axes.title(station+' '+start_date+' to '+end_date)
+            axes.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
 
             if dolocationids.size > 0:
                 if gcabs_df.size > 0:
