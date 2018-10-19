@@ -88,9 +88,7 @@ def create_spatial_join_cabs(buffer_radius_miles: float, stations_geodf: GeoData
     stations_cabs_df = stations_cabs_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'LocationID']]
     stations_cabs_df.rename(columns={'LocationID': 'locationid'}, inplace=True)
     stations_cabs_df['weight'] = NaN
-    stations_cabs_df.loc[(stations_cabs_df['locationid'] != '') &
-                         (~stations_cabs_df['locationid'].isnull()) &
-                         (~stations_cabs_df['locationid'].isna()), 'weight'] = buffer_radius_miles
+    stations_cabs_df.loc[stations_cabs_df['locationid'].notna(), 'weight'] = buffer_radius_miles
 
     return stations_cabs_df
 
@@ -101,9 +99,7 @@ def create_spatial_join_traffic(buffer_radius_miles: float, stations_geodf: GeoD
     stations_traffic_df: GeoDataFrame = sjoin(stations_geodf, links_df, how='left', op='intersects')
     stations_traffic_df = stations_traffic_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'linkid']]
     stations_traffic_df['weight'] = NaN
-    stations_traffic_df.loc[(stations_traffic_df['linkid'] != '') &
-                            (~stations_traffic_df['linkid'].isnull()) &
-                            (~stations_traffic_df['linkid'].isna()), 'weight'] = buffer_radius_miles
+    stations_traffic_df.loc[stations_traffic_df['linkid'].notna(), 'weight'] = buffer_radius_miles
 
     return stations_traffic_df
 
