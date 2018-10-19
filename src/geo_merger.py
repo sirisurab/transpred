@@ -9,6 +9,7 @@ import seaborn as sns
 from shapely.geometry import Polygon
 from typing import Tuple, List
 from pandas import Series, DataFrame
+from functools import partial
 
 GEOMERGED_PATH: str = 'geo-merged/'
 REFBASE_BUCKET: str = 'ref-base'
@@ -66,16 +67,17 @@ def create_spatial_joins(buffer_radius_miles: float, stations_geodf: GeoDataFram
     stations_traffic_df = stations_traffic_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'linkid']]
 
     # exclude previous buffer cab location ids and traffic link ids from current buffer circle, before writing to file
-    stations_cabs_df['weight'] = stations_cabs_df.apply(func=add_weight,
-                                              axis=1,
-                                              id_col='locationid',
-                                              prev_buffer_df=prev_buffer_ids[0],
-                                              buffer_radius=buffer_radius_miles)
-    stations_traffic_df['weight'] = stations_traffic_df.apply(func=add_weight,
-                                                    axis=1,
-                                                    id_col='linkid',
-                                                    prev_buffer_df=prev_buffer_ids[1],
-                                                    buffer_radius=buffer_radius_miles)
+
+    stations_cabs_df['weight'] = stations_cabs_df.apply(func=partial(add_weight,
+                                                                     id_col='locationid',
+                                                                     prev_buffer_df=prev_buffer_ids[0],
+                                                                     buffer_radius=buffer_radius_miles),
+                                                        axis=1)
+    stations_traffic_df['weight'] = stations_traffic_df.apply(func=partial(add_weight,
+                                                                           id_col='linkid',
+                                                                           prev_buffer_df=prev_buffer_ids[1],
+                                                                           buffer_radius=buffer_radius_miles),
+                                                              axis=1)
 
     return stations_cabs_df, stations_traffic_df
 
