@@ -35,7 +35,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
             sns.lineplot(data=df[varcol2], ax=ax1, color='coral',
                          ci=None, linewidth=size)
     else:
-        sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
+        sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2)
 
     #ax.title(station+' '+start_date+' to '+end_date)
     ax.set_title(label1 + ' vs ' + label2)
@@ -43,25 +43,21 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     return
 
 
-def create_base_plot_bokeh(station: str, base_df: DataFrame, datecol: str, varcol: str, varname: str, color: str ='red') -> figure:
-    p = figure(title='plot for station ' + station,
-                x_axis_label='datetime', x_axis_type='datetime',
-                y_axis_label=varname)
+def create_rel_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None, datecol: str=None):
+    if weighted:
+        for name, group in df2.reset_index().groupby(weight_col):
+            weight = float(name)
+            df = group.set_index(datecol)
+            alpha = 1 / 2 * weight
+            sns.relplot(x=df1[varcol1], y=df[varcol2], ax=ax, color='coral',
+                         ci=None, alpha=alpha)
+    else:
+        sns.relplot(x=df1[varcol1], y=df2[varcol2], ax=ax, color='coral', label=label2)
 
-    axis_range: Tuple = get_axis_range(df=base_df, col=varcol)
-    p.y_range = Range1d(start=axis_range[0], end=axis_range[1])
-    p.line(base_df[datecol], base_df[varcol],
-            legend=varname, line_width=2, line_color=color)
-    return p
-
-
-def add_variable_to_plot_bokeh(p: figure, var_df: DataFrame, datecol: str, varcol: str, varname: str, color: str='green') -> figure:
-    axis_range = get_axis_range(df=var_df, col=varcol)
-    p.extra_y_ranges = {'extra': Range1d(start=axis_range[0], end=axis_range[1])}
-    p.add_layout(LinearAxis(y_range_name='extra', axis_label=varname), 'right')
-    p.line(var_df[datecol], var_df[varcol],
-            legend=varname, line_width=2, line_color=color, y_range_name='extra')
-    return p
+    #ax.title(station+' '+start_date+' to '+end_date)
+    ax.set_title(label1 + ' vs ' + label2)
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
+    return
 
 
 def plot(*args) -> bool:
@@ -217,7 +213,7 @@ def plot(*args) -> bool:
 
             # create plots
             plt.close('all')
-            fig, axes = plt.subplots(nrows=5, ncols=2, clear=True, figsize=(18, 15))
+            fig, axes = plt.subplots(nrows=10, ncols=2, clear=True, figsize=(25, 15))
 
             if dolocationids.size > 0:
                 if gcabs_df.size > 0:
@@ -227,7 +223,7 @@ def plot(*args) -> bool:
                     varcol2 = 'passengers'
                     create_plot(df1=transit_df,
                                 varcol1=varcol1,
-                                label1=var1+varcol1,
+                                label1=var1+'exits',
                                 df2=gcabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
@@ -235,15 +231,35 @@ def plot(*args) -> bool:
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
-
-                    varcol1 = 'delent'
-                    create_plot(df1=transit_df,
+                    create_rel_plot(df1=transit_df,
                                 varcol1=varcol1,
-                                label1=var1+varcol1,
+                                label1=var1+'exits',
                                 df2=gcabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
                                 ax=axes[0, 1],
+                                weighted=True,
+                                weight_col='weight',
+                                datecol=cabs_datecols[0])
+
+                    varcol1 = 'delent'
+                    create_plot(df1=transit_df,
+                                varcol1=varcol1,
+                                label1=var1+'entries',
+                                df2=gcabs_df,
+                                varcol2=varcol2,
+                                label2=var2+varcol2,
+                                ax=axes[1, 0],
+                                weighted=True,
+                                weight_col='weight',
+                                datecol=cabs_datecols[0])
+                    create_rel_plot(df1=transit_df,
+                                varcol1=varcol1,
+                                label1=var1+'entries',
+                                df2=gcabs_df,
+                                varcol2=varcol2,
+                                label2=var2+varcol2,
+                                ax=axes[1, 1],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
@@ -255,11 +271,21 @@ def plot(*args) -> bool:
                     varcol2 = 'passengers'
                     create_plot(df1=transit_df,
                                 varcol1=varcol1,
-                                label1=var1+varcol1,
+                                label1=var1+'exits',
                                 df2=ycabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
-                                ax=axes[1, 0],
+                                ax=axes[2, 0],
+                                weighted=True,
+                                weight_col='weight',
+                                datecol=cabs_datecols[0])
+                    create_rel_plot(df1=transit_df,
+                                varcol1=varcol1,
+                                label1=var1+'exits',
+                                df2=ycabs_df,
+                                varcol2=varcol2,
+                                label2=var2+varcol2,
+                                ax=axes[2, 1],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
@@ -267,11 +293,21 @@ def plot(*args) -> bool:
                     varcol1 = 'delent'
                     create_plot(df1=transit_df,
                                 varcol1=varcol1,
-                                label1=var1+varcol1,
+                                label1=var1+'entries',
                                 df2=ycabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
-                                ax=axes[1, 1],
+                                ax=axes[3, 0],
+                                weighted=True,
+                                weight_col='weight',
+                                datecol=cabs_datecols[0])
+                    create_rel_plot(df1=transit_df,
+                                varcol1=varcol1,
+                                label1=var1+'entries',
+                                df2=ycabs_df,
+                                varcol2=varcol2,
+                                label2=var2+varcol2,
+                                ax=axes[3, 1],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
@@ -283,11 +319,21 @@ def plot(*args) -> bool:
                 varcol2 = 'speed'
                 create_plot(df1=transit_df,
                             varcol1=varcol1,
-                            label1=var1+varcol1,
+                            label1=var1+'exits',
                             df2=traffic_df,
                             varcol2=varcol2,
                             label2=var2+varcol2,
-                            ax=axes[2, 0],
+                            ax=axes[4, 0],
+                            weighted=True,
+                            weight_col='weight',
+                            datecol=traffic_datecols[0])
+                create_rel_plot(df1=transit_df,
+                            varcol1=varcol1,
+                            label1=var1+'exits',
+                            df2=traffic_df,
+                            varcol2=varcol2,
+                            label2=var2+varcol2,
+                            ax=axes[4, 1],
                             weighted=True,
                             weight_col='weight',
                             datecol=traffic_datecols[0])
@@ -295,11 +341,21 @@ def plot(*args) -> bool:
                 varcol1 = 'delent'
                 create_plot(df1=transit_df,
                             varcol1=varcol1,
-                            label1=var1+varcol1,
+                            label1=var1+'entries',
                             df2=traffic_df,
                             varcol2=varcol2,
                             label2=var2+varcol2,
-                            ax=axes[2, 1],
+                            ax=axes[5, 0],
+                            weighted=True,
+                            weight_col='weight',
+                            datecol=traffic_datecols[0])
+                create_rel_plot(df1=transit_df,
+                            varcol1=varcol1,
+                            label1=var1+'entries',
+                            df2=traffic_df,
+                            varcol2=varcol2,
+                            label2=var2+varcol2,
+                            ax=axes[5, 1],
                             weighted=True,
                             weight_col='weight',
                             datecol=traffic_datecols[0])
@@ -311,20 +367,34 @@ def plot(*args) -> bool:
             varcol2 = 'price'
             create_plot(df1=transit_df,
                         varcol1=varcol1,
-                        label1=var1 + varcol1,
+                        label1=var1 + 'exits',
                         df2=gas_df,
                         varcol2=varcol2,
                         label2=var2 + varcol2,
-                        ax=axes[3, 0])
+                        ax=axes[6, 0])
+            create_rel_plot(df1=transit_df,
+                        varcol1=varcol1,
+                        label1=var1 + 'exits',
+                        df2=gas_df,
+                        varcol2=varcol2,
+                        label2=var2 + varcol2,
+                        ax=axes[6, 1])
 
             varcol1 = 'delent'
             create_plot(df1=transit_df,
                         varcol1=varcol1,
-                        label1=var1 + varcol1,
+                        label1=var1 + 'entries',
                         df2=gas_df,
                         varcol2=varcol2,
                         label2=var2 + varcol2,
-                        ax=axes[3, 1])
+                        ax=axes[7, 0])
+            create_rel_plot(df1=transit_df,
+                        varcol1=varcol1,
+                        label1=var1 + 'entries',
+                        df2=gas_df,
+                        varcol2=varcol2,
+                        label2=var2 + varcol2,
+                        ax=axes[7, 1])
 
             # weather
             varcol1 = 'delex'
@@ -333,20 +403,34 @@ def plot(*args) -> bool:
             varcol2 = 'temp'
             create_plot(df1=transit_df,
                         varcol1=varcol1,
-                        label1=var1 + varcol1,
+                        label1=var1 + 'exits',
                         df2=weather_df,
                         varcol2=varcol2,
                         label2=var2 + varcol2,
-                        ax=axes[4, 0])
+                        ax=axes[8, 0])
+            create_rel_plot(df1=transit_df,
+                        varcol1=varcol1,
+                        label1=var1 + 'exits',
+                        df2=weather_df,
+                        varcol2=varcol2,
+                        label2=var2 + varcol2,
+                        ax=axes[8, 1])
 
             varcol1 = 'delent'
             create_plot(df1=transit_df,
                         varcol1=varcol1,
-                        label1=var1 + varcol1,
+                        label1=var1 + 'entries',
                         df2=weather_df,
                         varcol2=varcol2,
                         label2=var2 + varcol2,
-                        ax=axes[4, 1])
+                        ax=axes[9, 0])
+            create_rel_plot(df1=transit_df,
+                        varcol1=varcol1,
+                        label1=var1 + 'entries',
+                        df2=weather_df,
+                        varcol2=varcol2,
+                        label2=var2 + varcol2,
+                        ax=axes[9, 1])
 
             plot_filename = station + '.png'
             outfile = tmp_filepath + plot_filename
