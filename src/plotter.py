@@ -146,6 +146,7 @@ def plot(*args) -> bool:
 
             if dolocationids.size > 0:
                 cabs_dtypes = {
+                    'dolocationid': 'int64',
                     'passengers': 'int64',
                     'distance': 'float64'
                 }
@@ -180,6 +181,7 @@ def plot(*args) -> bool:
 
             if linkids.size > 0:
                 traffic_dtypes = {
+                    'linkid': 'int64',
                     'speed': 'float64',
                     'traveltime': 'float64'
                 }
