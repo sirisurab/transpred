@@ -38,7 +38,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
         sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
 
     #ax.title(station+' '+start_date+' to '+end_date)
-    ax.title(label1 + ' vs ' + label2)
+    ax.set_title(label1 + ' vs ' + label2)
     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
     return
 
