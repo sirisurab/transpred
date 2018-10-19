@@ -47,14 +47,9 @@ def create_rel_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, v
     if weighted:
         for name, group in df2.reset_index().groupby(weight_col):
             weight = float(name)
-            df = group.set_index(datecol)
-            print('before drop duplicates')
-            print(df.head(2))
-            df = df[~df.index.duplicated()]
-            print('after drop duplicates')
-            print(df.head(2))
+            df = group.set_index(datecol).resample('D')[varcol2].mean()
             alpha = 1 / 2 * weight
-            sns.relplot(x=df1[varcol1], y=df[varcol2], ax=ax, color='coral',
+            sns.relplot(x=df1[varcol1], y=df, ax=ax, color='coral',
                          ci=None, alpha=alpha)
     else:
         sns.relplot(x=df1[varcol1], y=df2[varcol2], ax=ax, color='coral', label=label2)
