@@ -25,8 +25,8 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
 
 def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax):
     sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
-    #ax1 = ax.twinx()
-    #sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
+    ax1 = ax.twinx()
+    sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
     return
 
 
