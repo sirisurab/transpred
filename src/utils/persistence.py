@@ -37,7 +37,7 @@ def fetch_s3_options() -> Dict[str, Union[Optional[str], bool, Dict[str, str]]]:
 
 def copy_files(source_folder:str, dest_bucket:str) -> bool:
     mc = get_client()
-    print('created minio client')
+    #print('created minio client')
     try:
         mc.make_bucket(dest_bucket)
         print('made bucket '+dest_bucket)
@@ -65,7 +65,7 @@ def copy_files(source_folder:str, dest_bucket:str) -> bool:
 
 def copy_file(dest_bucket: str, file: str, source: str) -> bool:
     mc = get_client()
-    print('created minio client')
+    #print('created minio client')
     try:
         mc.make_bucket(dest_bucket)
         print('made bucket '+dest_bucket)
@@ -92,7 +92,7 @@ def copy_file(dest_bucket: str, file: str, source: str) -> bool:
 
 def create_bucket(bucket: str) -> bool:
     mc = get_client()
-    print('created minio client')
+    #print('created minio client')
     try:
         mc.make_bucket(bucket)
 
@@ -149,13 +149,13 @@ def create_bucket(bucket: str) -> bool:
 
 def get_file(bucket: str, filename: str, filepath: str) -> Object:
     mc = get_client()
-    print('created minio client')
+    #print('created minio client')
     return mc.fget_object(bucket_name=bucket, object_name=filename, file_path=filepath)
 
 
 def get_file_stream(bucket: str, filename: str) -> HTTPResponse:
     mc = get_client()
-    print('created minio client')
+    #print('created minio client')
     return mc.get_object(bucket_name=bucket, object_name=filename)
 
 
