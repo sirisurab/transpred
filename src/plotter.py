@@ -43,16 +43,17 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     return
 
 
-def create_rel_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None, datecol: str=None):
+def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None, datecol: str=None):
     if weighted:
-        for name, group in df2.reset_index().groupby(weight_col):
+        for name, group in df.reset_index().groupby(weight_col):
             weight = float(name)
-            df = group.set_index(datecol).resample('D')[varcol2].mean()
+            #df = group.set_index(datecol).resample('D')[varcol2].mean()
+            df = group.set_index(datecol)
             alpha = 1 / 2 * weight
-            sns.relplot(x=df1[varcol1], y=df, ax=ax, color='coral',
+            sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color='coral',
                          ci=None, alpha=alpha)
     else:
-        sns.relplot(x=df1[varcol1], y=df2[varcol2], ax=ax, color='coral', label=label2)
+        sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color='coral', label=label2)
 
     #ax.title(station+' '+start_date+' to '+end_date)
     ax.set_title(label1 + ' vs ' + label2)
@@ -218,6 +219,7 @@ def plot(*args) -> bool:
             if dolocationids.size > 0:
                 if gcabs_df.size > 0:
                     varcol1 = 'delex'
+                    varcol11 = 'delent'
                     var1 = 'transit '
                     var2 = 'gcabs '
                     varcol2 = 'passengers'
@@ -231,20 +233,20 @@ def plot(*args) -> bool:
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
-                    create_rel_plot(df1=transit_df,
+
+                    df = transit_df.merge(gcabs_df, left_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2, 'weight']]
+                    create_rel_plot(df=df,
                                 varcol1=varcol1,
                                 label1=var1+'exits',
-                                df2=gcabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
                                 ax=axes[0, 1],
                                 weighted=True,
                                 weight_col='weight',
-                                datecol=cabs_datecols[0])
+                                datecol=ts_datecols[0])
 
-                    varcol1 = 'delent'
                     create_plot(df1=transit_df,
-                                varcol1=varcol1,
+                                varcol1=varcol11,
                                 label1=var1+'entries',
                                 df2=gcabs_df,
                                 varcol2=varcol2,
@@ -253,19 +255,19 @@ def plot(*args) -> bool:
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
-                    create_rel_plot(df1=transit_df,
-                                varcol1=varcol1,
+                    create_rel_plot(df=df,
+                                varcol1=varcol11,
                                 label1=var1+'entries',
-                                df2=gcabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
                                 ax=axes[1, 1],
                                 weighted=True,
                                 weight_col='weight',
-                                datecol=cabs_datecols[0])
+                                datecol=ts_datecols[0])
 
                 if ycabs_df.size > 0:
                     varcol1 = 'delex'
+                    varcol11 = 'delent'
                     var1 = 'transit '
                     var2 = 'ycabs '
                     varcol2 = 'passengers'
@@ -279,20 +281,20 @@ def plot(*args) -> bool:
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
-                    create_rel_plot(df1=transit_df,
+
+                    df = transit_df.merge(ycabs_df, left_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2, 'weight']]
+                    create_rel_plot(df=df,
                                 varcol1=varcol1,
                                 label1=var1+'exits',
-                                df2=ycabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
                                 ax=axes[2, 1],
                                 weighted=True,
                                 weight_col='weight',
-                                datecol=cabs_datecols[0])
+                                datecol=ts_datecols[0])
 
-                    varcol1 = 'delent'
                     create_plot(df1=transit_df,
-                                varcol1=varcol1,
+                                varcol1=varcol11,
                                 label1=var1+'entries',
                                 df2=ycabs_df,
                                 varcol2=varcol2,
@@ -301,19 +303,19 @@ def plot(*args) -> bool:
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
-                    create_rel_plot(df1=transit_df,
-                                varcol1=varcol1,
+                    create_rel_plot(df=df,
+                                varcol1=varcol11,
                                 label1=var1+'entries',
-                                df2=ycabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
                                 ax=axes[3, 1],
                                 weighted=True,
                                 weight_col='weight',
-                                datecol=cabs_datecols[0])
+                                datecol=ts_datecols[0])
 
             if linkids.size > 0 and transit_df.size > 0:
                 varcol1 = 'delex'
+                varcol11 = 'delent'
                 var1 = 'transit '
                 var2 = 'traffic '
                 varcol2 = 'speed'
@@ -327,20 +329,20 @@ def plot(*args) -> bool:
                             weighted=True,
                             weight_col='weight',
                             datecol=traffic_datecols[0])
-                create_rel_plot(df1=transit_df,
+
+                df = transit_df.merge(traffic_df, left_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2, 'weight']]
+                create_rel_plot(df=df,
                             varcol1=varcol1,
                             label1=var1+'exits',
-                            df2=traffic_df,
                             varcol2=varcol2,
                             label2=var2+varcol2,
                             ax=axes[4, 1],
                             weighted=True,
                             weight_col='weight',
-                            datecol=traffic_datecols[0])
+                            datecol=ts_datecols[0])
 
-                varcol1 = 'delent'
                 create_plot(df1=transit_df,
-                            varcol1=varcol1,
+                            varcol1=varcol11,
                             label1=var1+'entries',
                             df2=traffic_df,
                             varcol2=varcol2,
@@ -349,19 +351,19 @@ def plot(*args) -> bool:
                             weighted=True,
                             weight_col='weight',
                             datecol=traffic_datecols[0])
-                create_rel_plot(df1=transit_df,
-                            varcol1=varcol1,
+                create_rel_plot(df=df,
+                            varcol1=varcol11,
                             label1=var1+'entries',
-                            df2=traffic_df,
                             varcol2=varcol2,
                             label2=var2+varcol2,
                             ax=axes[5, 1],
                             weighted=True,
                             weight_col='weight',
-                            datecol=traffic_datecols[0])
+                            datecol=ts_datecols[0])
 
             # gas
             varcol1 = 'delex'
+            varcol11 = 'delent'
             var1 = 'transit '
             var2 = 'gas '
             varcol2 = 'price'
@@ -372,32 +374,30 @@ def plot(*args) -> bool:
                         varcol2=varcol2,
                         label2=var2 + varcol2,
                         ax=axes[6, 0])
-            create_rel_plot(df1=transit_df,
+
+            df = transit_df.merge(gas_df, left_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2]]
+            create_rel_plot(df=df,
                         varcol1=varcol1,
                         label1=var1 + 'exits',
-                        df2=gas_df,
                         varcol2=varcol2,
                         label2=var2 + varcol2,
                         ax=axes[6, 1])
 
-            varcol1 = 'delent'
             create_plot(df1=transit_df,
-                        varcol1=varcol1,
+                        varcol1=varcol11,
                         label1=var1 + 'entries',
                         df2=gas_df,
                         varcol2=varcol2,
                         label2=var2 + varcol2,
                         ax=axes[7, 0])
-            create_rel_plot(df1=transit_df,
-                        varcol1=varcol1,
+            create_rel_plot(df=df,
+                        varcol1=varcol11,
                         label1=var1 + 'entries',
-                        df2=gas_df,
                         varcol2=varcol2,
                         label2=var2 + varcol2,
                         ax=axes[7, 1])
 
             # weather
-            varcol1 = 'delex'
             var1 = 'transit '
             var2 = 'weather '
             varcol2 = 'temp'
@@ -408,26 +408,25 @@ def plot(*args) -> bool:
                         varcol2=varcol2,
                         label2=var2 + varcol2,
                         ax=axes[8, 0])
-            create_rel_plot(df1=transit_df,
+
+            df = transit_df.merge(weather_df, left_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2]]
+            create_rel_plot(df=df,
                         varcol1=varcol1,
                         label1=var1 + 'exits',
-                        df2=weather_df,
                         varcol2=varcol2,
                         label2=var2 + varcol2,
                         ax=axes[8, 1])
 
-            varcol1 = 'delent'
             create_plot(df1=transit_df,
-                        varcol1=varcol1,
+                        varcol1=varcol11,
                         label1=var1 + 'entries',
                         df2=weather_df,
                         varcol2=varcol2,
                         label2=var2 + varcol2,
                         ax=axes[9, 0])
-            create_rel_plot(df1=transit_df,
-                        varcol1=varcol1,
+            create_rel_plot(df=df,
+                        varcol1=varcol11,
                         label1=var1 + 'entries',
-                        df2=weather_df,
                         varcol2=varcol2,
                         label2=var2 + varcol2,
                         ax=axes[9, 1])
