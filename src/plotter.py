@@ -59,8 +59,8 @@ def plot(*args) -> bool:
     # read in and out buckets, freq and range for task from task_map
     freq: str = task_map.task_type_map[task]['freq']
     range: List[str] = task_map.task_type_map[task]['range']
-    start_date: int = int(range[0])
-    end_date: int = int(range[1])
+    start_date: str = range[0]
+    end_date: str = range[1]
     geomerged_cabs: str = GEOMERGED_PATH+'/cabs.csv'
     geomerged_traffic: str = GEOMERGED_PATH+'/traffic.csv'
     gas_file: str ='gas.csv'
