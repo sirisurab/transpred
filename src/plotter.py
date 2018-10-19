@@ -92,7 +92,8 @@ def plot(*args) -> bool:
     }
     gas_datecols = ['date']
     gas_df: DataFrame = read_csv(filestream, usecols=list(dtypes.keys())+gas_datecols, parse_dates=gas_datecols, encoding='utf-8', dtype=dtypes)
-    gas_df = gas_df.set_index(gas_datecols)[start_date: end_date]
+    gas_df = gas_df.set_index(gas_datecols).loc[start_date: end_date]
+    print(gas_df.head())
 
     filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=weather_file)
     dtypes = {
@@ -102,7 +103,8 @@ def plot(*args) -> bool:
     }
     weather_datecols = ['date']
     weather_df: DataFrame = read_csv(filestream, usecols=list(dtypes.keys())+weather_datecols, parse_dates=weather_datecols, encoding='utf-8', dtype=dtypes)
-    weather_df = weather_df.set_index(weather_datecols)[start_date: end_date]
+    weather_df = weather_df.set_index(weather_datecols).loc[start_date: end_date]
+    print(weather_df.head())
 
     # for plotting
     plot_filepath: str = task + '/'
@@ -130,7 +132,7 @@ def plot(*args) -> bool:
                                              date_parser=row_operations.parse_rg_dt,
                                              encoding='utf-8', dtype=dtypes)
             print(transit_df.head())
-            transit_df = transit_df.set_index('datetime')[start_date: end_date]
+            transit_df = transit_df.set_index('datetime').loc[start_date: end_date]
             print(transit_df.head())
 
             # read data from other in buckets
@@ -172,8 +174,8 @@ def plot(*args) -> bool:
                                   ignore_index=True)
                 ycabs_df = ycabs_df.merge(dolocationids, left_on='dolocationid', right_on='locationid', how='left', copy=False).\
                     drop(columns=['dolocationid', 'locationid']).drop_duplicates()
-                gcabs_df = gcabs_df.set_index(cabs_datecols)[start_date: end_date]
-                ycabs_df = ycabs_df.set_index(cabs_datecols)[start_date: end_date]
+                gcabs_df = gcabs_df.set_index(cabs_datecols).loc[start_date: end_date]
+                ycabs_df = ycabs_df.set_index(cabs_datecols).loc[start_date: end_date]
                 print(gcabs_df.head())
                 print(ycabs_df.head())
 
@@ -198,7 +200,7 @@ def plot(*args) -> bool:
                                    if str(int(linkid)) in ps.get_all_filenames(bucket=RGTRAFFIC_BUCKET, path='/')],
                                   ignore_index=True)
                 traffic_df = traffic_df.merge(linkids, on='linkid', how='left', copy=False).drop(columns=['linkid']).drop_duplicates()
-                traffic_df = traffic_df.set_index(traffic_datecols)[start_date: end_date]
+                traffic_df = traffic_df.set_index(traffic_datecols).loc[start_date: end_date]
                 print(traffic_df.head())
 
             # create plots
