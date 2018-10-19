@@ -30,12 +30,12 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     if weighted:
         for name, group in df2.reset_index().groupby(weight_col):
             weight = float(name)
-            print(group.head())
+            #print(group.head())
             df = group.set_index(datecol)
             #weight = df[weight_col].iloc[0]
-            size = 1 / (2 * weight)
-            print('size %s' % str(size))
-            sns.lineplot(data=df[varcol2], ax=ax1, color='coral', size=size)
+            df['size'] = 1 / (2 * weight)
+            sns.lineplot(data=df[varcol2], ax=ax1, color='coral', size=df['size'],
+                         ci=None)
     else:
         sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
     return
