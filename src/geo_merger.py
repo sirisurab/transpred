@@ -42,7 +42,7 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
 
 
 def add_weight(row, id_col, prev_buffer_df, buffer_radius):
-    print(row)
+    #print(row)
     if row[id_col] == '' or row[id_col] is None:
         row['weight'] = ''
         return row
@@ -67,10 +67,12 @@ def create_spatial_joins(buffer_radius_miles: float, stations_geodf: GeoDataFram
 
     # exclude previous buffer cab location ids and traffic link ids from current buffer circle, before writing to file
     stations_cabs_df = stations_cabs_df.apply(func=add_weight,
+                                              axis=1,
                                               id_col='locationid',
                                               prev_buffer_df=prev_buffer_ids[0],
                                               buffer_radius=buffer_radius_miles)
     stations_traffic_df = stations_traffic_df.apply(func=add_weight,
+                                                    axis=1,
                                                     id_col='linkid',
                                                     prev_buffer_df=prev_buffer_ids[1],
                                                     buffer_radius=buffer_radius_miles)
