@@ -155,7 +155,8 @@ def plot(*args) -> bool:
                                             usecols=cabs_datecols + list(cabs_dtypes.keys()),
                                             parse_dates=cabs_datecols,
                                             encoding='utf-8', dtype=cabs_dtypes)
-                                   for locationid in dolocationids['locationid']],
+                                   for locationid in dolocationids['locationid']
+                                   if str(locationid) in ps.get_all_filenames(bucket=RGGCABS_BUCKET, path='/')],
                                    ignore_index=True)
                 gcabs_df = gcabs_df.merge(dolocationids, on='locationid', how='left', copy=False)
                 print(gcabs_df.head())
@@ -164,7 +165,8 @@ def plot(*args) -> bool:
                                             usecols=cabs_datecols + cabs_cols,
                                             parse_dates=cabs_datecols,
                                             encoding='utf-8', dtype=cabs_dtypes)
-                                   for locationid in dolocationids['locationid']],
+                                   for locationid in dolocationids['locationid']
+                                   if str(locationid) in ps.get_all_filenames(bucket=RGYCABS_BUCKET, path='/')],
                                   ignore_index=True)
                 ycabs_df = ycabs_df.merge(dolocationids, on='locationid', how='left', copy=False)
                 print(ycabs_df.head())
@@ -187,7 +189,8 @@ def plot(*args) -> bool:
                                               usecols=traffic_datecols + traffic_cols,
                                               parse_dates=traffic_datecols,
                                               encoding='utf-8', dtype=traffic_dtypes)
-                                    for linkid in linkids['linkid']],
+                                    for linkid in linkids['linkid']
+                                   if str(int(linkid)) in ps.get_all_filenames(bucket=RGTRAFFIC_BUCKET, path='/')],
                                   ignore_index=True)
                 traffic_df = traffic_df.merge(linkids, on='linkid', how='left', copy=False)
                 print(traffic_df.head())
