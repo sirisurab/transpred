@@ -4,11 +4,11 @@ from math import sin, pi
 import matplotlib.pyplot as plt
 from utils import persistence as ps, file_io
 from geog import propagate
-from numpy import linspace, arange, ndarray
+from numpy import linspace, arange, ndarray, NaN
 import seaborn as sns
 from shapely.geometry import Polygon
 from typing import Tuple, List
-from pandas import Series, DataFrame
+from pandas import Series, DataFrame, concat
 from functools import partial
 
 GEOMERGED_PATH: str = 'geo-merged/'
@@ -81,6 +81,33 @@ def create_spatial_joins(buffer_radius_miles: float, stations_geodf: GeoDataFram
     return stations_cabs_df, stations_traffic_df
 
 
+def create_spatial_join_cabs(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zone_df: GeoDataFrame) -> DataFrame:
+    # perform spatial join
+    # between stations (buffer circles) and taxi-zones polygons
+    stations_cabs_df: GeoDataFrame = sjoin(stations_geodf, taxi_zone_df, how='left', op='intersects')
+    stations_cabs_df = stations_cabs_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'LocationID']]
+    stations_cabs_df.rename(columns={'LocationID': 'locationid'}, inplace=True)
+    stations_cabs_df['weight'] = NaN
+    stations_cabs_df.loc[(stations_cabs_df['locationid'] != '') &
+                         (~stations_cabs_df['locationid'].isnull()) &
+                         (~stations_cabs_df['locationid'].isna()), 'weight'] = buffer_radius_miles
+
+    return stations_cabs_df
+
+
+def create_spatial_join_traffic(buffer_radius_miles: float, stations_geodf: GeoDataFrame, links_df: GeoDataFrame) -> DataFrame:
+    # perform spatial join
+    # between stations (buffer circles) and traffic_links lines
+    stations_traffic_df: GeoDataFrame = sjoin(stations_geodf, links_df, how='left', op='intersects')
+    stations_traffic_df = stations_traffic_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'linkid']]
+    stations_traffic_df['weight'] = NaN
+    stations_traffic_df.loc[(stations_traffic_df['linkid'] != '') &
+                            (~stations_traffic_df['linkid'].isnull()) &
+                            (~stations_traffic_df['linkid'].isna()), 'weight'] = buffer_radius_miles
+
+    return stations_traffic_df
+
+
 def geo_merge(buffer_radii: ndarray) -> bool:
     #gc_radius_miles: float = 3963 - 13 * sin(NYC_LATITUDE * pi/180)
 
@@ -106,7 +133,9 @@ def geo_merge(buffer_radii: ndarray) -> bool:
                                                           bucket=REFBASE_BUCKET)
 
     status_1: bool = False
-    prev_buffer_ids: Tuple[DataFrame, DataFrame] = (DataFrame(), DataFrame())
+    #prev_buffer_ids: Tuple[DataFrame, DataFrame] = (DataFrame(), DataFrame())
+    cabs_df: DataFrame = DataFrame()
+    traffic_df: DataFrame = DataFrame()
     for radius in buffer_radii:
         status_1 = False
         try:
@@ -142,24 +171,43 @@ def geo_merge(buffer_radii: ndarray) -> bool:
                                             links_df=links_df)
 
                 # perform spatial join
-                prev_buffer_ids = create_spatial_joins(buffer_radius_miles=buffer_radius_miles,
+                #prev_buffer_ids = create_spatial_joins(buffer_radius_miles=buffer_radius_miles,
+                #                                       stations_geodf=stations_geodf,
+                #                                       taxi_zone_df=taxi_zone_df,
+                #                                       links_df=links_df,
+                #                                       prev_buffer_ids=prev_buffer_ids)
+
+                cabs_df = concat([cabs_df, create_spatial_join_cabs(buffer_radius_miles=buffer_radius_miles,
                                                        stations_geodf=stations_geodf,
-                                                       taxi_zone_df=taxi_zone_df,
-                                                       links_df=links_df,
-                                                       prev_buffer_ids=prev_buffer_ids)
+                                                       taxi_zone_df=taxi_zone_df)], ignore_index=True)
+
+                traffic_df = concat([traffic_df, create_spatial_join_traffic(buffer_radius_miles=buffer_radius_miles,
+                                                                  stations_geodf=stations_geodf,
+                                                                  links_df=links_df)], ignore_index=True)
 
 
             except Exception as err:
                 print('Error in geo_merge %(radius)s' % {'radius': str(buffer_radius_miles)})
                 raise err
 
+    cabs_df = cabs_df.groupby(['stationid', 'locationid']).agg({'stop_id': 'first',
+                                                              'stop_name': 'first',
+                                                              'tsstation': 'first',
+                                                              'borough': 'first',
+                                                              'weight': 'min'})
+    traffic_df = traffic_df.groupby(['stationid', 'linkid']).agg({'stop_id': 'first',
+                                                                 'stop_name': 'first',
+                                                                 'tsstation': 'first',
+                                                                 'borough': 'first',
+                                                                 'weight': 'min'})
+
     # write files
     # if stations_cabs_df.size > 0:
     geomerged_file = GEOMERGED_PATH + '/cabs.csv'
-    status_1 = file_io.write_csv(df=prev_buffer_ids[0], bucket=REFBASE_BUCKET, filename=geomerged_file)
+    status_1 = file_io.write_csv(df=cabs_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
     # if stations_traffic_df.size > 0:
     geomerged_file = GEOMERGED_PATH + '/traffic.csv'
-    status_2 = file_io.write_csv(df=prev_buffer_ids[1], bucket=REFBASE_BUCKET, filename=geomerged_file)
+    status_2 = file_io.write_csv(df=traffic_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
 
     return status_1 and status_2
 
