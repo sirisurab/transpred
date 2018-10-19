@@ -234,7 +234,7 @@ def plot(*args) -> bool:
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
 
-                    df = transit_df.merge(gcabs_df, left_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2, 'weight']]
+                    df = transit_df.merge(gcabs_df, left_index=True, right_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2, 'weight']]
                     create_rel_plot(df=df,
                                 varcol1=varcol1,
                                 label1=var1+'exits',
@@ -282,7 +282,7 @@ def plot(*args) -> bool:
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
 
-                    df = transit_df.merge(ycabs_df, left_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2, 'weight']]
+                    df = transit_df.merge(ycabs_df, left_index=True, right_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2, 'weight']]
                     create_rel_plot(df=df,
                                 varcol1=varcol1,
                                 label1=var1+'exits',
@@ -330,7 +330,7 @@ def plot(*args) -> bool:
                             weight_col='weight',
                             datecol=traffic_datecols[0])
 
-                df = transit_df.merge(traffic_df, left_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2, 'weight']]
+                df = transit_df.merge(traffic_df, left_index=True, right_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2, 'weight']]
                 create_rel_plot(df=df,
                             varcol1=varcol1,
                             label1=var1+'exits',
@@ -375,7 +375,7 @@ def plot(*args) -> bool:
                         label2=var2 + varcol2,
                         ax=axes[6, 0])
 
-            df = transit_df.merge(gas_df, left_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2]]
+            df = transit_df.merge(gas_df, left_index=True, right_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2]]
             create_rel_plot(df=df,
                         varcol1=varcol1,
                         label1=var1 + 'exits',
@@ -409,7 +409,7 @@ def plot(*args) -> bool:
                         label2=var2 + varcol2,
                         ax=axes[8, 0])
 
-            df = transit_df.merge(weather_df, left_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2]]
+            df = transit_df.merge(weather_df, left_index=True, right_index=True, how='left', copy=False)[[varcol1, varcol11, varcol2]]
             create_rel_plot(df=df,
                         varcol1=varcol1,
                         label1=var1 + 'exits',
