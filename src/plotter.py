@@ -131,7 +131,6 @@ def plot(*args) -> bool:
                                              parse_dates=ts_datecols,
                                              date_parser=row_operations.parse_rg_dt,
                                              encoding='utf-8', dtype=dtypes)
-            print(transit_df.head())
             transit_df = transit_df.set_index('datetime').loc[start_date: end_date]
             print(transit_df.head())
 
