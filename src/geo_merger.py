@@ -42,45 +42,6 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     return status
 
 
-def add_weight(row, id_col, prev_buffer_df, buffer_radius):
-    if row[id_col] == '' or row[id_col] is None:
-        return ''
-    if prev_buffer_df.size == 0:
-        return buffer_radius
-    df_row: DataFrame = prev_buffer_df.loc[(prev_buffer_df[id_col] == row[id_col]) & (prev_buffer_df['station_id'] == row['station_id'])]
-    if df_row.size > 0:
-        return df_row['weight'].iloc[0]
-    else:
-        return buffer_radius
-
-
-def create_spatial_joins(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zone_df: GeoDataFrame, links_df: GeoDataFrame, prev_buffer_ids: Tuple[DataFrame, DataFrame]) -> Tuple[DataFrame, DataFrame]:
-    # perform spatial join
-    # between stations (buffer circles) and taxi-zones polygons
-    stations_cabs_df: GeoDataFrame = sjoin(stations_geodf, taxi_zone_df, how='left', op='intersects')
-    stations_cabs_df = stations_cabs_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'LocationID']]
-    stations_cabs_df.rename(columns={'LocationID': 'locationid'}, inplace=True)
-    # perform spatial join
-    # between stations (buffer circles) and traffic_links lines
-    stations_traffic_df: GeoDataFrame = sjoin(stations_geodf, links_df, how='left', op='intersects')
-    stations_traffic_df = stations_traffic_df[['station_id', 'stop_id', 'stop_name', 'tsstation', 'borough', 'linkid']]
-
-    # exclude previous buffer cab location ids and traffic link ids from current buffer circle, before writing to file
-
-    stations_cabs_df['weight'] = stations_cabs_df.apply(func=partial(add_weight,
-                                                                     id_col='locationid',
-                                                                     prev_buffer_df=prev_buffer_ids[0],
-                                                                     buffer_radius=buffer_radius_miles),
-                                                        axis=1)
-    stations_traffic_df['weight'] = stations_traffic_df.apply(func=partial(add_weight,
-                                                                           id_col='linkid',
-                                                                           prev_buffer_df=prev_buffer_ids[1],
-                                                                           buffer_radius=buffer_radius_miles),
-                                                              axis=1)
-
-    return stations_cabs_df, stations_traffic_df
-
-
 def create_spatial_join_cabs(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zone_df: GeoDataFrame) -> DataFrame:
     # perform spatial join
     # between stations (buffer circles) and taxi-zones polygons
@@ -165,13 +126,6 @@ def geo_merge(buffer_radii: ndarray) -> bool:
                                             stations_geodf=stations_geodf,
                                             taxi_zone_df=taxi_zone_df,
                                             links_df=links_df)
-
-                # perform spatial join
-                #prev_buffer_ids = create_spatial_joins(buffer_radius_miles=buffer_radius_miles,
-                #                                       stations_geodf=stations_geodf,
-                #                                       taxi_zone_df=taxi_zone_df,
-                #                                       links_df=links_df,
-                #                                       prev_buffer_ids=prev_buffer_ids)
 
                 cabs_df = concat([cabs_df, create_spatial_join_cabs(buffer_radius_miles=buffer_radius_miles,
                                                        stations_geodf=stations_geodf,
