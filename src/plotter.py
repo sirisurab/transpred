@@ -36,6 +36,10 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
                          ci=None, linewidth=size)
     else:
         sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
+
+    #ax.title(station+' '+start_date+' to '+end_date)
+    ax.title(label1 + ' vs ' + label2)
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
     return
 
 
@@ -214,8 +218,6 @@ def plot(*args) -> bool:
             # create plots
             plt.close('all')
             fig, axes = plt.subplots(nrows=5, ncols=2, clear=True, figsize=(18, 15))
-            axes.title(station+' '+start_date+' to '+end_date)
-            axes.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
 
             if dolocationids.size > 0:
                 if gcabs_df.size > 0:
