@@ -49,7 +49,7 @@ def add_weight(row, id_col, prev_buffer_df, buffer_radius):
     if prev_buffer_df.size == 0:
         row['weight'] = buffer_radius
         return row
-    df_row: DataFrame = prev_buffer_df.loc[lambda df: df[id_col] == row[id_col] and df['station_id'] == row['station_id']]
+    df_row: DataFrame = prev_buffer_df.loc[lambda df: df[id_col] == row[id_col] & df['station_id'] == row['station_id']]
     if df_row.size > 0:
         row['weight'] = df_row['weight']
     else:
