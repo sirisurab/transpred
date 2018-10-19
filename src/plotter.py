@@ -3,7 +3,7 @@ from typing import List, Dict, Tuple
 from data_tools import task_map, row_operations
 from utils import persistence as ps
 from urllib3.response import HTTPResponse
-from pandas import DataFrame, read_csv, concat
+from pandas import DataFrame, read_csv, concat, Grouper
 from bokeh.plotting import figure, output_file, show
 from bokeh.models import Range1d, LinearAxis
 from numpy import NaN, mean
@@ -28,11 +28,11 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
     ax1 = ax.twinx()
     if weighted:
-        for name, group in df2.reset_index().groupby(weight_col):
+        for name, group in df2.groupby(level=1):
             weight = float(name)
-            df = group.set_index(datecol)
+            #df = group.set_index(datecol)
             size = 1 / weight
-            sns.lineplot(data=df[varcol2], ax=ax1, color='coral',
+            sns.lineplot(data=group[varcol2], ax=ax1, color='coral',
                          ci=None, linewidth=size)
     else:
         sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2)
@@ -46,10 +46,10 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
 def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None, datecol: str=None):
     #index_col = df.index.names
     if weighted:
-        for name, group in df.reset_index().groupby(weight_col):
+        for name, group in df.groupby(level=1):
             weight = float(name)
             #df = group.set_index(datecol).resample('D')[varcol2].mean()
-            df = group.set_index(datecol)
+            #df = group.set_index(datecol)
             alpha = 1 / 2 * weight
             sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color='coral',
                          ci=None, alpha=alpha)
@@ -142,7 +142,7 @@ def plot(*args) -> bool:
                                              parse_dates=ts_datecols,
                                              date_parser=row_operations.parse_rg_dt,
                                              encoding='utf-8', dtype=dtypes)
-            transit_df = transit_df.set_index('datetime').loc[start_date: end_date]
+            transit_df = transit_df.set_index('datetime').resample('D').sum().loc[start_date: end_date]
             print(transit_df.head())
 
             # read data from other in buckets
@@ -184,8 +184,8 @@ def plot(*args) -> bool:
                                   ignore_index=True)
                 ycabs_df = ycabs_df.merge(dolocationids, left_on='dolocationid', right_on='locationid', how='left', copy=False).\
                     drop(columns=['dolocationid', 'locationid']).drop_duplicates()
-                gcabs_df = gcabs_df.set_index(cabs_datecols).loc[start_date: end_date]
-                ycabs_df = ycabs_df.set_index(cabs_datecols).loc[start_date: end_date]
+                gcabs_df = gcabs_df.set_index(cabs_datecols, 'weight').groupby(Grouper(freq='D', level=0)).sum().loc[start_date: end_date]
+                ycabs_df = ycabs_df.set_index(cabs_datecols, 'weight').groupby(Grouper(freq='D', level=0)).sum().loc[start_date: end_date]
                 print(gcabs_df.head())
                 print(ycabs_df.head())
 
@@ -210,231 +210,221 @@ def plot(*args) -> bool:
                                    if str(int(linkid)) in ps.get_all_filenames(bucket=RGTRAFFIC_BUCKET, path='/')],
                                   ignore_index=True)
                 traffic_df = traffic_df.merge(linkids, on='linkid', how='left', copy=False).drop(columns=['linkid']).drop_duplicates()
-                traffic_df = traffic_df.set_index(traffic_datecols).loc[start_date: end_date]
+                traffic_df = traffic_df.set_index(traffic_datecols, 'weight').groupby(Grouper(freq='D', level=0)).sum().loc[start_date: end_date]
                 print(traffic_df.head())
 
             # create plots
             plt.close('all')
             fig, axes = plt.subplots(nrows=10, ncols=2, clear=True, figsize=(25, 15))
+            ts_col1 = 'delex'
+            ts_col2 = 'delent'
+            ts_label = 'transit '
 
             if dolocationids.size > 0:
                 if gcabs_df.size > 0:
-                    varcol1 = 'delex'
-                    varcol11 = 'delent'
-                    var1 = 'transit '
-                    var2 = 'gcabs '
-                    varcol2 = 'passengers'
+                    gcabs_label = 'gcabs '
+                    gcabs_col = 'passengers'
                     create_plot(df1=transit_df,
-                                varcol1=varcol1,
-                                label1=var1+'exits',
+                                varcol1=ts_col1,
+                                label1=ts_label+'exits',
                                 df2=gcabs_df,
-                                varcol2=varcol2,
-                                label2=var2+varcol2,
+                                varcol2=gcabs_col,
+                                label2=gcabs_label+gcabs_col,
                                 ax=axes[0, 0],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
 
-                    df = transit_df.merge(gcabs_df, left_index=True, right_index=True, how='left', copy=False)\
-                    [[ts_datecols[0], varcol1, varcol11, varcol2, 'weight']].set_index(ts_datecols[0])
+                    df = transit_df.join(gcabs_df, how='outer')\
+                    [[ts_col1, ts_col2, gcabs_col, 'weight']]
                     create_rel_plot(df=df,
-                                varcol1=varcol1,
-                                label1=var1+'exits',
-                                varcol2=varcol2,
-                                label2=var2+varcol2,
+                                varcol1=ts_col1,
+                                label1=ts_label+'exits',
+                                varcol2=gcabs_col,
+                                label2=gcabs_label+gcabs_col,
                                 ax=axes[0, 1],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=ts_datecols[0])
 
                     create_plot(df1=transit_df,
-                                varcol1=varcol11,
-                                label1=var1+'entries',
+                                varcol1=ts_col2,
+                                label1=ts_label+'entries',
                                 df2=gcabs_df,
-                                varcol2=varcol2,
-                                label2=var2+varcol2,
+                                varcol2=gcabs_col,
+                                label2=gcabs_label+gcabs_col,
                                 ax=axes[1, 0],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
                     create_rel_plot(df=df,
-                                varcol1=varcol11,
-                                label1=var1+'entries',
-                                varcol2=varcol2,
-                                label2=var2+varcol2,
+                                varcol1=ts_col2,
+                                label1=ts_label+'entries',
+                                varcol2=gcabs_col,
+                                label2=gcabs_label+gcabs_col,
                                 ax=axes[1, 1],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=ts_datecols[0])
 
                 if ycabs_df.size > 0:
-                    varcol1 = 'delex'
-                    varcol11 = 'delent'
-                    var1 = 'transit '
-                    var2 = 'ycabs '
-                    varcol2 = 'passengers'
+                    ycabs_label = 'ycabs '
+                    ycabs_col = 'passengers'
                     create_plot(df1=transit_df,
-                                varcol1=varcol1,
-                                label1=var1+'exits',
+                                varcol1=ts_col1,
+                                label1=ts_label+'exits',
                                 df2=ycabs_df,
-                                varcol2=varcol2,
-                                label2=var2+varcol2,
+                                varcol2=ycabs_col,
+                                label2=ycabs_label+ycabs_col,
                                 ax=axes[2, 0],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
 
-                    df = transit_df.merge(ycabs_df, left_index=True, right_index=True, how='left', copy=False)\
-                    [[ts_datecols[0], varcol1, varcol11, varcol2, 'weight']].set_index(ts_datecols[0])
+                    df = transit_df.join(ycabs_df, how='outer')\
+                    [[ts_col1, ts_col2, ycabs_col, 'weight']]
                     create_rel_plot(df=df,
-                                varcol1=varcol1,
-                                label1=var1+'exits',
-                                varcol2=varcol2,
-                                label2=var2+varcol2,
+                                varcol1=ts_col1,
+                                label1=ts_label+'exits',
+                                varcol2=ycabs_col,
+                                label2=ycabs_label+ycabs_col,
                                 ax=axes[2, 1],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=ts_datecols[0])
 
                     create_plot(df1=transit_df,
-                                varcol1=varcol11,
-                                label1=var1+'entries',
+                                varcol1=ts_col2,
+                                label1=ts_label+'entries',
                                 df2=ycabs_df,
-                                varcol2=varcol2,
-                                label2=var2+varcol2,
+                                varcol2=ycabs_col,
+                                label2=ycabs_label+ycabs_col,
                                 ax=axes[3, 0],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
                     create_rel_plot(df=df,
-                                varcol1=varcol11,
-                                label1=var1+'entries',
-                                varcol2=varcol2,
-                                label2=var2+varcol2,
+                                varcol1=ts_col2,
+                                label1=ts_label+'entries',
+                                varcol2=ycabs_col,
+                                label2=ycabs_label+ycabs_col,
                                 ax=axes[3, 1],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=ts_datecols[0])
 
             if linkids.size > 0 and transit_df.size > 0:
-                varcol1 = 'delex'
-                varcol11 = 'delent'
-                var1 = 'transit '
-                var2 = 'traffic '
-                varcol2 = 'speed'
+                tr_label = 'traffic '
+                tr_col = 'speed'
                 create_plot(df1=transit_df,
-                            varcol1=varcol1,
-                            label1=var1+'exits',
+                            varcol1=ts_col1,
+                            label1=ts_label+'exits',
                             df2=traffic_df,
-                            varcol2=varcol2,
-                            label2=var2+varcol2,
+                            varcol2=tr_col,
+                            label2=tr_label+tr_col,
                             ax=axes[4, 0],
                             weighted=True,
                             weight_col='weight',
                             datecol=traffic_datecols[0])
 
-                df = transit_df.merge(traffic_df, left_index=True, right_index=True, how='left', copy=False)\
-                    [[ts_datecols[0], varcol1, varcol11, varcol2, 'weight']].set_index(ts_datecols[0])
+                df = transit_df.join(traffic_df, how='outer') \
+                    [[ts_col1, ts_col2, tr_col, 'weight']]
                 create_rel_plot(df=df,
-                            varcol1=varcol1,
-                            label1=var1+'exits',
-                            varcol2=varcol2,
-                            label2=var2+varcol2,
+                            varcol1=ts_col1,
+                            label1=ts_label+'exits',
+                            varcol2=tr_col,
+                            label2=tr_label+tr_col,
                             ax=axes[4, 1],
                             weighted=True,
                             weight_col='weight',
                             datecol=ts_datecols[0])
 
                 create_plot(df1=transit_df,
-                            varcol1=varcol11,
-                            label1=var1+'entries',
+                            varcol1=ts_col2,
+                            label1=ts_label+'entries',
                             df2=traffic_df,
-                            varcol2=varcol2,
-                            label2=var2+varcol2,
+                            varcol2=tr_col,
+                            label2=tr_label+tr_col,
                             ax=axes[5, 0],
                             weighted=True,
                             weight_col='weight',
                             datecol=traffic_datecols[0])
                 create_rel_plot(df=df,
-                            varcol1=varcol11,
-                            label1=var1+'entries',
-                            varcol2=varcol2,
-                            label2=var2+varcol2,
+                            varcol1=ts_col2,
+                            label1=ts_label+'entries',
+                            varcol2=tr_col,
+                            label2=tr_label+tr_col,
                             ax=axes[5, 1],
                             weighted=True,
                             weight_col='weight',
                             datecol=ts_datecols[0])
 
             # gas
-            varcol1 = 'delex'
-            varcol11 = 'delent'
-            var1 = 'transit '
-            var2 = 'gas '
-            varcol2 = 'price'
+            gas_label = 'gas '
+            gas_col = 'price'
             create_plot(df1=transit_df,
-                        varcol1=varcol1,
-                        label1=var1 + 'exits',
+                        varcol1=ts_col1,
+                        label1=ts_label + 'exits',
                         df2=gas_df,
-                        varcol2=varcol2,
-                        label2=var2 + varcol2,
+                        varcol2=gas_col,
+                        label2=gas_label + gas_col,
                         ax=axes[6, 0])
 
-            df = transit_df.merge(gas_df, left_index=True, right_index=True, how='left', copy=False)\
-                    [[ts_datecols[0], varcol1, varcol11, varcol2, 'weight']].set_index(ts_datecols[0])
+            df = transit_df.join(gas_df, how='outer') \
+                [[ts_col1, ts_col2, gas_col]]
             create_rel_plot(df=df,
-                        varcol1=varcol1,
-                        label1=var1 + 'exits',
-                        varcol2=varcol2,
-                        label2=var2 + varcol2,
+                        varcol1=ts_col1,
+                        label1=ts_label + 'exits',
+                        varcol2=gas_col,
+                        label2=gas_label + gas_col,
                         ax=axes[6, 1])
 
             create_plot(df1=transit_df,
-                        varcol1=varcol11,
-                        label1=var1 + 'entries',
+                        varcol1=ts_col2,
+                        label1=ts_label + 'entries',
                         df2=gas_df,
-                        varcol2=varcol2,
-                        label2=var2 + varcol2,
+                        varcol2=gas_col,
+                        label2=gas_label + gas_col,
                         ax=axes[7, 0])
             create_rel_plot(df=df,
-                        varcol1=varcol11,
-                        label1=var1 + 'entries',
-                        varcol2=varcol2,
-                        label2=var2 + varcol2,
+                        varcol1=ts_col2,
+                        label1=ts_label + 'entries',
+                        varcol2=gas_col,
+                        label2=gas_label + gas_col,
                         ax=axes[7, 1])
 
             # weather
-            var1 = 'transit '
-            var2 = 'weather '
-            varcol2 = 'temp'
+            wr_label = 'weather '
+            wr_col = 'temp'
             create_plot(df1=transit_df,
-                        varcol1=varcol1,
-                        label1=var1 + 'exits',
+                        varcol1=ts_col1,
+                        label1=ts_label + 'exits',
                         df2=weather_df,
-                        varcol2=varcol2,
-                        label2=var2 + varcol2,
+                        varcol2=wr_col,
+                        label2=wr_label + wr_col,
                         ax=axes[8, 0])
 
-            df = transit_df.merge(weather_df, left_index=True, right_index=True, how='left', copy=False)\
-                    [[ts_datecols[0], varcol1, varcol11, varcol2, 'weight']].set_index(ts_datecols[0])
+            df = transit_df.join(weather_df, how='outer') \
+                [[ts_col1, ts_col2, wr_col]]
             create_rel_plot(df=df,
-                        varcol1=varcol1,
-                        label1=var1 + 'exits',
-                        varcol2=varcol2,
-                        label2=var2 + varcol2,
+                        varcol1=ts_col1,
+                        label1=ts_label + 'exits',
+                        varcol2=wr_col,
+                        label2=wr_label + wr_col,
                         ax=axes[8, 1])
 
             create_plot(df1=transit_df,
-                        varcol1=varcol11,
-                        label1=var1 + 'entries',
+                        varcol1=ts_col2,
+                        label1=ts_label + 'entries',
                         df2=weather_df,
-                        varcol2=varcol2,
-                        label2=var2 + varcol2,
+                        varcol2=wr_col,
+                        label2=wr_label + wr_col,
                         ax=axes[9, 0])
             create_rel_plot(df=df,
-                        varcol1=varcol11,
-                        label1=var1 + 'entries',
-                        varcol2=varcol2,
-                        label2=var2 + varcol2,
+                        varcol1=ts_col2,
+                        label1=ts_label + 'entries',
+                        varcol2=wr_col,
+                        label2=wr_label + wr_col,
                         ax=axes[9, 1])
 
             plot_filename = station + '.png'
