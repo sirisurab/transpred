@@ -6,7 +6,7 @@ from urllib3.response import HTTPResponse
 from pandas import DataFrame, read_csv, concat
 from bokeh.plotting import figure, output_file, show
 from bokeh.models import Range1d, LinearAxis
-from numpy import mean
+from numpy import NaN
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -54,16 +54,15 @@ def add_variable_to_plot_bokeh(p: figure, var_df: DataFrame, datecol: str, varco
 def plot(*args) -> bool:
     inputs: List[str] = list(*args)
     task: str = inputs[0]
-    buffer: float = float(inputs[1])
-    print('plotting task %(task)s and buffer-radius %(buffer)s for stations %(stations)s'
-          % {'task': task, 'buffer': buffer, 'stations': inputs[2:]})
+    print('plotting task %(task)s for stations %(stations)s'
+          % {'task': task, 'stations': inputs[1:]})
     # read in and out buckets, freq and range for task from task_map
     freq: str = task_map.task_type_map[task]['freq']
     range: List[str] = task_map.task_type_map[task]['range']
     start_date: int = int(range[0])
     end_date: int = int(range[1])
-    geomerged_cabs: str = GEOMERGED_PATH+str(buffer)+'/cabs.csv'
-    geomerged_traffic: str = GEOMERGED_PATH+str(buffer)+'/traffic.csv'
+    geomerged_cabs: str = GEOMERGED_PATH+'/cabs.csv'
+    geomerged_traffic: str = GEOMERGED_PATH+'/traffic.csv'
     gas_file: str ='gas.csv'
     weather_file: str ='weather.csv'
 
@@ -72,7 +71,8 @@ def plot(*args) -> bool:
     dtypes: Dict[str, str] = {
         'stop_name': 'object',
         'tsstation': 'object',
-        'locationid': 'int64'
+        'locationid': 'int64',
+        'weight': 'float64'
     }
     geomerged_cabs_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
     geomerged_cabs_df = geomerged_cabs_df[~geomerged_cabs_df['locationid'].isna()]
@@ -80,7 +80,8 @@ def plot(*args) -> bool:
     dtypes = {
         'stop_name': 'object',
         'tsstation': 'object',
-        'linkid': 'float64'
+        'linkid': 'float64',
+        'weight': 'float64'
     }
     geomerged_traffic_df: DataFrame = read_csv(filestream, usecols=dtypes.keys(), encoding='utf-8', dtype=dtypes)
     geomerged_traffic_df = geomerged_traffic_df[~geomerged_traffic_df['linkid'].isna()]
@@ -104,13 +105,13 @@ def plot(*args) -> bool:
     weather_df = weather_df.set_index(weather_datecols)[start_date: end_date]
 
     # for plotting
-    plot_filepath: str = task + '/' + str(buffer) + '/'
+    plot_filepath: str = task + '/'
     tmp_filepath: str = '/tmp/'
     #output_file(tmp_filepath)
     sns.set()
     sns.set_style('dark')
 
-    for station in inputs[2:]:
+    for station in inputs[1:]:
         try:
             # determine filename of transit data for
             # the current station in the rg-transit bucket
@@ -139,9 +140,9 @@ def plot(*args) -> bool:
             # determine relevant cabs files
             # by finding dolocationids corresponding
             # to current station from ref-base geomerged df
-            dolocationids = geomerged_cabs_df.loc[geomerged_cabs_df.tsstation == station]['locationid']
+            dolocationids = geomerged_cabs_df.loc[geomerged_cabs_df.tsstation == station][['locationid', 'weight']]
 
-            if len(dolocationids) > 0:
+            if dolocationids.size > 0:
                 cabs_dtypes = {
                     'passengers': 'int64',
                     'distance': 'float64'
@@ -152,31 +153,28 @@ def plot(*args) -> bool:
                                             usecols=cabs_datecols + list(cabs_dtypes.keys()),
                                             parse_dates=cabs_datecols,
                                             encoding='utf-8', dtype=cabs_dtypes)
-                                   for locationid in dolocationids],
+                                   for _, locationid in dolocationids['locationid'].items()],
                                    ignore_index=True)
+                gcabs_df = gcabs_df.merge(dolocationids, on='locationid', how='left', copy=False)
                 print(gcabs_df.head())
                 ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
                                             header=0,
                                             usecols=cabs_datecols + cabs_cols,
                                             parse_dates=cabs_datecols,
                                             encoding='utf-8', dtype=cabs_dtypes)
-                                   for locationid in dolocationids],
+                                   for _, locationid in dolocationids['locationid'].items()],
                                   ignore_index=True)
+                ycabs_df = ycabs_df.merge(dolocationids, on='locationid', how='left', copy=False)
                 print(ycabs_df.head())
-
-                #gcabs_df = gcabs_df.set_index(cabs_datecols).sort_index().resample('1D')[cabs_cols].apply(sum)
-                #gcabs_df = gcabs_df.loc[start_date: end_date]
-                #ycabs_df = ycabs_df.set_index(cabs_datecols).sort_index().resample('1D')[cabs_cols].apply(sum)
-                #ycabs_df = ycabs_df.loc[start_date: end_date]
                 gcabs_df = gcabs_df.set_index(cabs_datecols)[start_date: end_date]
                 ycabs_df = ycabs_df.set_index(cabs_datecols)[start_date: end_date]
 
             # determine relevant traffic files
             # by finding linkids corresponding
             # to current station from ref-base geomerged traffic df
-            linkids = geomerged_traffic_df.loc[geomerged_traffic_df.tsstation == station]['linkid']
+            linkids = geomerged_traffic_df.loc[geomerged_traffic_df.tsstation == station][['linkid', 'weight']]
 
-            if len(linkids) > 0:
+            if linkids.size > 0:
                 traffic_dtypes = {
                     'speed': 'float64',
                     'traveltime': 'float64'
@@ -187,19 +185,17 @@ def plot(*args) -> bool:
                                               usecols=traffic_datecols + traffic_cols,
                                               parse_dates=traffic_datecols,
                                               encoding='utf-8', dtype=traffic_dtypes)
-                                    for linkid in linkids],
+                                    for _, linkid in linkids['linkid'].items()],
                                   ignore_index=True)
-
+                traffic_df = traffic_df.merge(linkids, on='linkid', how='left', copy=False)
                 print(traffic_df.head())
-                #traffic_df = traffic_df.set_index(traffic_datecols).sort_index().resample('1D')[traffic_cols].apply(mean)
-                #traffic_df = traffic_df.loc[start_date: end_date]
                 traffic_df = traffic_df.set_index(traffic_datecols)[start_date: end_date]
 
             # create plots
             plt.close('all')
             fig, axes = plt.subplots(nrows=5, ncols=2, clear=True, figsize=(18, 15))
 
-            if len(dolocationids) > 0:
+            if dolocationids.size > 0:
                 if gcabs_df.size > 0:
                     varcol1 = 'delex'
                     var1 = 'transit '
@@ -244,7 +240,7 @@ def plot(*args) -> bool:
                                 label2=var2+varcol2,
                                 ax=axes[1, 1])
 
-            if len(linkids) > 0 and transit_df.size > 0:
+            if linkids.size > 0 and transit_df.size > 0:
                 varcol1 = 'delex'
                 var1 = 'transit '
                 var2 = 'traffic '
