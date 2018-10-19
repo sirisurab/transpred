@@ -186,12 +186,12 @@ def geo_merge(buffer_radii: ndarray) -> bool:
                 print('Error in geo_merge %(radius)s' % {'radius': str(buffer_radius_miles)})
                 raise err
 
-    cabs_df = cabs_df.groupby(['stationid', 'locationid']).agg({'stop_id': 'first',
+    cabs_df = cabs_df.groupby(['station_id', 'locationid']).agg({'stop_id': 'first',
                                                               'stop_name': 'first',
                                                               'tsstation': 'first',
                                                               'borough': 'first',
                                                               'weight': 'min'})
-    traffic_df = traffic_df.groupby(['stationid', 'linkid']).agg({'stop_id': 'first',
+    traffic_df = traffic_df.groupby(['station_id', 'linkid']).agg({'stop_id': 'first',
                                                                  'stop_name': 'first',
                                                                  'tsstation': 'first',
                                                                  'borough': 'first',
