@@ -141,6 +141,8 @@ def plot(*args) -> bool:
             # by finding dolocationids corresponding
             # to current station from ref-base geomerged df
             dolocationids = geomerged_cabs_df.loc[geomerged_cabs_df.tsstation == station][['locationid', 'weight']]
+            for locationid in dolocationids['locationid']:
+                print(locationid)
 
             if dolocationids.size > 0:
                 cabs_dtypes = {
