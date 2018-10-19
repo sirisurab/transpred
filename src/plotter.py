@@ -28,7 +28,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
     ax1 = ax.twinx()
     if weighted:
-        sns.lineplot(data=df2, x=datecol, y=varcol2, ax=ax1, label=label2, legend='brief',
+        sns.lineplot(data=df2, x=df2.index, y=varcol2, ax=ax1, label=label2, legend='brief',
                      hue=weight_col, hue_norm=Normalize(vmin=.95, vmax=.5))
     else:
         sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
