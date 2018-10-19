@@ -158,7 +158,7 @@ def plot(*args) -> bool:
                                    for locationid in dolocationids['locationid']
                                    if str(locationid) in ps.get_all_filenames(bucket=RGGCABS_BUCKET, path='/')],
                                    ignore_index=True)
-                gcabs_df = gcabs_df.merge(dolocationids, on='locationid', how='left', copy=False)
+                gcabs_df = gcabs_df.merge(dolocationids, left_on='dolocationid', right_on='locationid', how='left', copy=False)
                 print(gcabs_df.head())
                 ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
                                             header=0,
@@ -168,7 +168,7 @@ def plot(*args) -> bool:
                                    for locationid in dolocationids['locationid']
                                    if str(locationid) in ps.get_all_filenames(bucket=RGYCABS_BUCKET, path='/')],
                                   ignore_index=True)
-                ycabs_df = ycabs_df.merge(dolocationids, on='locationid', how='left', copy=False)
+                ycabs_df = ycabs_df.merge(dolocationids, left_on='dolocationid', right_on='locationid', how='left', copy=False)
                 print(ycabs_df.head())
                 gcabs_df = gcabs_df.set_index(cabs_datecols)[start_date: end_date]
                 ycabs_df = ycabs_df.set_index(cabs_datecols)[start_date: end_date]
