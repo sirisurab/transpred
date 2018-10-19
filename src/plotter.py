@@ -8,6 +8,7 @@ from bokeh.plotting import figure, output_file, show
 from bokeh.models import Range1d, LinearAxis
 from numpy import NaN
 import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
 import seaborn as sns
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
@@ -23,10 +24,13 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
     return df[col].min(), df[col].max()
 
 
-def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax):
+def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax, weighted: bool=False, weight_col: str=None):
     sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
     ax1 = ax.twinx()
-    sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
+    if weighted:
+        sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief', hue=df2[weight_col], hue_norm=Normalize())
+    else:
+        sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2, legend='brief')
     return
 
 
@@ -218,7 +222,9 @@ def plot(*args) -> bool:
                                 df2=gcabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
-                                ax=axes[0, 0])
+                                ax=axes[0, 0],
+                                weighted=True,
+                                weight_col='weight')
 
                     varcol1 = 'delent'
                     create_plot(df1=transit_df,
@@ -227,7 +233,9 @@ def plot(*args) -> bool:
                                 df2=gcabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
-                                ax=axes[0, 1])
+                                ax=axes[0, 1],
+                                weighted=True,
+                                weight_col='weight')
 
                 if ycabs_df.size > 0:
                     varcol1 = 'delex'
@@ -240,7 +248,9 @@ def plot(*args) -> bool:
                                 df2=ycabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
-                                ax=axes[1, 0])
+                                ax=axes[1, 0],
+                                weighted=True,
+                                weight_col='weight')
 
                     varcol1 = 'delent'
                     create_plot(df1=transit_df,
@@ -249,7 +259,9 @@ def plot(*args) -> bool:
                                 df2=ycabs_df,
                                 varcol2=varcol2,
                                 label2=var2+varcol2,
-                                ax=axes[1, 1])
+                                ax=axes[1, 1],
+                                weighted=True,
+                                weight_col='weight')
 
             if linkids.size > 0 and transit_df.size > 0:
                 varcol1 = 'delex'
@@ -262,7 +274,9 @@ def plot(*args) -> bool:
                             df2=traffic_df,
                             varcol2=varcol2,
                             label2=var2+varcol2,
-                            ax=axes[2, 0])
+                            ax=axes[2, 0],
+                            weighted=True,
+                            weight_col='weight')
 
                 varcol1 = 'delent'
                 create_plot(df1=transit_df,
@@ -271,7 +285,9 @@ def plot(*args) -> bool:
                             df2=traffic_df,
                             varcol2=varcol2,
                             label2=var2+varcol2,
-                            ax=axes[2, 1])
+                            ax=axes[2, 1],
+                            weighted=True,
+                            weight_col='weight')
 
             # gas
             varcol1 = 'delex'
