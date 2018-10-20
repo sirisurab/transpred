@@ -133,7 +133,9 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                 gcabs_df = gcabs_df.merge(dolocationids, left_on='dolocationid', right_on='locationid', how='left', copy=False).\
                     drop(columns=['dolocationid', 'locationid']).drop_duplicates()
 
-                gcabs_df = gcabs_df.set_index(cabs_datecols, 'weight').groupby(Grouper(freq=freq, level=0)).sum().loc[start_date: end_date]
+                gcabs_df = gcabs_df.set_index(cabs_datecols, 'weight').groupby(Grouper(freq=freq, level=0)).agg({'passengers': 'sum',
+                                                                                                                'distance': 'sum',
+                                                                                                                 'weight': 'first'}).loc[start_date: end_date]
                 print(gcabs_df.head())
 
                 # plots for cabs
@@ -196,7 +198,9 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                 ycabs_df = ycabs_df.merge(dolocationids, left_on='dolocationid', right_on='locationid', how='left',
                                           copy=False). \
                     drop(columns=['dolocationid', 'locationid']).drop_duplicates()
-                ycabs_df = ycabs_df.set_index(cabs_datecols, 'weight').groupby(Grouper(freq=freq, level=0)).sum().loc[
+                ycabs_df = ycabs_df.set_index(cabs_datecols, 'weight').groupby(Grouper(freq=freq, level=0)).agg({'passengers': 'sum',
+                                                                                                                'distance': 'sum',
+                                                                                                                 'weight': 'first'}).loc[
                            start_date: end_date]
 
                 print(ycabs_df.head())
@@ -272,7 +276,9 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                                    if str(int(linkid)) in ps.get_all_filenames(bucket=RGTRAFFIC_BUCKET, path='/')],
                                   ignore_index=True)
                 traffic_df = traffic_df.merge(linkids, on='linkid', how='left', copy=False).drop(columns=['linkid']).drop_duplicates()
-                traffic_df = traffic_df.set_index(traffic_datecols, 'weight').groupby(Grouper(freq=freq, level=0)).mean().loc[start_date: end_date]
+                traffic_df = traffic_df.set_index(traffic_datecols, 'weight').groupby(Grouper(freq=freq, level=0)).agg({'speed': 'mean',
+                                                                                                                'traveltime': 'mean',
+                                                                                                                 'weight': 'first'}).loc[start_date: end_date]
                 print(traffic_df.head())
 
             if linkids.size > 0 and transit_df.size > 0:
