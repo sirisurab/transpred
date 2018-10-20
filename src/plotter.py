@@ -30,15 +30,16 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
     ax1 = ax.twinx()
     if weighted:
-        for name, group in df2.groupby(weight_col):
-            weight = float(name)
-            if weight == 0.0:
-                continue
-            #df = group.set_index(datecol)
-            invw = 1 / weight
-            size = RELPLOT_SZ_MULT * (invw - MIN_INVW / (MAX_INVW - MIN_INVW))
-            sns.lineplot(data=group[varcol2], ax=ax1, color='coral',
-                         ci=None, linewidth=size)
+    #    for name, group in df2.groupby(weight_col):
+    #        weight = float(name)
+    #        if weight == 0.0:
+    #            continue
+    #        #df = group.set_index(datecol)
+    #        invw = 1 / weight
+    #        size = RELPLOT_SZ_MULT * (invw - MIN_INVW / (MAX_INVW - MIN_INVW))
+        df2[weight_col] = 1 / df2[weight_col]
+        sns.lineplot(data=df2[varcol2], hue=df2[weight_col], ax=ax1, #color='coral',
+                         ci=None)
     else:
         sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2)
 
@@ -58,7 +59,8 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
     #        #df = group.set_index(datecol).resample('D')[varcol2].mean()
     #        #df = group.set_index(datecol)
         invw = 1 / df[weight_col]
-        df[weight_col] = RELPLOT_SZ_MULT * (invw - MIN_INVW / (MAX_INVW - MIN_INVW))
+        #df[weight_col] = RELPLOT_SZ_MULT * (invw - MIN_INVW / (MAX_INVW - MIN_INVW))
+        df[weight_col] = 1 / df[weight_col]
         sns.relplot(x=varcol1, y=varcol2, hue=weight_col, data=df, ax=ax, #color='coral',
                      ci=None)
     else:
