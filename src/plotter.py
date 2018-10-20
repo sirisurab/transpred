@@ -21,13 +21,17 @@ MIN_INVW= 1 / 9.5
 MAX_INVW = 1 / 0.5
 RELPLOT_SZ_MULT = 1.5
 
+BASE_COLOR='#34495E'
+COLOR1='#E74C3C'
+COLOR2='#2ECC71'
+
 
 def get_axis_range(df: DataFrame, col: str) -> Tuple:
     return df[col].min(), df[col].max()
 
 
 def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None, datecol: str=None):
-    sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
+    sns.lineplot(data=df1[varcol1], ax=ax, color=BASE_COLOR, label=label1, legend='brief')
     ax1 = ax.twinx()
     if weighted:
     #    for name, group in df2.groupby(weight_col):
@@ -40,7 +44,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
         df2[varcol2] = df2[varcol2] / (RELPLOT_SZ_MULT * df2[weight_col])
     #    sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2)
     #else:
-    sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2)
+    sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
 
     #ax.title(station+' '+start_date+' to '+end_date)
     ax.set_title(label1 + ' vs ' + label2)
@@ -62,7 +66,7 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
     #    sns.relplot(x=varcol1, y=varcol2, hue=weight_col, data=df, ax=ax, color='coral', ci=None)
     #else:
-    sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color='coral', label=label2)
+    sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, label=label2)
 
     #ax.title(station+' '+start_date+' to '+end_date)
     ax.set_title(label1 + ' vs ' + label2)
@@ -99,7 +103,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
         plot_filepath: str = task + '/'
         tmp_filepath: str = '/tmp/'
         sns.set()
-        sns.set_style('dark')
+        sns.set_style('dark-grid')
         plt.close('all')
         fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 10))
         ts_col1 = 'delex'
