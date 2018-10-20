@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from multiprocessing import Process, cpu_count
 from error_handling import errors
-from matplotlib.backends.backend_pdf import PdfPages
+from geopandas import GeoDataFrame
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
 RGGCABS_BUCKET: str = 'rg-gcabs'
@@ -438,6 +438,11 @@ def plot(*args) -> bool:
     gas_datecols = ['date']
     gas_df: DataFrame = read_csv(filestream, usecols=list(dtypes.keys())+gas_datecols, parse_dates=gas_datecols, encoding='utf-8', dtype=dtypes)
     gas_df = gas_df.set_index(gas_datecols).loc[start_date: end_date]
+    # drop outliers
+    l_q = gas_df['price'].quantile(.25)
+    h_q = gas_df['price'].quantile(.75)
+    iqr1_5 = (h_q - l_q) * 1.5
+    gas_df = gas_df.loc[(gas_df['price'] > l_q - iqr1_5) & (gas_df['price'] < h_q + iqr1_5)]
     #print(gas_df.head())
 
     filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=weather_file)
