@@ -55,7 +55,7 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
     return
 
 
-def plot_for_station(task: str, station: str, sub_task: str, pdffile: PdfPages, geomerged_cabs_df: DataFrame=None, geomerged_traffic_df: DataFrame=None, gas_df: DataFrame=None, weather_df: DataFrame=None):
+def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: DataFrame=None, geomerged_traffic_df: DataFrame=None, gas_df: DataFrame=None, weather_df: DataFrame=None):
     try:
         freq: str = task_map.task_type_map[task]['freq']
         range: List[str] = task_map.task_type_map[task]['range']
@@ -379,8 +379,12 @@ def plot_for_station(task: str, station: str, sub_task: str, pdffile: PdfPages, 
 
         fig.tight_layout()
         #fig.savefig(outfile)
-        pdffile.savefig(fig)
-        print('added fig to pdf - %(task)s %(station)s'
+        # save plots in out bucket
+        plot_filename = sub_task+'.pdf'
+        outfile = tmp_filepath + plot_filename
+        ps.copy_file(dest_bucket=PLOTS_BUCKET, file=task+'/'+station+'/'+plot_filename, source=outfile)
+        #pdffile.savefig(fig)
+        print('saved pdf - %(task)s %(station)s'
               % {'task': task, 'station': station})
 
     except Exception as err:
@@ -452,44 +456,33 @@ def plot(*args) -> bool:
     init_plot_kwargs = lambda station : {'task': task,
                                        'station': station,
                                        'sub_task': None,
-                                       'pdffile': None,
                                        'geomerged_cabs_df': None,
                                        'geomerged_traffic_df': None,
                                        'gas_df': None,
                                        'weather_df': None}
-    tmp_filepath: str = '/tmp/'
-    for station in inputs[1:]:
-        with PdfPages(tmp_filepath+station+'.pdf') as pdf:
-            for sub_task in ['gcabs', 'ycabs', 'traffic', 'gas', 'weather']:
-                plot_kwargs: Dict = init_plot_kwargs(station)
-                plot_kwargs['sub_task'] = sub_task
-                plot_kwargs['pdffile'] = pdf
-                if sub_task in ['gcabs', 'ycabs']:
-                    plot_kwargs['geomerged_cabs_df'] = geomerged_cabs_df
-                elif sub_task == 'traffic':
-                    plot_kwargs['geomerged_traffic_df'] = geomerged_traffic_df
-                elif sub_task == 'gas':
-                    plot_kwargs['gas_df'] = gas_df
-                elif sub_task == 'weather':
-                    plot_kwargs['weather_df'] = weather_df
 
-                p = Process(target=plot_for_station, kwargs=plot_kwargs)
-                p.start()
-                print('started process %(pid)s for %(station)s %(sub_task)s' % {'pid': p.name,
-                                                                                'station': station,
-                                                                                'sub_task': sub_task})
-                processes.append(p)
+    for station in inputs[1:]:
+        for sub_task in ['gcabs', 'ycabs', 'traffic', 'gas', 'weather']:
+            plot_kwargs: Dict = init_plot_kwargs(station)
+            plot_kwargs['sub_task'] = sub_task
+            if sub_task in ['gcabs', 'ycabs']:
+                plot_kwargs['geomerged_cabs_df'] = geomerged_cabs_df
+            elif sub_task == 'traffic':
+                plot_kwargs['geomerged_traffic_df'] = geomerged_traffic_df
+            elif sub_task == 'gas':
+                plot_kwargs['gas_df'] = gas_df
+            elif sub_task == 'weather':
+                plot_kwargs['weather_df'] = weather_df
+
+            p = Process(target=plot_for_station, kwargs=plot_kwargs)
+            p.start()
+            print('started process %(pid)s for %(station)s %(sub_task)s' % {'pid': p.name,
+                                                                            'station': station,
+                                                                            'sub_task': sub_task})
+            processes.append(p)
 
     for p in processes:
         p.join()
-
-
-    # combine files and write to minio
-    for station in inputs[1:]:
-        # save plots in out bucket
-        plot_filename = station+'.pdf'
-        outfile = tmp_filepath + plot_filename
-        ps.copy_file(dest_bucket=PLOTS_BUCKET, file=task+'/' + plot_filename, source=outfile)
 
     return True
 
