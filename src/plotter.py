@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from multiprocessing import Process, cpu_count
 from error_handling import errors
+from matplotlib.backends.backend_pgf import PdfPages
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
 RGGCABS_BUCKET: str = 'rg-gcabs'
@@ -54,7 +55,7 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
     return
 
 
-def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: DataFrame=None, geomerged_traffic_df: DataFrame=None, gas_df: DataFrame=None, weather_df: DataFrame=None):
+def plot_for_station(task: str, station: str, sub_task: str, pdffile: PdfPages, geomerged_cabs_df: DataFrame=None, geomerged_traffic_df: DataFrame=None, gas_df: DataFrame=None, weather_df: DataFrame=None):
     try:
         freq: str = task_map.task_type_map[task]['freq']
         range: List[str] = task_map.task_type_map[task]['range']
@@ -80,12 +81,11 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
         print(transit_df.head())
 
         # create plots
-        plot_filepath: str = task + '/'
         tmp_filepath: str = '/tmp/'
         sns.set()
-        sns.set_style('darkgrid')
+        sns.set_style('dark')
         plt.close('all')
-        fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(15, 8))
+        fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 6))
         ts_col1 = 'delex'
         ts_col2 = 'delent'
         ts_label = 'transit '
@@ -376,12 +376,10 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
         else:
             raise errors.TaskTypeError(sub_task)
 
-        plot_filename = station + '_'+sub_task+'.pdf'
-        outfile = tmp_filepath + plot_filename
+
         fig.tight_layout()
-        fig.savefig(outfile)
-        # save plots in out bucket
-        ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plot_filepath+plot_filename, source=outfile)
+        #fig.savefig(outfile)
+        pdffile.savefig(fig)
 
     except Exception as err:
         print('Error in plotting task %(task)s for station %(station)s'
@@ -452,15 +450,18 @@ def plot(*args) -> bool:
     init_plot_kwargs = lambda station : {'task': task,
                                        'station': station,
                                        'sub_task': None,
+                                       'pdffile': None,
                                        'geomerged_cabs_df': None,
                                        'geomerged_traffic_df': None,
                                        'gas_df': None,
                                        'weather_df': None}
-
+    tmp_filepath: str = '/tmp/'
     for station in inputs[1:]:
+        pdf = PdfPages(tmp_filepath+station+'.pdf')
         for sub_task in ['gcabs', 'ycabs', 'traffic', 'gas', 'weather']:
             plot_kwargs: Dict = init_plot_kwargs(station)
             plot_kwargs['sub_task'] = sub_task
+            plot_kwargs['pdffile'] = pdf
             if sub_task in ['gcabs', 'ycabs']:
                 plot_kwargs['geomerged_cabs_df'] = geomerged_cabs_df
             elif sub_task == 'traffic':
@@ -479,6 +480,14 @@ def plot(*args) -> bool:
 
     for p in processes:
         p.join()
+
+
+    # combine files and write to minio
+    for station in inputs[1:]:
+        # save plots in out bucket
+        plot_filename = station+'.pdf'
+        outfile = tmp_filepath + plot_filename
+        ps.copy_file(dest_bucket=PLOTS_BUCKET, file=task+'/' + plot_filename, source=outfile)
 
     return True
 
