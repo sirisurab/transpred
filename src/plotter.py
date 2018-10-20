@@ -19,7 +19,7 @@ PLOTS_BUCKET: str = 'plots'
 
 MIN_INVW= 1 / 9.5
 MAX_INVW = 1 / 0.5
-RELPLOT_SZ_MULT = 3
+RELPLOT_SZ_MULT = 1.5
 
 
 def get_axis_range(df: DataFrame, col: str) -> Tuple:
@@ -37,11 +37,10 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     #        #df = group.set_index(datecol)
     #        invw = 1 / weight
     #        size = RELPLOT_SZ_MULT * (invw - MIN_INVW / (MAX_INVW - MIN_INVW))
-        df2[weight_col] = 1 / df2[weight_col]
-        sns.lineplot(data=df2[varcol2], hue=df2[weight_col], ax=ax1, #color='coral',
-                         ci=None)
-    else:
-        sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2)
+        df2[varcol2] = df2[varcol2] / (RELPLOT_SZ_MULT * df2[weight_col])
+    #    sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2)
+    #else:
+    sns.lineplot(data=df2[varcol2], ax=ax1, color='coral', label=label2)
 
     #ax.title(station+' '+start_date+' to '+end_date)
     ax.set_title(label1 + ' vs ' + label2)
@@ -58,13 +57,12 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
     #            continue
     #        #df = group.set_index(datecol).resample('D')[varcol2].mean()
     #        #df = group.set_index(datecol)
-        invw = 1 / df[weight_col]
+    #    invw = 1 / df[weight_col]
         #df[weight_col] = RELPLOT_SZ_MULT * (invw - MIN_INVW / (MAX_INVW - MIN_INVW))
-        df[weight_col] = 1 / df[weight_col]
-        sns.relplot(x=varcol1, y=varcol2, hue=weight_col, data=df, ax=ax, #color='coral',
-                     ci=None)
-    else:
-        sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color='coral', label=label2)
+        df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
+    #    sns.relplot(x=varcol1, y=varcol2, hue=weight_col, data=df, ax=ax, color='coral', ci=None)
+    #else:
+    sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color='coral', label=label2)
 
     #ax.title(station+' '+start_date+' to '+end_date)
     ax.set_title(label1 + ' vs ' + label2)
