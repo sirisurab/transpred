@@ -19,6 +19,7 @@ PLOTS_BUCKET: str = 'plots'
 
 MIN_INVW= 1 / 9.5
 MAX_INVW = 1 / 0.5
+RELPLOT_SZ_MULT = 2
 
 
 def get_axis_range(df: DataFrame, col: str) -> Tuple:
@@ -35,7 +36,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
                 continue
             #df = group.set_index(datecol)
             invw = 1 / weight
-            size = invw - MIN_INVW / (MAX_INVW - MIN_INVW)
+            size = RELPLOT_SZ_MULT * (invw - MIN_INVW / (MAX_INVW - MIN_INVW))
             sns.lineplot(data=group[varcol2], ax=ax1, color='coral',
                          ci=None, linewidth=size)
     else:
@@ -57,9 +58,9 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
             #df = group.set_index(datecol).resample('D')[varcol2].mean()
             #df = group.set_index(datecol)
             invw = 1 / weight
-            alpha = invw - MIN_INVW / (MAX_INVW - MIN_INVW)
+            s = RELPLOT_SZ_MULT * (invw - MIN_INVW / (MAX_INVW - MIN_INVW))
             sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color='coral',
-                         ci=None, alpha=alpha)
+                         ci=None, s=s)
     else:
         sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color='coral', label=label2)
 
@@ -100,7 +101,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
         sns.set()
         sns.set_style('dark')
         plt.close('all')
-        fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 15))
+        fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(10, 15))
         ts_col1 = 'delex'
         ts_col2 = 'delent'
         ts_label = 'transit '
