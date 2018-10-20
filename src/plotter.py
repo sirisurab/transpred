@@ -78,7 +78,7 @@ def plot_for_station(task: str, station: str, sub_task: str, pdffile: PdfPages, 
                                          date_parser=row_operations.parse_rg_dt,
                                          encoding='utf-8', dtype=dtypes)
         transit_df = transit_df.set_index('datetime').resample(freq).sum().loc[start_date: end_date]
-        print(transit_df.head())
+        #print(transit_df.head())
 
         # create plots
         tmp_filepath: str = '/tmp/'
@@ -121,7 +121,7 @@ def plot_for_station(task: str, station: str, sub_task: str, pdffile: PdfPages, 
                 gcabs_df = gcabs_df.set_index(cabs_datecols, 'weight').groupby(Grouper(freq=freq, level=0)).agg({'passengers': 'sum',
                                                                                                                 'distance': 'sum',
                                                                                                                  'weight': 'first'}).loc[start_date: end_date]
-                print(gcabs_df.head())
+                #print(gcabs_df.head())
 
                 # plots for cabs
                 if dolocationids.size > 0 and gcabs_df.size > 0:
@@ -184,7 +184,7 @@ def plot_for_station(task: str, station: str, sub_task: str, pdffile: PdfPages, 
                                                                                                                  'weight': 'first'}).loc[
                            start_date: end_date]
 
-                print(ycabs_df.head())
+                #print(ycabs_df.head())
 
                 # plots for cabs
                 if dolocationids.size > 0 and ycabs_df.size > 0:
@@ -256,7 +256,7 @@ def plot_for_station(task: str, station: str, sub_task: str, pdffile: PdfPages, 
                 traffic_df = traffic_df.set_index(traffic_datecols, 'weight').groupby(Grouper(freq=freq, level=0)).agg({'speed': 'mean',
                                                                                                                 'traveltime': 'mean',
                                                                                                                  'weight': 'first'}).loc[start_date: end_date]
-                print(traffic_df.head())
+                #print(traffic_df.head())
 
             if linkids.size > 0 and transit_df.size > 0:
                 tr_label = 'traffic '
@@ -380,6 +380,8 @@ def plot_for_station(task: str, station: str, sub_task: str, pdffile: PdfPages, 
         fig.tight_layout()
         #fig.savefig(outfile)
         pdffile.savefig(fig)
+        print('added fig to pdf - %(task)s %(station)s'
+              % {'task': task, 'station': station})
 
     except Exception as err:
         print('Error in plotting task %(task)s for station %(station)s'
@@ -431,7 +433,7 @@ def plot(*args) -> bool:
     gas_datecols = ['date']
     gas_df: DataFrame = read_csv(filestream, usecols=list(dtypes.keys())+gas_datecols, parse_dates=gas_datecols, encoding='utf-8', dtype=dtypes)
     gas_df = gas_df.set_index(gas_datecols).loc[start_date: end_date]
-    print(gas_df.head())
+    #print(gas_df.head())
 
     filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=weather_file)
     dtypes = {
@@ -442,7 +444,7 @@ def plot(*args) -> bool:
     weather_datecols = ['date']
     weather_df: DataFrame = read_csv(filestream, usecols=list(dtypes.keys())+weather_datecols, parse_dates=weather_datecols, encoding='utf-8', dtype=dtypes)
     weather_df = weather_df.set_index(weather_datecols).loc[start_date: end_date]
-    print(weather_df.head())
+    #print(weather_df.head())
 
     # spawn plot process for each station
     processes = []
@@ -457,26 +459,26 @@ def plot(*args) -> bool:
                                        'weather_df': None}
     tmp_filepath: str = '/tmp/'
     for station in inputs[1:]:
-        pdf = PdfPages(tmp_filepath+station+'.pdf')
-        for sub_task in ['gcabs', 'ycabs', 'traffic', 'gas', 'weather']:
-            plot_kwargs: Dict = init_plot_kwargs(station)
-            plot_kwargs['sub_task'] = sub_task
-            plot_kwargs['pdffile'] = pdf
-            if sub_task in ['gcabs', 'ycabs']:
-                plot_kwargs['geomerged_cabs_df'] = geomerged_cabs_df
-            elif sub_task == 'traffic':
-                plot_kwargs['geomerged_traffic_df'] = geomerged_traffic_df
-            elif sub_task == 'gas':
-                plot_kwargs['gas_df'] = gas_df
-            elif sub_task == 'weather':
-                plot_kwargs['weather_df'] = weather_df
+        with PdfPages(tmp_filepath+station+'.pdf') as pdf:
+            for sub_task in ['gcabs', 'ycabs', 'traffic', 'gas', 'weather']:
+                plot_kwargs: Dict = init_plot_kwargs(station)
+                plot_kwargs['sub_task'] = sub_task
+                plot_kwargs['pdffile'] = pdf
+                if sub_task in ['gcabs', 'ycabs']:
+                    plot_kwargs['geomerged_cabs_df'] = geomerged_cabs_df
+                elif sub_task == 'traffic':
+                    plot_kwargs['geomerged_traffic_df'] = geomerged_traffic_df
+                elif sub_task == 'gas':
+                    plot_kwargs['gas_df'] = gas_df
+                elif sub_task == 'weather':
+                    plot_kwargs['weather_df'] = weather_df
 
-            p = Process(target=plot_for_station, kwargs=plot_kwargs)
-            p.start()
-            print('started process %(pid)s for %(station)s %(sub_task)s' % {'pid': p.name,
-                                                                            'station': station,
-                                                                            'sub_task': sub_task})
-            processes.append(p)
+                p = Process(target=plot_for_station, kwargs=plot_kwargs)
+                p.start()
+                print('started process %(pid)s for %(station)s %(sub_task)s' % {'pid': p.name,
+                                                                                'station': station,
+                                                                                'sub_task': sub_task})
+                processes.append(p)
 
     for p in processes:
         p.join()
