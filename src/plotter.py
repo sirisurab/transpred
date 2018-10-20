@@ -91,7 +91,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
         sns.set()
         sns.set_style('dark')
         plt.close('all')
-        fig, axes = plt.subplots(nrows=10, ncols=2, clear=True, figsize=(25, 15))
+        fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 15))
         ts_col1 = 'delex'
         ts_col2 = 'delent'
         ts_label = 'transit '
@@ -202,7 +202,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                                 df2=ycabs_df,
                                 varcol2=ycabs_col,
                                 label2=ycabs_label + ycabs_col,
-                                ax=axes[2, 0],
+                                ax=axes[0, 0],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
@@ -214,7 +214,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                                     label1=ts_label + 'exits',
                                     varcol2=ycabs_col,
                                     label2=ycabs_label + ycabs_col,
-                                    ax=axes[2, 1],
+                                    ax=axes[0, 1],
                                     weighted=True,
                                     weight_col='weight',
                                     datecol=ts_datecols[0])
@@ -225,7 +225,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                                 df2=ycabs_df,
                                 varcol2=ycabs_col,
                                 label2=ycabs_label + ycabs_col,
-                                ax=axes[3, 0],
+                                ax=axes[1, 0],
                                 weighted=True,
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
@@ -234,7 +234,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                                     label1=ts_label + 'entries',
                                     varcol2=ycabs_col,
                                     label2=ycabs_label + ycabs_col,
-                                    ax=axes[3, 1],
+                                    ax=axes[1, 1],
                                     weighted=True,
                                     weight_col='weight',
                                     datecol=ts_datecols[0])
@@ -275,7 +275,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                             df2=traffic_df,
                             varcol2=tr_col,
                             label2=tr_label+tr_col,
-                            ax=axes[4, 0],
+                            ax=axes[0, 0],
                             weighted=True,
                             weight_col='weight',
                             datecol=traffic_datecols[0])
@@ -287,7 +287,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                             label1=ts_label+'exits',
                             varcol2=tr_col,
                             label2=tr_label+tr_col,
-                            ax=axes[4, 1],
+                            ax=axes[0, 1],
                             weighted=True,
                             weight_col='weight',
                             datecol=ts_datecols[0])
@@ -298,7 +298,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                             df2=traffic_df,
                             varcol2=tr_col,
                             label2=tr_label+tr_col,
-                            ax=axes[5, 0],
+                            ax=axes[1, 0],
                             weighted=True,
                             weight_col='weight',
                             datecol=traffic_datecols[0])
@@ -307,7 +307,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                             label1=ts_label+'entries',
                             varcol2=tr_col,
                             label2=tr_label+tr_col,
-                            ax=axes[5, 1],
+                            ax=axes[1, 1],
                             weighted=True,
                             weight_col='weight',
                             datecol=ts_datecols[0])
@@ -323,7 +323,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                         df2=gas_df,
                         varcol2=gas_col,
                         label2=gas_label + gas_col,
-                        ax=axes[6, 0])
+                        ax=axes[0, 0])
 
             df = transit_df.join(gas_df, how='outer') \
                 [[ts_col1, ts_col2, gas_col]]
@@ -332,7 +332,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                         label1=ts_label + 'exits',
                         varcol2=gas_col,
                         label2=gas_label + gas_col,
-                        ax=axes[6, 1])
+                        ax=axes[0, 1])
 
             create_plot(df1=transit_df,
                         varcol1=ts_col2,
@@ -340,13 +340,13 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                         df2=gas_df,
                         varcol2=gas_col,
                         label2=gas_label + gas_col,
-                        ax=axes[7, 0])
+                        ax=axes[1, 0])
             create_rel_plot(df=df,
                         varcol1=ts_col2,
                         label1=ts_label + 'entries',
                         varcol2=gas_col,
                         label2=gas_label + gas_col,
-                        ax=axes[7, 1])
+                        ax=axes[1, 1])
 
         elif sub_task == 'weather':
             # weather
@@ -358,7 +358,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                         df2=weather_df,
                         varcol2=wr_col,
                         label2=wr_label + wr_col,
-                        ax=axes[8, 0])
+                        ax=axes[0, 0])
 
             df = transit_df.join(weather_df, how='outer') \
                 [[ts_col1, ts_col2, wr_col]]
@@ -367,7 +367,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                         label1=ts_label + 'exits',
                         varcol2=wr_col,
                         label2=wr_label + wr_col,
-                        ax=axes[8, 1])
+                        ax=axes[0, 1])
 
             create_plot(df1=transit_df,
                         varcol1=ts_col2,
@@ -375,18 +375,18 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                         df2=weather_df,
                         varcol2=wr_col,
                         label2=wr_label + wr_col,
-                        ax=axes[9, 0])
+                        ax=axes[1, 0])
             create_rel_plot(df=df,
                         varcol1=ts_col2,
                         label1=ts_label + 'entries',
                         varcol2=wr_col,
                         label2=wr_label + wr_col,
-                        ax=axes[9, 1])
+                        ax=axes[1, 1])
 
         else:
             raise errors.TaskTypeError(sub_task)
 
-        plot_filename = station + '.png'
+        plot_filename = station + '_'+sub_task+'.png'
         outfile = tmp_filepath + plot_filename
         fig.tight_layout()
         fig.savefig(outfile)
