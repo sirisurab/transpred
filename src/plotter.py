@@ -103,7 +103,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
         plot_filepath: str = task + '/'
         tmp_filepath: str = '/tmp/'
         sns.set()
-        sns.set_style('dark-grid')
+        sns.set_style('darkgrid')
         plt.close('all')
         fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 10))
         ts_col1 = 'delex'
