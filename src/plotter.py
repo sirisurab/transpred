@@ -342,7 +342,9 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                         ax=axes[0, 0])
 
             df = transit_df.join(gas_df, how='outer') \
-                [[ts_col1, ts_col2, gas_col]]
+                [[ts_col1, ts_col2, gas_col]].groupby(Grouper(freq=freq, level=0)).agg({ts_col1: 'sum',
+                                                                                        ts_col2: 'sum',
+                                                                                         gas_col: 'sum'})
             create_rel_plot(df=df,
                         varcol1=ts_col1,
                         label1=ts_label + 'exits',
@@ -498,7 +500,7 @@ def plot(*args) -> bool:
 
             p = Process(target=plot_for_station, kwargs=plot_kwargs)
             p.start()
-            print('started process %(pid)f for %(station)s %(sub_task)s' % {'pid': p.pid,
+            print('started process %(pid)s for %(station)s %(sub_task)s' % {'pid': p.name,
                                                                             'station': station,
                                                                             'sub_task': sub_task})
             processes.append(p)
