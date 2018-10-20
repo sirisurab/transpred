@@ -105,7 +105,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
         sns.set()
         sns.set_style('darkgrid')
         plt.close('all')
-        fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 10))
+        fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(15, 8))
         ts_col1 = 'delex'
         ts_col2 = 'delent'
         ts_label = 'transit '
@@ -158,6 +158,17 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
 
+                    create_plot(df1=transit_df,
+                                varcol1=ts_col2,
+                                label1=ts_label + 'entries',
+                                df2=gcabs_df,
+                                varcol2=gcabs_col,
+                                label2=gcabs_label + gcabs_col,
+                                ax=axes[0, 1],
+                                weighted=True,
+                                weight_col='weight',
+                                datecol=cabs_datecols[0])
+
                     df = transit_df.join(gcabs_df, how='outer') \
                         [[ts_col1, ts_col2, gcabs_col, 'weight']]
                     create_rel_plot(df=df,
@@ -165,21 +176,10 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                                     label1=ts_label + 'exits',
                                     varcol2=gcabs_col,
                                     label2=gcabs_label + gcabs_col,
-                                    ax=axes[0, 1],
+                                    ax=axes[1, 0],
                                     weighted=True,
                                     weight_col='weight',
                                     datecol=ts_datecols[0])
-
-                    create_plot(df1=transit_df,
-                                varcol1=ts_col2,
-                                label1=ts_label + 'entries',
-                                df2=gcabs_df,
-                                varcol2=gcabs_col,
-                                label2=gcabs_label + gcabs_col,
-                                ax=axes[1, 0],
-                                weighted=True,
-                                weight_col='weight',
-                                datecol=cabs_datecols[0])
                     create_rel_plot(df=df,
                                     varcol1=ts_col2,
                                     label1=ts_label + 'entries',
@@ -225,6 +225,17 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                                 weight_col='weight',
                                 datecol=cabs_datecols[0])
 
+                    create_plot(df1=transit_df,
+                                varcol1=ts_col2,
+                                label1=ts_label + 'entries',
+                                df2=ycabs_df,
+                                varcol2=ycabs_col,
+                                label2=ycabs_label + ycabs_col,
+                                ax=axes[0, 1],
+                                weighted=True,
+                                weight_col='weight',
+                                datecol=cabs_datecols[0])
+
                     df = transit_df.join(ycabs_df, how='outer') \
                         [[ts_col1, ts_col2, ycabs_col, 'weight']]
                     create_rel_plot(df=df,
@@ -232,21 +243,10 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                                     label1=ts_label + 'exits',
                                     varcol2=ycabs_col,
                                     label2=ycabs_label + ycabs_col,
-                                    ax=axes[0, 1],
+                                    ax=axes[1, 0],
                                     weighted=True,
                                     weight_col='weight',
                                     datecol=ts_datecols[0])
-
-                    create_plot(df1=transit_df,
-                                varcol1=ts_col2,
-                                label1=ts_label + 'entries',
-                                df2=ycabs_df,
-                                varcol2=ycabs_col,
-                                label2=ycabs_label + ycabs_col,
-                                ax=axes[1, 0],
-                                weighted=True,
-                                weight_col='weight',
-                                datecol=cabs_datecols[0])
                     create_rel_plot(df=df,
                                     varcol1=ts_col2,
                                     label1=ts_label + 'entries',
@@ -300,6 +300,17 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                             weight_col='weight',
                             datecol=traffic_datecols[0])
 
+                create_plot(df1=transit_df,
+                            varcol1=ts_col2,
+                            label1=ts_label+'entries',
+                            df2=traffic_df,
+                            varcol2=tr_col,
+                            label2=tr_label+tr_col,
+                            ax=axes[0, 1],
+                            weighted=True,
+                            weight_col='weight',
+                            datecol=traffic_datecols[0])
+
                 df = transit_df.join(traffic_df, how='outer') \
                     [[ts_col1, ts_col2, tr_col, 'weight']]
                 create_rel_plot(df=df,
@@ -307,21 +318,10 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                             label1=ts_label+'exits',
                             varcol2=tr_col,
                             label2=tr_label+tr_col,
-                            ax=axes[0, 1],
-                            weighted=True,
-                            weight_col='weight',
-                            datecol=ts_datecols[0])
-
-                create_plot(df1=transit_df,
-                            varcol1=ts_col2,
-                            label1=ts_label+'entries',
-                            df2=traffic_df,
-                            varcol2=tr_col,
-                            label2=tr_label+tr_col,
                             ax=axes[1, 0],
                             weighted=True,
                             weight_col='weight',
-                            datecol=traffic_datecols[0])
+                            datecol=ts_datecols[0])
                 create_rel_plot(df=df,
                             varcol1=ts_col2,
                             label1=ts_label+'entries',
@@ -345,6 +345,14 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                         label2=gas_label + gas_col,
                         ax=axes[0, 0])
 
+            create_plot(df1=transit_df,
+                        varcol1=ts_col2,
+                        label1=ts_label + 'entries',
+                        df2=gas_df,
+                        varcol2=gas_col,
+                        label2=gas_label + gas_col,
+                        ax=axes[0, 1])
+
             df = transit_df.join(gas_df, how='outer') \
                 [[ts_col1, ts_col2, gas_col]].groupby(Grouper(freq=freq, level=0)).agg({ts_col1: 'sum',
                                                                                         ts_col2: 'sum',
@@ -352,14 +360,6 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
             create_rel_plot(df=df,
                         varcol1=ts_col1,
                         label1=ts_label + 'exits',
-                        varcol2=gas_col,
-                        label2=gas_label + gas_col,
-                        ax=axes[0, 1])
-
-            create_plot(df1=transit_df,
-                        varcol1=ts_col2,
-                        label1=ts_label + 'entries',
-                        df2=gas_df,
                         varcol2=gas_col,
                         label2=gas_label + gas_col,
                         ax=axes[1, 0])
@@ -382,19 +382,19 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                         label2=wr_label + wr_col,
                         ax=axes[0, 0])
 
+            create_plot(df1=transit_df,
+                        varcol1=ts_col2,
+                        label1=ts_label + 'entries',
+                        df2=weather_df,
+                        varcol2=wr_col,
+                        label2=wr_label + wr_col,
+                        ax=axes[0, 1])
+
             df = transit_df.join(weather_df, how='outer') \
                 [[ts_col1, ts_col2, wr_col]]
             create_rel_plot(df=df,
                         varcol1=ts_col1,
                         label1=ts_label + 'exits',
-                        varcol2=wr_col,
-                        label2=wr_label + wr_col,
-                        ax=axes[0, 1])
-
-            create_plot(df1=transit_df,
-                        varcol1=ts_col2,
-                        label1=ts_label + 'entries',
-                        df2=weather_df,
                         varcol2=wr_col,
                         label2=wr_label + wr_col,
                         ax=axes[1, 0])
