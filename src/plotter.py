@@ -26,7 +26,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     sns.lineplot(data=df1[varcol1], ax=ax, color='blue', label=label1, legend='brief')
     ax1 = ax.twinx()
     if weighted:
-        for name, group in df2.groupby(level=1):
+        for name, group in df2.groupby(weight_col):
             weight = float(name)
             #df = group.set_index(datecol)
             size = 1 / weight
@@ -44,7 +44,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
 def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None, datecol: str=None):
     #index_col = df.index.names
     if weighted:
-        for name, group in df.groupby(level=1):
+        for name, group in df.groupby(weight_col):
             weight = float(name)
             #df = group.set_index(datecol).resample('D')[varcol2].mean()
             #df = group.set_index(datecol)
