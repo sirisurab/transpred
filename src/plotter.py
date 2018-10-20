@@ -17,6 +17,9 @@ REFBASE_BUCKET: str = 'ref-base'
 GEOMERGED_PATH: str = 'geo-merged/'
 PLOTS_BUCKET: str = 'plots'
 
+MIN_INVW= 1 / 9.5
+MAX_INVW = 1 / 0.5
+
 
 def get_axis_range(df: DataFrame, col: str) -> Tuple:
     return df[col].min(), df[col].max()
@@ -28,8 +31,11 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     if weighted:
         for name, group in df2.groupby(weight_col):
             weight = float(name)
+            if weight == 0.0:
+                continue
             #df = group.set_index(datecol)
-            size = 1 / weight
+            invw = 1 / weight
+            size = invw - MIN_INVW / (MAX_INVW - MIN_INVW)
             sns.lineplot(data=group[varcol2], ax=ax1, color='coral',
                          ci=None, linewidth=size)
     else:
@@ -46,9 +52,12 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
     if weighted:
         for name, group in df.groupby(weight_col):
             weight = float(name)
+            if weight == 0.0:
+                continue
             #df = group.set_index(datecol).resample('D')[varcol2].mean()
             #df = group.set_index(datecol)
-            alpha = 1 / 2 * weight
+            invw = 1 / weight
+            alpha = invw - MIN_INVW / (MAX_INVW - MIN_INVW)
             sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color='coral',
                          ci=None, alpha=alpha)
     else:
