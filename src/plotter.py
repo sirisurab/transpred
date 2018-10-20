@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from multiprocessing import Process, cpu_count
 from error_handling import errors
-from matplotlib.backends.backend_pgf import PdfPages
+from matplotlib.backends.backend_pdf import PdfPages
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
 RGGCABS_BUCKET: str = 'rg-gcabs'
