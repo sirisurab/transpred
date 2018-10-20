@@ -379,11 +379,12 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
 
         fig.tight_layout()
         # save plots in out bucket
-        plot_filename = station+'/'+sub_task+'.pdf'
-        outfile = tmp_filepath + plot_filename
-        fig.savefig(outfile)
-        ps.copy_file(dest_bucket=PLOTS_BUCKET, file=task+'/'+plot_filename, source=outfile)
-        #pdffile.savefig(fig)
+        filename = sub_task+'.pdf'
+        local_filename = station+'_'+filename
+        remote_filename = station+'/'+filename
+        local_file = tmp_filepath + local_filename
+        fig.savefig(local_file)
+        ps.copy_file(dest_bucket=PLOTS_BUCKET, file=task+'/'+remote_filename, source=local_file)
         print('saved pdf - %(task)s %(station)s'
               % {'task': task, 'station': station})
 
