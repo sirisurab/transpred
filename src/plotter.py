@@ -325,6 +325,8 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                 [[ts_col1, ts_col2, gas_col]].groupby(Grouper(freq=freq, level=0)).agg({ts_col1: 'sum',
                                                                                         ts_col2: 'sum',
                                                                                          gas_col: 'sum'})
+            # drop outliers
+            df = row_operations.drop_outliers(df, 'price')
             create_rel_plot(df=df,
                         varcol1=ts_col1,
                         label1=ts_label + 'exits',
@@ -439,10 +441,7 @@ def plot(*args) -> bool:
     gas_df: DataFrame = read_csv(filestream, usecols=list(dtypes.keys())+gas_datecols, parse_dates=gas_datecols, encoding='utf-8', dtype=dtypes)
     gas_df = gas_df.set_index(gas_datecols).loc[start_date: end_date]
     # drop outliers
-    l_q = gas_df['price'].quantile(.25)
-    h_q = gas_df['price'].quantile(.75)
-    iqr1_5 = (h_q - l_q) * 1.5
-    gas_df = gas_df.loc[(gas_df['price'] > l_q - iqr1_5) & (gas_df['price'] < h_q + iqr1_5)]
+    gas_df = row_operations.drop_outliers(gas_df, 'price')
     #print(gas_df.head())
 
     filestream = ps.get_file_stream(bucket=REFBASE_BUCKET, filename=weather_file)

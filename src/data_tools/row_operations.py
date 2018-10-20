@@ -27,7 +27,16 @@ def clean_transit(row: pd.Series) -> pd.Series:
     row['EXITS'] = pd.to_numeric(row['EXITS'], errors='coerce')
     return row
 
+
 def parse_rg_dt(x):
     return pd.to_datetime(x,
                      format="%Y-%m-%d",
                      errors='coerce')
+
+
+def drop_outliers(df: pd.DataFrame, col: str):
+    # drop outliers
+    l_q = df[col].quantile(.25)
+    h_q = df[col].quantile(.75)
+    iqr1_5 = (h_q - l_q) * 1.5
+    return df.loc[(df[col] > l_q - iqr1_5) & (df[col] < h_q + iqr1_5)]
