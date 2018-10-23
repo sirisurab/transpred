@@ -12,7 +12,7 @@ from data_tools import task_map
 from dask.distributed import Client
 from data_tools import row_operations as row_ops
 import calendar as cal
-from pandas import to_datetime, read_csv
+from pandas import to_datetime, read_csv, Timedelta
 
 MIN_YEAR = 2010
 MAX_YEAR = 2018
@@ -106,6 +106,7 @@ def perform_tsfare(b_task: bytes) -> bool:
     os.makedirs(source_folder, exist_ok=True)
     print('created source folder '+source_folder)
     status: bool = False
+    td : Timedelta = Timedelta(14, unit='d')
     try:
         for day in range(1, 32):
             url = url_part1 + prefix_zero(day) + url_part2
@@ -125,7 +126,7 @@ def perform_tsfare(b_task: bytes) -> bool:
                 raise err
             df = read_csv(source_folder+filename, skiprows=2)
             date: str = prefix_zero(month)+'/'+prefix_zero(day)+'/20'+year
-            df['date'] = to_datetime(date, format='%m/%d/%Y')
+            df['date'] = to_datetime(date, format='%m/%d/%Y') - td
             df.to_csv(source_folder+filename)
             print('copying file '+filename+' to bucket tsfare')
             status = ps.copy_file(dest_bucket='tsfare', file=filename, source=source_folder+filename)
