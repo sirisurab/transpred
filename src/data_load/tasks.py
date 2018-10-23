@@ -98,8 +98,8 @@ def perform_tsfare(b_task: bytes) -> bool:
     task_split: List[str] = task.split('-')
     year: str = task_split[0]
     month: int = int(task_split[1])
-    url_part1: str = "http://web.mta.info/developers/data/nyct/fares/fares"+year+prefix_zero(month)
-    url_part2: str = ".txt"
+    url_part1: str = "http://web.mta.info/developers/data/nyct/fares/fares_"+year+prefix_zero(month)
+    url_part2: str = ".csv"
     #urls: List[str] = [url_part1+prefix_zero(day)+url_part2 for day in range(1, 32)]
     print('downloading from transit fare urls ')
     source_folder: str = os.path.dirname(__file__)+'/tsfare/'
