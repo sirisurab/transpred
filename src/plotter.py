@@ -39,6 +39,8 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     df2 = row_operations.drop_outliers(df=df2, col=varcol2)
 
     sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
+    ax.set_ylabel(label1)
+    ax1.set_ylabel(label2)
 
     ax.set_title(label1 + ' vs ' + label2)
     #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
@@ -52,8 +54,9 @@ def create_reg_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
     df = row_operations.drop_outliers(df=df, col=varcol2)
     sns.regplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, scatter_kws={'s':10}, line_kws={'linewidth':.8})
-
-    ax.set_title(label1 + ' vs ' + label2)
+    ax.set_xlabel(label1)
+    ax.set_ylabel(label2)
+    #ax.set_title(label1 + ' vs ' + label2)
     #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
     return
 
@@ -63,8 +66,9 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
     df = row_operations.drop_outliers(df=df, col=varcol2)
     sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, scatter_kws={'s':10})
-
-    ax.set_title(label1 + ' vs ' + label2)
+    ax.set_xlabel(label1)
+    ax.set_ylabel(label2)
+    #ax.set_title(label1 + ' vs ' + label2)
     #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
     return
 
@@ -101,6 +105,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
         sns.set_style('dark')
         plt.close('all')
         fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 6))
+        plt.subplots_adjust(wspace=.2, hspace=.2)
         ts_col1 = 'delex'
         ts_col2 = 'delent'
         ts_label = 'transit '
