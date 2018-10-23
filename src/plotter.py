@@ -49,7 +49,7 @@ def create_reg_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
     if weighted:
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
     df = row_operations.drop_outliers(df=df, col=varcol2)
-    sns.regplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, scatter_kws={'s':10})
+    sns.regplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, scatter_kws={'s':10}, line_kws={'linewidth':.7})
 
     ax.set_title(label1 + ' vs ' + label2)
     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
@@ -95,7 +95,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
 
         # create plots
         tmp_filepath: str = '/tmp/'
-        sns.set(font_scale=.75, rc={'lines.linewidth':0.7})
+        sns.set(font_scale=.65, rc={'lines.linewidth':1.4})
         sns.set_style('dark')
         plt.close('all')
         fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 6))
