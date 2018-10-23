@@ -36,6 +36,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     ax1 = ax.twinx()
     if weighted:
         df2[varcol2] = df2[varcol2] / (RELPLOT_SZ_MULT * df2[weight_col])
+    df2 = row_operations.drop_outliers(df=df2, col=varcol2)
 
     sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
 
@@ -47,7 +48,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
 def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None):
     if weighted:
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
-
+    df = row_operations.drop_outliers(df=df, col=varcol2)
     sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, label=label2)
 
     ax.set_title(label1 + ' vs ' + label2)
@@ -259,7 +260,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                                                                                                  'weight': 'first'}).loc[start_date: end_date]
                 #print(traffic_df.head())
                 # drop outliers
-                traffic_df = row_operations.drop_outliers(traffic_df, 'speed')
+                #traffic_df = row_operations.drop_outliers(traffic_df, 'speed')
 
             if linkids.size > 0 and transit_df.size > 0:
                 tr_label = 'traffic '
@@ -329,7 +330,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                                                                         ts_col2: 'sum',
                                                                                          gas_col: 'sum'})
             # drop outliers
-            df = row_operations.drop_outliers(df, 'price')
+            #df = row_operations.drop_outliers(df, 'price')
             create_rel_plot(df=df,
                         varcol1=ts_col1,
                         label1=ts_label + 'exits',
