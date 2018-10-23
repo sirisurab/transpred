@@ -405,8 +405,9 @@ def plot(*args) -> bool:
     freq: str = inputs[1]
     filterby: str = inputs[2]
     filterval: str = inputs[3]
+    stations : List[str] = inputs[4:]
     print('plotting task %(task)s for stations %(stations)s'
-          % {'task': task, 'stations': inputs[4:]})
+          % {'task': task, 'stations': stations})
     # read in and out buckets, freq and range for task from task_map
     freq: str = task_map.task_type_map[task]['freq']
     range: List[str] = task_map.task_type_map[task]['range']
@@ -473,7 +474,7 @@ def plot(*args) -> bool:
                                        'gas_df': None,
                                        'weather_df': None}
 
-    for station in inputs[1:]:
+    for station in stations:
         for sub_task in ['gcabs', 'ycabs', 'traffic', 'gas', 'weather']:
             plot_kwargs: Dict = init_plot_kwargs(station)
             plot_kwargs['sub_task'] = sub_task
