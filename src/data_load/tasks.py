@@ -439,8 +439,8 @@ def perform_tsfare_dask(task_type: str, years: List[str]) -> bool:
                              skipinitialspace=True,
                              skip_blank_lines=True,
                              parse_dates=['date'],
-                             date_parser=row_ops.clean_tsfare_date,
                              converters={
+                                 'STATION': str.strip,
                                  'FF': row_ops.clean_num,
                                  'SEN/DIS': row_ops.clean_num,
                                  '7-D AFAS UNL': row_ops.clean_num,
