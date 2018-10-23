@@ -29,6 +29,8 @@ if __name__ == '__main__':
             status = dl_tasks.perform_cabs_dask(task_type, years)
         elif task_type == 'dl-transit':
             status = dl_tasks.perform_transit_dask(task_type, years)
+        elif task_type == 'dl-tsfare':
+            status = dl_tasks.perform_tsfare_dask(task_type, years)
         elif task_type == 'dl-traffic':
             status = dl_tasks.perform_traffic_dask(task_type, years)
 

@@ -8,6 +8,10 @@ task_type_map: Dict = {
                                 'in': 'transit',
                                 'out': 'dl-transit'
                                 },
+                  'dl-tsfare': {
+                                'in': 'tsfare',
+                                'out': 'dl-tsfare'
+                                },
                   'dl-traffic': {
                                 'in': 'traffic',
                                 'out': 'dl-traffic'
