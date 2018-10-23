@@ -426,7 +426,7 @@ def perform_tsfare_dask(task_type: str, years: List[str]) -> bool:
                              },
                              encoding='utf-8'
                              )
-            df['date'] = to_datetime(df.loc[0]['station'].rsplit('-',1)[1], format="%m/%d/%Y", errors='coerce')
+            df['date'] = to_datetime(df.loc[df.index[0],'station'].rsplit('-',1)[1], format="%m/%d/%Y", errors='coerce')
             df = df.drop([0], axis=0)
             #to_parquet(df=df, out_bucket=out_bucket, folder=year + '/', compute=True)
             dd.to_csv(df=df,
