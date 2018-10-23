@@ -32,7 +32,7 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
 
 
 def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None):
-    sns.lineplot(data=df1[varcol1], ax=ax, color=BASE_COLOR, label=label1, legend='brief')
+    sns.lineplot(data=df1[varcol1], ax=ax, color=BASE_COLOR, label=label1)
     ax1 = ax.twinx()
     if weighted:
         df2[varcol2] = df2[varcol2] / (RELPLOT_SZ_MULT * df2[weight_col])
@@ -41,7 +41,9 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
 
     ax.set_title(label1 + ' vs ' + label2)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
+    #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels, handletextpad=0, columnspacing=1, loc='best', ncol=2, frameon=True)
     return
 
 
