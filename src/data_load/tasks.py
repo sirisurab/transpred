@@ -123,7 +123,7 @@ def perform_tsfare(b_task: bytes) -> bool:
 
             except Exception as err:
                 raise err
-            df = read_csv(source_folder+filename, skiprows=3)
+            df = read_csv(source_folder+filename, skiprows=2)
             date: str = prefix_zero(month)+'/'+prefix_zero(day)+'/20'+year
             df['date'] = to_datetime(date, format='%m/%d/%Y')
             df.to_csv(source_folder+filename)
