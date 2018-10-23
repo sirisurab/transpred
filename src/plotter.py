@@ -55,16 +55,17 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
     return
 
 
-def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: DataFrame=None, geomerged_traffic_df: DataFrame=None, gas_df: DataFrame=None, weather_df: DataFrame=None):
+def plot_for_station(task: str, freq: str, filterby: str, filterval: str, station: str, sub_task: str, geomerged_cabs_df: DataFrame=None, geomerged_traffic_df: DataFrame=None, gas_df: DataFrame=None, weather_df: DataFrame=None):
     try:
-        freq: str = task_map.task_type_map[task]['freq']
+        #freq: str = task_map.task_type_map[task]['freq']
         range: List[str] = task_map.task_type_map[task]['range']
         start_date: str = range[0]
         end_date: str = range[1]
         # determine filename of transit data for
         # the current station in the rg-transit bucket
         # replace '/' in station with ' '
-        ts_filename: str = station.replace('/', ' ').upper()
+        file_path: str = freq+'/'+filterby+filterval+'/'
+        ts_filename: str = file_path+station.replace('/', ' ').upper()
 
         # read transit data for station (rg-transit bucket)
         filestream = ps.get_file_stream(bucket=RGTRANSIT_BUCKET, filename=ts_filename)
@@ -107,13 +108,13 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
 
             if sub_task == 'gcabs':
                 gcabs_df: DataFrame
-                gcabs_df = concat([read_csv(ps.get_file_stream(bucket=RGGCABS_BUCKET, filename=str(locationid)),
+                gcabs_df = concat([read_csv(ps.get_file_stream(bucket=RGGCABS_BUCKET, filename=file_path+str(locationid)),
                                             header=0,
                                             usecols=cabs_datecols + list(cabs_dtypes.keys()),
                                             parse_dates=cabs_datecols,
                                             encoding='utf-8', dtype=cabs_dtypes)
                                    for locationid in dolocationids['locationid']
-                                   if str(locationid) in ps.get_all_filenames(bucket=RGGCABS_BUCKET, path='/')],
+                                   if str(locationid) in ps.get_all_filenames(bucket=RGGCABS_BUCKET, path=file_path)],
                                    ignore_index=True)
                 gcabs_df = gcabs_df.merge(dolocationids, left_on='dolocationid', right_on='locationid', how='left', copy=False).\
                     drop(columns=['dolocationid', 'locationid']).drop_duplicates()
@@ -168,13 +169,13 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
 
             elif sub_task == 'ycabs':
                 ycabs_df: DataFrame
-                ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=str(locationid)),
+                ycabs_df = concat([read_csv(ps.get_file_stream(bucket=RGYCABS_BUCKET, filename=file_path+str(locationid)),
                                             header=0,
                                             usecols=cabs_datecols + list(cabs_dtypes.keys()),
                                             parse_dates=cabs_datecols,
                                             encoding='utf-8', dtype=cabs_dtypes)
                                    for locationid in dolocationids['locationid']
-                                   if str(locationid) in ps.get_all_filenames(bucket=RGYCABS_BUCKET, path='/')],
+                                   if str(locationid) in ps.get_all_filenames(bucket=RGYCABS_BUCKET, path=file_path)],
                                   ignore_index=True)
                 ycabs_df = ycabs_df.merge(dolocationids, left_on='dolocationid', right_on='locationid', how='left',
                                           copy=False). \
@@ -244,13 +245,13 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
                     'traveltime': 'float64'
                 }
                 traffic_cols = list(traffic_dtypes.keys())
-                traffic_df = concat([read_csv(ps.get_file_stream(bucket=RGTRAFFIC_BUCKET, filename=str(int(linkid))),
+                traffic_df = concat([read_csv(ps.get_file_stream(bucket=RGTRAFFIC_BUCKET, filename=file_path+str(int(linkid))),
                                               header=0,
                                               usecols=traffic_datecols + traffic_cols,
                                               parse_dates=traffic_datecols,
                                               encoding='utf-8', dtype=traffic_dtypes)
                                     for linkid in linkids['linkid']
-                                   if str(int(linkid)) in ps.get_all_filenames(bucket=RGTRAFFIC_BUCKET, path='/')],
+                                   if str(int(linkid)) in ps.get_all_filenames(bucket=RGTRAFFIC_BUCKET, path=file_path)],
                                   ignore_index=True)
                 traffic_df = traffic_df.merge(linkids, on='linkid', how='left', copy=False).drop(columns=['linkid']).drop_duplicates()
                 traffic_df = traffic_df.set_index(traffic_datecols, 'weight').groupby(Grouper(freq=freq, level=0)).agg({'speed': 'mean',
@@ -386,7 +387,7 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
         remote_filename = station+'/'+filename
         local_file = tmp_filepath + local_filename
         fig.savefig(local_file)
-        ps.copy_file(dest_bucket=PLOTS_BUCKET, file=task+'/'+remote_filename, source=local_file)
+        ps.copy_file(dest_bucket=PLOTS_BUCKET, file=file_path+'/'+remote_filename, source=local_file)
         print('saved pdf - %(task)s %(station)s'
               % {'task': task, 'station': station})
 
@@ -401,8 +402,11 @@ def plot_for_station(task: str, station: str, sub_task: str, geomerged_cabs_df: 
 def plot(*args) -> bool:
     inputs: List[str] = list(*args)
     task: str = inputs[0]
+    freq: str = inputs[1]
+    filterby: str = inputs[2]
+    filterval: str = inputs[3]
     print('plotting task %(task)s for stations %(stations)s'
-          % {'task': task, 'stations': inputs[1:]})
+          % {'task': task, 'stations': inputs[4:]})
     # read in and out buckets, freq and range for task from task_map
     freq: str = task_map.task_type_map[task]['freq']
     range: List[str] = task_map.task_type_map[task]['range']
@@ -459,6 +463,9 @@ def plot(*args) -> bool:
     processes = []
     print(cpu_count())
     init_plot_kwargs = lambda station : {'task': task,
+                                         'freq':freq,
+                                        'filterby':filterby,
+                                        'filterval':filterval,
                                        'station': station,
                                        'sub_task': None,
                                        'geomerged_cabs_df': None,
