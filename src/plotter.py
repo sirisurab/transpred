@@ -102,7 +102,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
         sns.set()
         sns.set_style('dark')
         plt.close('all')
-        fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 6))
+        fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 10))
         ts_col1 = 'delex'
         ts_col2 = 'delent'
         ts_label = 'transit '
