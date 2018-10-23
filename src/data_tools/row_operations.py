@@ -27,6 +27,8 @@ def clean_transit(row: pd.Series) -> pd.Series:
     row['EXITS'] = pd.to_numeric(row['EXITS'], errors='coerce')
     return row
 
+def clean_tsfare_date(date):
+    return pd.to_datetime(str(date),format="%m/%d/%Y", errors='coerce')
 
 def parse_rg_dt(x):
     return pd.to_datetime(x,

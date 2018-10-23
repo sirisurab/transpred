@@ -417,13 +417,12 @@ def perform_tsfare_dask(task_type: str, years: List[str]) -> bool:
         month_end: int = 13
         calendar: cal.Calendar = cal.Calendar()
         for year in years:
-            usecols = list(range(1,28))
-            names =['station','FF','SEN/DIS', '7-D AFAS UNL','30-D AFAS/RMF UNL','JOINT RR TKT',
+            usecols =['date','station','FF','SEN/DIS', '7-D AFAS UNL','30-D AFAS/RMF UNL','JOINT RR TKT',
             '7-D UNL','30-D UNL','14-D RFM UNL','1-D UNL','14-D UNL','7D-XBUS PASS','TCMC',
             'RF 2 TRIP','RR UNL NO TRADE','TCMC ANNUAL MC','MR EZPAY EXP','MR EZPAY UNL',
             'PATH 2-T','AIRTRAIN FF','AIRTRAIN 30-D','AIRTRAIN 10-T','AIRTRAIN MTHLY',
-            'STUDENTS','NICE 2-T','CUNY-120','CUNY-60']
-            url_part1: str = 'http://web.mta.info/developers/data/nyct/fares/fares_'
+            'STUDENTS']
+            url_part1: str = 's3://'+in_bucket+'/fares_'
             url_part2: str = ".csv"
             # urls for all saturdays in month range for year
             urls: List[str] = [url_part1 + year[2:] + prefix_zero(month) + prefix_zero(day_tuple[0]) + url_part2
@@ -434,12 +433,12 @@ def perform_tsfare_dask(task_type: str, years: List[str]) -> bool:
             #for url in urls:
             #    print(url)
             df = dd.read_csv(urlpath=urls,
-                             header=None,
+                             header=0,
                              usecols=usecols,
-                             names=names,
                              skipinitialspace=True,
                              skip_blank_lines=True,
-                             skiprows=[0,2],
+                             parse_dates=['date'],
+                             date_parser=row_ops.clean_tsfare_date,
                              converters={
                                  'FF': row_ops.clean_num,
                                  'SEN/DIS': row_ops.clean_num,
@@ -463,15 +462,10 @@ def perform_tsfare_dask(task_type: str, years: List[str]) -> bool:
                                  'AIRTRAIN 30-D': row_ops.clean_num,
                                  'AIRTRAIN 10-T': row_ops.clean_num,
                                  'AIRTRAIN MTHLY': row_ops.clean_num,
-                                 'STUDENTS': row_ops.clean_num,
-                                 'NICE 2-T': row_ops.clean_num,
-                                 'CUNY-120': row_ops.clean_num,
-                                 'CUNY-60': row_ops.clean_num
+                                 'STUDENTS': row_ops.clean_num
                              },
                              encoding='utf-8'
                              )
-            df['date'] = to_datetime(df.loc[[0],['station']].rsplit('-',1)[1], format="%m/%d/%Y", errors='coerce')
-            df = df.drop([0], axis=0)
             #to_parquet(df=df, out_bucket=out_bucket, folder=year + '/', compute=True)
             dd.to_csv(df=df,
                      filename='s3://'+out_bucket+'/'+year+'/',
