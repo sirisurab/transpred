@@ -28,7 +28,7 @@ def create_tasks(task_type: str, *args) -> None:
     #years_lst: List[str] = years.split()
     tasks: List[str]
     print("dispatching from create tasks for %(task)r %(years)s" % {'task':task_type, 'years':args})
-    if task_type == 'dl-transit':
+    if task_type in ('dl-transit', 'dl-tsfare'):
         tasks = dl_tasks.make_transit(*args)
     elif task_type == 'dl-traffic':
         tasks = dl_tasks.make_traffic()

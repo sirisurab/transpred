@@ -12,7 +12,7 @@ from data_tools import task_map
 from dask.distributed import Client
 from data_tools import row_operations as row_ops
 import calendar as cal
-from pandas import to_datetime
+from pandas import to_datetime, read_csv
 
 MIN_YEAR = 2010
 MAX_YEAR = 2018
@@ -86,6 +86,49 @@ def perform_transit(b_task: bytes) -> bool:
 
             print('copying file '+filename+' to bucket transit')
             status = ps.copy_file(dest_bucket='transit', file=filename, source=source_folder+filename)
+
+    except Exception as err:
+        raise err
+    else:
+        return status
+
+
+def perform_tsfare(b_task: bytes) -> bool:
+    task: str = str(b_task, 'utf-8')
+    task_split: List[str] = task.split('-')
+    year: str = task_split[0]
+    month: int = int(task_split[1])
+    url_part1: str = "http://web.mta.info/developers/data/nyct/fares/fares"+year+prefix_zero(month)
+    url_part2: str = ".txt"
+    #urls: List[str] = [url_part1+prefix_zero(day)+url_part2 for day in range(1, 32)]
+    print('downloading from transit fare urls ')
+    source_folder: str = os.path.dirname(__file__)+'/tsfare/'
+    os.makedirs(source_folder, exist_ok=True)
+    print('created source folder '+source_folder)
+    status: bool = False
+    try:
+        for day in range(1, 32):
+            url = url_part1 + prefix_zero(day) + url_part2
+            print('downloading file from '+url)
+            try:
+                filename: str = http.download_from_url(url, source_folder)
+            except u_err.HTTPError as err:
+                # ignore bad urls
+                if err.code == 404:
+                    print('ignoring bad transit fare url ' + url)
+                    # do not attempt to copy file to minio
+                    continue
+                else:
+                    raise err
+
+            except Exception as err:
+                raise err
+            df = read_csv(source_folder+filename, skiprows=3)
+            date: str = prefix_zero(month)+'/'+prefix_zero(day)+'/20'+year
+            df['date'] = to_datetime(date, format='%m/%d/%Y')
+            df.to_csv(source_folder+filename)
+            print('copying file '+filename+' to bucket tsfare')
+            status = ps.copy_file(dest_bucket='tsfare', file=filename, source=source_folder+filename)
 
     except Exception as err:
         raise err
