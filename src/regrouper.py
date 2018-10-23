@@ -54,7 +54,7 @@ def regroup(task_type: str, years: List[str], resample_freq: str, filter_key: st
     return True
 
 
-def write_group_to_csv(group, split_by: str, out_bucket: str) -> int:
+def write_group_to_csv(group, split_by: str, out_bucket: str, out_path: str) -> int:
     filename: str
     #name: str = str(group[split_by].iloc[0]).lstrip(split_by).strip()
     name: str = group.unstack(split_by)[split_by].iloc[0]
@@ -65,7 +65,7 @@ def write_group_to_csv(group, split_by: str, out_bucket: str) -> int:
     else:
         filename = str(name).replace('/', ' ')
     #group.to_csv(s3.open('s3://'+out_bucket+'/'+filename, 'w'))
-    file_io.write_csv(df=group, bucket=out_bucket, filename=filename)
+    file_io.write_csv(df=group, bucket=out_bucket, filename=out_path+filename)
     print('wrote file %(file)s' % {'file': filename})
 
     return 1
@@ -90,15 +90,15 @@ def regroup_dask(task_type: str, years: List[str], resample_freq: str, filter_ke
         ps.create_bucket(out_bucket)
 
         s3_in_url: str = 's3://' + in_bucket + '/'
-        s3_in_sub_path: str = '/' + resample_freq + '/' + filter_key+filter_val + '/*'
-        df = dd.concat([dd.read_csv(urlpath=s3_in_url+year+s3_in_sub_path,
+        s3_sub_path: str = resample_freq + '/' + filter_key+filter_val + '/'
+        df = dd.concat([dd.read_csv(urlpath=s3_in_url+year+s3_sub_path+'*',
                                      storage_options=s3_options,
                                      parse_dates=date_cols,
                                      dtype=dtypes
                                      ) for year in years])
 
         print('read files from in bucket and concat-ted into one df')
-        df.groupby(split_by).apply(partial(write_group_to_csv, split_by=split_by, out_bucket=out_bucket), meta=('int')).compute()
+        df.groupby(split_by).apply(partial(write_group_to_csv, split_by=split_by, out_bucket=out_bucket, out_path=s3_sub_path), meta=('int')).compute()
 
     except Exception as err:
         print('Error: %(error)s in regrouper for task_type %(task)s' % {'error': err, 'task': task_type})
