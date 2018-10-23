@@ -95,7 +95,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
 
         # create plots
         tmp_filepath: str = '/tmp/'
-        sns.set(font_scale=.75)
+        sns.set(font_scale=.75, rc={'lines.linewidth':0.7})
         sns.set_style('dark')
         plt.close('all')
         fig, axes = plt.subplots(nrows=2, ncols=2, clear=True, figsize=(18, 6))
