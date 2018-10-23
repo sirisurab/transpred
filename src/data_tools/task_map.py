@@ -262,6 +262,39 @@ task_type_map: Dict = {
                                         'delent': int64
                                         }
                                 },
+                  'rg-tsfare': {
+                                'in': 'dl-tsfare',
+                                'out': 'rg-tsfare',
+                                'split_by': ['STATION'],
+                                'date_cols': ['date'],
+                                'dtypes': {
+                                            'date': 'datetime64[ns]',
+                                             'STATION': object,
+                                             'FF': int64,
+                                             'SEN/DIS': int64,
+                                             '7-D AFAS UNL': int64,
+                                             '30-D AFAS/RMF UNL': int64,
+                                             'JOINT RR TKT': int64,
+                                             '7-D UNL': int64,
+                                             '30-D UNL': int64,
+                                             '14-D RFM UNL': int64,
+                                             '1-D UNL': int64,
+                                             '14-D UNL': int64,
+                                             '7D-XBUS PASS': int64,
+                                             'TCMC': int64,
+                                             'RF 2 TRIP': int64,
+                                             'RR UNL NO TRADE': int64,
+                                             'TCMC ANNUAL MC': int64,
+                                             'MR EZPAY EXP': int64,
+                                             'MR EZPAY UNL': int64,
+                                             'PATH 2-T': int64,
+                                             'AIRTRAIN FF': int64,
+                                             'AIRTRAIN 30-D': int64,
+                                             'AIRTRAIN 10-T': int64,
+                                             'AIRTRAIN MTHLY': int64,
+                                             'STUDENTS': int64
+                                        }
+                                },
                   'rg-gcabs': {
                                 'in': 'rs-gcabs',
                                 'out': 'rg-gcabs',
