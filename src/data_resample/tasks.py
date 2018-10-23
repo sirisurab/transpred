@@ -12,7 +12,7 @@ from dask.distributed import Client
 resample_map: Dict = {
     'filter_by': {
         'key': 'weekday',
-        'value': 2
+        'value': 4
     },
     'freq': '1W'
 }
