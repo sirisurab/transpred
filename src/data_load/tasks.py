@@ -433,6 +433,7 @@ def perform_tsfare_dask(task_type: str, years: List[str]) -> bool:
             #for url in urls:
             #    print(url)
             df = dd.read_csv(urlpath=urls,
+                             storage_options=s3_options,
                              header=0,
                              usecols=usecols,
                              skipinitialspace=True,
