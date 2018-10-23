@@ -91,7 +91,7 @@ def regroup_dask(task_type: str, years: List[str], resample_freq: str, filter_ke
 
         s3_in_url: str = 's3://' + in_bucket + '/'
         s3_sub_path: str = resample_freq + '/' + filter_key+filter_val + '/'
-        df = dd.concat([dd.read_csv(urlpath=s3_in_url+year+s3_sub_path+'*',
+        df = dd.concat([dd.read_csv(urlpath=s3_in_url+year+'/'+s3_sub_path+'*',
                                      storage_options=s3_options,
                                      parse_dates=date_cols,
                                      dtype=dtypes
