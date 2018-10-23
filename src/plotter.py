@@ -258,6 +258,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                                                                                                 'traveltime': 'mean',
                                                                                                                  'weight': 'first'}).loc[start_date: end_date]
                 #print(traffic_df.head())
+                # drop outliers
+                traffic_df = row_operations.drop_outliers(traffic_df, 'speed')
 
             if linkids.size > 0 and transit_df.size > 0:
                 tr_label = 'traffic '
