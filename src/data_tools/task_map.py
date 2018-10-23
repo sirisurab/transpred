@@ -268,7 +268,6 @@ task_type_map: Dict = {
                                 'split_by': ['STATION'],
                                 'date_cols': ['date'],
                                 'dtypes': {
-                                            'date': 'datetime64[ns]',
                                              'STATION': object,
                                              'FF': int64,
                                              'SEN/DIS': int64,
