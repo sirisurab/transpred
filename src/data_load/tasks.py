@@ -417,7 +417,7 @@ def perform_tsfare_dask(task_type: str, years: List[str]) -> bool:
         month_end: int = 13
         calendar: cal.Calendar = cal.Calendar()
         for year in years:
-            usecols =['date','station','FF','SEN/DIS', '7-D AFAS UNL','30-D AFAS/RMF UNL','JOINT RR TKT',
+            usecols =['date','STATION','FF','SEN/DIS', '7-D AFAS UNL','30-D AFAS/RMF UNL','JOINT RR TKT',
             '7-D UNL','30-D UNL','14-D RFM UNL','1-D UNL','14-D UNL','7D-XBUS PASS','TCMC',
             'RF 2 TRIP','RR UNL NO TRADE','TCMC ANNUAL MC','MR EZPAY EXP','MR EZPAY UNL',
             'PATH 2-T','AIRTRAIN FF','AIRTRAIN 30-D','AIRTRAIN 10-T','AIRTRAIN MTHLY',
