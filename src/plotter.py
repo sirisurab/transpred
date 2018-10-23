@@ -9,7 +9,6 @@ import seaborn as sns
 from multiprocessing import Process, cpu_count
 from error_handling import errors
 from scipy import stats
-from geopandas import GeoDataFrame
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
 RGGCABS_BUCKET: str = 'rg-gcabs'
@@ -46,15 +45,12 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     return
 
 
-def create_joint_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None):
+def create_reg_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None):
     if weighted:
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
     df = row_operations.drop_outliers(df=df, col=varcol2)
-    #sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, label=label2)
-    g = sns.JointGrid(x=varcol1, y=varcol2, data=df)
-    g = g.plot_joint(sns.regplot, ax=ax, color=COLOR1, label=label2)
-    g = g.plot_marginals(sns.distplot, color=COLOR1)
-    g = g.annotate(stats.pearsonr)
+    sns.regplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1)
+
     ax.set_title(label1 + ' vs ' + label2)
     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
     return
@@ -64,7 +60,7 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
     if weighted:
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
     df = row_operations.drop_outliers(df=df, col=varcol2)
-    sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, label=label2)
+    sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1)
 
     ax.set_title(label1 + ' vs ' + label2)
     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
@@ -166,7 +162,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
 
                     df = transit_df.join(gcabs_df, how='outer') \
                         [[ts_col1, ts_col2, gcabs_col, 'weight']]
-                    create_joint_plot(df=df,
+                    create_reg_plot(df=df,
                                     varcol1=ts_col1,
                                     label1=ts_label + 'exits',
                                     varcol2=gcabs_col,
@@ -174,7 +170,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                     ax=axes[1, 0],
                                     weighted=True,
                                     weight_col='weight')
-                    create_joint_plot(df=df,
+                    create_reg_plot(df=df,
                                     varcol1=ts_col2,
                                     label1=ts_label + 'entries',
                                     varcol2=gcabs_col,
@@ -229,7 +225,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
 
                     df = transit_df.join(ycabs_df, how='outer') \
                         [[ts_col1, ts_col2, ycabs_col, 'weight']]
-                    create_joint_plot(df=df,
+                    create_reg_plot(df=df,
                                     varcol1=ts_col1,
                                     label1=ts_label + 'exits',
                                     varcol2=ycabs_col,
@@ -237,7 +233,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                     ax=axes[1, 0],
                                     weighted=True,
                                     weight_col='weight')
-                    create_joint_plot(df=df,
+                    create_reg_plot(df=df,
                                     varcol1=ts_col2,
                                     label1=ts_label + 'entries',
                                     varcol2=ycabs_col,
@@ -302,7 +298,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
 
                 df = transit_df.join(traffic_df, how='outer') \
                     [[ts_col1, ts_col2, tr_col, 'weight']]
-                create_joint_plot(df=df,
+                create_reg_plot(df=df,
                             varcol1=ts_col1,
                             label1=ts_label+'exits',
                             varcol2=tr_col,
@@ -310,7 +306,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             ax=axes[1, 0],
                             weighted=True,
                             weight_col='weight')
-                create_joint_plot(df=df,
+                create_reg_plot(df=df,
                             varcol1=ts_col2,
                             label1=ts_label+'entries',
                             varcol2=tr_col,
@@ -346,13 +342,13 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                                                                          gas_col: 'sum'})
             # drop outliers
             #df = row_operations.drop_outliers(df, 'price')
-            create_joint_plot(df=df,
+            create_reg_plot(df=df,
                         varcol1=ts_col1,
                         label1=ts_label + 'exits',
                         varcol2=gas_col,
                         label2=gas_label + gas_col,
                         ax=axes[1, 0])
-            create_joint_plot(df=df,
+            create_reg_plot(df=df,
                         varcol1=ts_col2,
                         label1=ts_label + 'entries',
                         varcol2=gas_col,
@@ -381,13 +377,13 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
 
             df = transit_df.join(weather_df, how='outer') \
                 [[ts_col1, ts_col2, wr_col]]
-            create_joint_plot(df=df,
+            create_reg_plot(df=df,
                         varcol1=ts_col1,
                         label1=ts_label + 'exits',
                         varcol2=wr_col,
                         label2=wr_label + wr_col,
                         ax=axes[1, 0])
-            create_joint_plot(df=df,
+            create_reg_plot(df=df,
                         varcol1=ts_col2,
                         label1=ts_label + 'entries',
                         varcol2=wr_col,
