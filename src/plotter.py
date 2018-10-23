@@ -53,7 +53,7 @@ def create_joint_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, la
     #sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, label=label2)
     g = sns.JointGrid(x=varcol1, y=varcol2, data=df)
     g = g.plot_joint(sns.regplot, ax=ax, color=COLOR1, label=label2)
-    g = g.plot_marginals(sns.distplot, ax=ax, color=COLOR1, label=label2)
+    g = g.plot_marginals(sns.distplot, color=COLOR1)
     g = g.annotate(stats.pearsonr)
     ax.set_title(label1 + ' vs ' + label2)
     ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
