@@ -3,7 +3,7 @@ from typing import List, Dict, Tuple
 from data_tools import task_map, row_operations
 from utils import persistence as ps
 from urllib3.response import HTTPResponse
-from pandas import DataFrame, read_csv, concat, Grouper, melt
+from pandas import DataFrame, read_csv, concat, Grouper, melt, merge_asof
 import matplotlib.pyplot as plt
 import seaborn as sns
 from multiprocessing import Process, cpu_count
@@ -402,7 +402,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             multiplot=True,
                             multicol='fare_type')
 
-                df = transit_df.merge_asof(fares_df, left_index=True, right_index=True, right_by='fare_type') \
+                df = merge_asof(transit_df, fares_df, left_index=True, right_index=True, right_by='fare_type') \
                     [[ts_col1, ts_col2, tsf_col, 'fare_type']]
                 print(df.head())
                 #df = df.groupby(Grouper(freq=freq, level=0), 'fare_type').sum()
