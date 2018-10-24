@@ -160,7 +160,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
         else:
             shift = 1 + int(filterval) + 1
         td: Timedelta = Timedelta(shift, unit='d')
-        fares_df[fares_datecols] = fares_df[fares_datecols] + td
+        fares_df[fares_datecols[0]] = fares_df[fares_datecols[0]] + td
         fares_df = melt(fares_df, id_vars=fares_datecols, var_name='fare_type', value_name='total_users')
         fares_df = fares_df.groupby(fares_datecols+['fare_type']).sum()
         fares_df = fares_df.reset_index().set_index(fares_datecols).sort_index().loc[start_date: end_date]
