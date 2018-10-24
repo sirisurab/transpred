@@ -119,8 +119,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
         #print(transit_df.head())
 
         # read fares data for station complex using station_map dictionary
-        file_path = freq+'/'
-        fares_filename: str = file_path+station_map[station.upper()]
+        fares_file_path: str = freq+'/'
+        fares_filename: str = fares_file_path+station_map[station.upper()]
         filestream = ps.get_file_stream(bucket=RGFARES_BUCKET, filename=fares_filename)
         fares_datecols = ['date']
         fares_dtypes = {
@@ -594,7 +594,7 @@ def plot(*args) -> bool:
                                        'weather_df': None}
 
     for station in stations:
-        for sub_task in ['gcabs', 'ycabs', 'traffic', 'gas', 'weather']:
+        for sub_task in ['gcabs', 'ycabs', 'traffic', 'gas', 'weather', 'fares']:
             plot_kwargs: Dict = init_plot_kwargs(station)
             plot_kwargs['sub_task'] = sub_task
             if sub_task in ['gcabs', 'ycabs']:
