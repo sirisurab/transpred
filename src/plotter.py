@@ -3,7 +3,7 @@ from typing import List, Dict, Tuple
 from data_tools import task_map, row_operations
 from utils import persistence as ps
 from urllib3.response import HTTPResponse
-from pandas import DataFrame, read_csv, concat, Grouper
+from pandas import DataFrame, read_csv, concat, Grouper, melt
 import matplotlib.pyplot as plt
 import seaborn as sns
 from multiprocessing import Process, cpu_count
@@ -11,6 +11,7 @@ from error_handling import errors
 from scipy import stats
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
+RGFARES_BUCKET: str = 'rg-tsfare'
 RGGCABS_BUCKET: str = 'rg-gcabs'
 RGYCABS_BUCKET: str = 'rg-ycabs'
 RGTRAFFIC_BUCKET: str = 'rg-traffic'
@@ -26,19 +27,32 @@ BASE_COLOR='#34495E'
 COLOR1='#E74C3C'
 COLOR2='#2ECC71'
 
+station_map: Dict[str, str] = {
+                                'BOWERY': 'BOWERY STREET-DELANCEY ST',
+                                'WALL ST': 'WALL STREET',
+                                'COURT SQ': 'COURT SQ',
+                                '86 ST': '86TH STREET-4TH AVENUE',
+                                'SOUTH FERRY': 'WHITEHALL STREET'
+                              }
+
 
 def get_axis_range(df: DataFrame, col: str) -> Tuple:
     return df[col].min(), df[col].max()
 
 
-def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None):
+def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str,
+                ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None,
+                multiplot: bool=False, multicol: str=None):
     sns.lineplot(data=df1[varcol1], ax=ax, color=BASE_COLOR, label=label1)
     ax1 = ax.twinx()
     if weighted:
         df2[varcol2] = df2[varcol2] / (RELPLOT_SZ_MULT * df2[weight_col])
     df2 = row_operations.drop_outliers(df=df2, col=varcol2)
 
-    sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
+    if multiplot:
+        sns.lineplot(data=df2[varcol2], ax=ax1, label=label2, hue=multicol)
+    else:
+        sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
     ax.set_ylabel(label1)
     ax1.set_ylabel(label2)
 
@@ -49,11 +63,16 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     return
 
 
-def create_reg_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, label2: str, ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None):
+def create_reg_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, label2: str,
+                    ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None,
+                    multiplot: bool=False, multicol: str=None):
     if weighted:
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
     df = row_operations.drop_outliers(df=df, col=varcol2)
-    sns.regplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, scatter_kws={'s':10}, line_kws={'linewidth':.8})
+    if multiplot:
+        sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, hue=multicol, scatter_kws={'s':10})
+    else:
+        sns.regplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, scatter_kws={'s':10}, line_kws={'linewidth':.8})
     ax.set_xlabel(label1)
     ax.set_ylabel(label2)
     #ax.set_title(label1 + ' vs ' + label2)
@@ -98,6 +117,43 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                          encoding='utf-8', dtype=dtypes)
         transit_df = transit_df.set_index('datetime').resample(freq).sum().loc[start_date: end_date]
         #print(transit_df.head())
+
+        # read fares data for station complex using station_map dictionary
+        file_path = freq+'/'
+        fares_filename: str = file_path+station_map[station.upper()]
+        filestream = ps.get_file_stream(bucket=RGFARES_BUCKET, filename=fares_filename)
+        fares_datecols = ['date']
+        fares_dtypes = {
+            'FF': 'int64',
+            'SEN/DIS': 'int64',
+            '7-D AFAS UNL': 'int64',
+            '30-D AFAS/RMF UNL': 'int64',
+            'JOINT RR TKT': 'int64',
+            '7-D UNL': 'int64',
+            '30-D UNL': 'int64',
+            '14-D RFM UNL': 'int64',
+            '1-D UNL': 'int64',
+            '14-D UNL': 'int64',
+            '7D-XBUS PASS': 'int64',
+            'TCMC': 'int64',
+            'RF 2 TRIP': 'int64',
+            'RR UNL NO TRADE': 'int64',
+            'TCMC ANNUAL MC': 'int64',
+            'MR EZPAY EXP': 'int64',
+            'MR EZPAY UNL': 'int64',
+            'PATH 2-T': 'int64',
+            'AIRTRAIN FF': 'int64',
+            'AIRTRAIN 30-D': 'int64',
+            'AIRTRAIN 10-T': 'int64',
+            'AIRTRAIN MTHLY': 'int64',
+            'STUDENTS': 'int64'
+        }
+        fares_df = read_csv(filestream, usecols=fares_datecols + list(dtypes.keys()),
+                                         parse_dates=fares_datecols,
+                                         date_parser=row_operations.parse_rg_dt,
+                                         encoding='utf-8', dtype=fares_dtypes)
+        fares_df = melt(fares_df, id_vars=fares_datecols, var_name='fare_type', value_name='total_users')
+        fares_df = fares_df.set_index(fares_datecols).loc[start_date: end_date]
 
         # create plots
         tmp_filepath: str = '/tmp/'
@@ -321,6 +377,48 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             ax=axes[1, 1],
                             weighted=True,
                             weight_col='weight')
+
+        elif sub_task == 'fares':
+                tsf_label = 'transit fares'
+                tsf_col = 'total_users'
+                create_plot(df1=transit_df,
+                            varcol1=ts_col1,
+                            label1=ts_label+'exits',
+                            df2=fares_df,
+                            varcol2=tsf_col,
+                            label2=tsf_label,
+                            ax=axes[0, 0],
+                            multiplot=True,
+                            multicol='fare_type')
+
+                create_plot(df1=transit_df,
+                            varcol1=ts_col2,
+                            label1=ts_label+'entries',
+                            df2=fares_df,
+                            varcol2=tsf_col,
+                            label2=tsf_label,
+                            ax=axes[0, 1],
+                            multiplot=True,
+                            multicol='fare_type')
+
+                df = transit_df.join(fares_df, how='outer') \
+                    [ts_col1, ts_col2, tsf_col, 'fare_type'].groupby(Grouper(freq=freq, level=0), 'fare_type').sum()
+                create_reg_plot(df=df,
+                            varcol1=ts_col1,
+                            label1=ts_label+'exits',
+                            varcol2=tsf_col,
+                            label2=tsf_label,
+                            ax=axes[1, 0],
+                            multiplot=True,
+                            multicol='fare_type')
+                create_reg_plot(df=df,
+                            varcol1=ts_col2,
+                            label1=ts_label+'entries',
+                            varcol2=tsf_col,
+                            label2=tsf_label,
+                            ax=axes[1, 1],
+                            multiplot=True,
+                            multicol='fare_type')
 
         elif sub_task == 'gas':
 
