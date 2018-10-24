@@ -59,8 +59,8 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
 
     ax.set_title(label1 + ' vs ' + label2)
     #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, labels, handletextpad=0, columnspacing=1, loc='upper left', ncol=2, frameon=True)
+    #handles, labels = ax.get_legend_handles_labels()
+    #ax.legend(handles, labels, handletextpad=0, columnspacing=1, loc='upper left', ncol=2, frameon=True)
     return
 
 
