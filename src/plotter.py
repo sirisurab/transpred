@@ -148,7 +148,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
             'AIRTRAIN MTHLY': 'int64',
             'STUDENTS': 'int64'
         }
-        fares_df = read_csv(filestream, usecols=fares_datecols + list(dtypes.keys()),
+        fares_df = read_csv(filestream, usecols=fares_datecols + list(fares_dtypes.keys()),
                                          parse_dates=fares_datecols,
                                          date_parser=row_operations.parse_rg_dt,
                                          encoding='utf-8', dtype=fares_dtypes)
