@@ -153,7 +153,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                          date_parser=row_operations.parse_rg_dt,
                                          encoding='utf-8', dtype=fares_dtypes)
         fares_df = melt(fares_df, id_vars=fares_datecols, var_name='fare_type', value_name='total_users')
-        fares_df = fares_df.set_index(fares_datecols).loc[start_date: end_date]
+        fares_df = fares_df.set_index(fares_datecols).sort_index().loc[start_date: end_date]
         print(fares_df.head())
 
         # create plots
@@ -402,10 +402,10 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             multiplot=True,
                             multicol='fare_type')
 
-                df = transit_df.join(fares_df, how='outer') \
+                df = transit_df.merge_asof(fares_df, left_index=True, right_index=True, right_by='fare_type') \
                     [[ts_col1, ts_col2, tsf_col, 'fare_type']]
                 print(df.head())
-                df = df.groupby(Grouper(freq=freq, level=0), 'fare_type').sum()
+                #df = df.groupby(Grouper(freq=freq, level=0), 'fare_type').sum()
                 create_reg_plot(df=df,
                             varcol1=ts_col1,
                             label1=ts_label+'exits',
