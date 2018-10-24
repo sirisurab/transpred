@@ -3,7 +3,7 @@ from typing import List, Dict, Tuple
 from data_tools import task_map, row_operations
 from utils import persistence as ps
 from urllib3.response import HTTPResponse
-from pandas import DataFrame, read_csv, concat, Grouper, melt, merge_asof
+from pandas import DataFrame, read_csv, concat, Grouper, melt, merge_asof, Timedelta
 import matplotlib.pyplot as plt
 import seaborn as sns
 from multiprocessing import Process, cpu_count
@@ -51,7 +51,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
 
     if multiplot:
         df2 = df2.reset_index()
-        sns.lineplot(x='date', y=varcol2, estimator=None, ax=ax1, label=label2, hue=multicol, legend='full', data=df2)
+        sns.lineplot(x='date', y=varcol2, estimator=None, ax=ax1, label=label2, hue=multicol, legend='brief', data=df2)
     else:
         sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
     ax.set_ylabel(label1)
@@ -71,7 +71,7 @@ def create_reg_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
     df = row_operations.drop_outliers(df=df, col=varcol2)
     if multiplot:
-        sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, hue=multicol, legend='full')
+        sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, hue=multicol, legend='brief')
     else:
         sns.regplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, scatter_kws={'s':10}, line_kws={'linewidth':.8})
     ax.set_xlabel(label1)
@@ -153,6 +153,14 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                          parse_dates=fares_datecols,
                                          date_parser=row_operations.parse_rg_dt,
                                          encoding='utf-8', dtype=fares_dtypes)
+        # fares data is for one week starting saturday and is dated as of the starting saturday.
+        # shift dates from saturday to weekday filterval used for rest of the data
+        if int(filterval) == 6:
+            shift = 1
+        else:
+            shift = 1 + int(filterval) + 1
+        td: Timedelta = Timedelta(shift, unit='d')
+        fares_df[fares_datecols] = fares_df[fares_datecols] + td
         fares_df = melt(fares_df, id_vars=fares_datecols, var_name='fare_type', value_name='total_users')
         fares_df = fares_df.groupby(fares_datecols+['fare_type']).sum()
         fares_df = fares_df.reset_index().set_index(fares_datecols).sort_index().loc[start_date: end_date]
@@ -404,7 +412,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             multiplot=True,
                             multicol='fare_type')
 
-                df = merge_asof(transit_df, fares_df, left_index=True, right_index=True) \
+                df = transit_df.join(fares_df, how='outer') \
                     [[ts_col1, ts_col2, tsf_col, 'fare_type']]
                 print(df.head())
                 #df = df.groupby(Grouper(freq=freq, level=0), 'fare_type').sum()
