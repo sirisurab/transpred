@@ -154,7 +154,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                          encoding='utf-8', dtype=fares_dtypes)
         fares_df = melt(fares_df, id_vars=fares_datecols, var_name='fare_type', value_name='total_users')
         fares_df = fares_df.groupby(fares_datecols+['fare_type']).sum()
-        fares_df = fares_df.unstack(level=-1).sort_index().loc[start_date: end_date]
+        fares_df = fares_df.sort_index().loc[start_date: end_date]
         print(fares_df.head())
 
         # create plots
