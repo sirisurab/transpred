@@ -402,7 +402,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             multiplot=True,
                             multicol='fare_type')
 
-                df = merge_asof(transit_df, fares_df, left_index=True, right_index=True, right_by='fare_type') \
+                df = merge_asof(transit_df, fares_df, left_index=True, right_index=True) \
                     [[ts_col1, ts_col2, tsf_col, 'fare_type']]
                 print(df.head())
                 #df = df.groupby(Grouper(freq=freq, level=0), 'fare_type').sum()
