@@ -50,7 +50,8 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     df2 = row_operations.drop_outliers(df=df2, col=varcol2)
 
     if multiplot:
-        sns.lineplot(data=df2[varcol2], estimator=None, ax=ax1, label=label2, hue=multicol, legend='full')
+        df2 = df2.reset_index()
+        sns.lineplot(x='date', y=varcol2, estimator=None, ax=ax1, label=label2, hue=multicol, legend='full', data=df2)
     else:
         sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
     ax.set_ylabel(label1)
