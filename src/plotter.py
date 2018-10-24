@@ -70,7 +70,7 @@ def create_reg_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
     df = row_operations.drop_outliers(df=df, col=varcol2)
     if multiplot:
-        sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, hue=multicol, kwargs={'s':10})
+        sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, hue=multicol)
     else:
         sns.regplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, scatter_kws={'s':10}, line_kws={'linewidth':.8})
     ax.set_xlabel(label1)
