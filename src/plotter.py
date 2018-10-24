@@ -403,7 +403,9 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             multicol='fare_type')
 
                 df = transit_df.join(fares_df, how='outer') \
-                    [[ts_col1, ts_col2, tsf_col, 'fare_type']].groupby(Grouper(freq=freq, level=0), 'fare_type').sum()
+                    [[ts_col1, ts_col2, tsf_col, 'fare_type']]
+                print(df.head())
+                df = df.groupby(Grouper(freq=freq, level=0), 'fare_type').sum()
                 create_reg_plot(df=df,
                             varcol1=ts_col1,
                             label1=ts_label+'exits',
