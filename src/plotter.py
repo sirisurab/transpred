@@ -512,8 +512,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
               % {'task': task, 'station': station})
 
     except Exception as err:
-        print('Error in plotting task %(task)s for station %(station)s'
-              % {'task': task, 'station': station})
+        print('Error in plotting task %(task)s sub-task %(sub_task)s for station %(station)s'
+              % {'task': task, 'sub_task': sub_task, 'station': station})
         raise err
 
     return
