@@ -21,8 +21,10 @@ GEOG_N_POINTS: int = 20
 
 def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zone_df: GeoDataFrame,
                links_df: GeoDataFrame, annotate: bool=False, plot_path: str=None) -> bool:
-    sns.set()
+
+    sns.set(font_scale=.65)
     sns.set_style('darkgrid')
+    plt.close('all')
     # create plots
     fig, ax = plt.subplots(1, figsize=(18, 6), clear=True)
     # taxi zones plot
@@ -85,7 +87,7 @@ def geo_merge(buffer_radii: ndarray, station_ids: List[int]=None, plot_only: boo
                                                              bucket=REFBASE_BUCKET)
     print(stations_df.head())
     if station_ids is not None:
-        stations_df = stations_df.loc[stations_df['stop_id'].isin(station_ids)]
+        stations_df = stations_df.loc[stations_df['station_id'].isin(station_ids)]
         print(stations_df.head())
 
     # load taxi_zones data
