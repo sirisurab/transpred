@@ -36,7 +36,7 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
         stations_points_geodf.apply(lambda x: plt.annotate(text=x['tsstation'], xy=x['point'].coords[0], horizontalalignment='center'), axis=1)
     links_df.plot(ax=ax, color='#AE4B16', linewidth=0.5)
 
-    fig.text(.5, .05, 'NYC stations with circles-of-influence (radius '+buffer_radius_miles+' miles)', ha='center')
+    fig.text(.5, .05, 'NYC stations with circles-of-influence (radius '+str(buffer_radius_miles)+' miles)', ha='center')
 
     # save plots
     plt.show()
