@@ -57,9 +57,9 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     ax.set_ylabel(label1)
     ax1.set_ylabel(label2)
 
-    box = g.get_position()
-    g.set_position([box.x0, box.y0, box.width * .85, box.height])
-    g.legend(loc='upper right', bbox_to_anchor=(1.05, 1), ncol=1)
+    #box = g.get_position()
+    #g.set_position([box.x0, box.y0, box.width * .85, box.height])
+    #g.legend(loc='upper right', bbox_to_anchor=(1.05, 1), ncol=1)
     ax.set_title(label1 + ' vs ' + label2)
     #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
     #handles, labels = ax.get_legend_handles_labels()
@@ -80,9 +80,9 @@ def create_reg_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
     ax.set_xlabel(label1)
     ax.set_ylabel(label2)
 
-    box = g.get_position()
-    g.set_position([box.x0, box.y0, box.width * .85, box.height])
-    g.legend(loc='upper right', bbox_to_anchor=(1.05, 1), ncol=1)
+    #box = g.get_position()
+    #g.set_position([box.x0, box.y0, box.width * .85, box.height])
+    #g.legend(loc='upper right', bbox_to_anchor=(1.05, 1), ncol=1)
     #ax.set_title(label1 + ' vs ' + label2)
     #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
     return
