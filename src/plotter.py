@@ -51,12 +51,15 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
 
     if multiplot:
         df2 = df2.reset_index()
-        sns.lineplot(x='date', y=varcol2, estimator=None, ax=ax1, label=label2, hue=multicol, data=df2)
+        g = sns.lineplot(x='date', y=varcol2, estimator=None, ax=ax1, label=label2, hue=multicol, data=df2)
     else:
-        sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
+        g = sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
     ax.set_ylabel(label1)
     ax1.set_ylabel(label2)
 
+    box = g.ax.get_position()
+    g.ax.set_position([box.x0, box.y0, box.width * .85, box.height])
+    g.ax.legend(loc='upper right', bbox_to_anchor=(1.05, 1), ncol=1)
     ax.set_title(label1 + ' vs ' + label2)
     #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
     #handles, labels = ax.get_legend_handles_labels()
@@ -71,11 +74,15 @@ def create_reg_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
         df[varcol2] = df[varcol2] / (RELPLOT_SZ_MULT * df[weight_col])
     df = row_operations.drop_outliers(df=df, col=varcol2)
     if multiplot:
-        sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, hue=multicol)
+        g = sns.relplot(x=varcol1, y=varcol2, data=df, ax=ax, hue=multicol)
     else:
-        sns.regplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, scatter_kws={'s':10}, line_kws={'linewidth':.8})
+        g = sns.regplot(x=varcol1, y=varcol2, data=df, ax=ax, color=COLOR1, scatter_kws={'s':10}, line_kws={'linewidth':.8})
     ax.set_xlabel(label1)
     ax.set_ylabel(label2)
+
+    box = g.ax.get_position()
+    g.ax.set_position([box.x0, box.y0, box.width * .85, box.height])
+    g.ax.legend(loc='upper right', bbox_to_anchor=(1.05, 1), ncol=1)
     #ax.set_title(label1 + ' vs ' + label2)
     #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
     return
