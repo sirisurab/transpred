@@ -119,6 +119,7 @@ def create_rel_plot(df: DataFrame, varcol1: str, label1: str, varcol2: str, labe
 
 
 def plot_for_station(task: str, freq: str, filterby: str, filterval: str, station: str, sub_task: str, geomerged_cabs_df: DataFrame=None, geomerged_traffic_df: DataFrame=None, gas_df: DataFrame=None, weather_df: DataFrame=None):
+    import matplotlib.pyplot as plt
     try:
         #freq: str = task_map.task_type_map[task]['freq']
         range: List[str] = task_map.task_type_map[task]['range']
