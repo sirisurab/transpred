@@ -72,7 +72,7 @@ def create_spatial_join_traffic(buffer_radius_miles: float, stations_geodf: GeoD
     return stations_traffic_df
 
 
-def geo_merge(buffer_radii: ndarray, stations: List[str]=None, plot_only: bool=False, plot_path: str=None) -> bool:
+def geo_merge(buffer_radii: ndarray, station_ids: List[int]=None, plot_only: bool=False, plot_path: str=None) -> bool:
     #gc_radius_miles: float = 3963 - 13 * sin(NYC_LATITUDE * pi/180)
 
     # load station data
@@ -82,8 +82,8 @@ def geo_merge(buffer_radii: ndarray, stations: List[str]=None, plot_only: bool=F
                                                              zipname=st_zipname,
                                                              bucket=REFBASE_BUCKET)
     print(stations_df.head())
-    if stations is not None:
-        stations_df = stations_df.loc[stations_df['stop_name'].isin(stations)]
+    if station_ids is not None:
+        stations_df = stations_df.loc[stations_df['stop_id'].isin(station_ids)]
         print(stations_df.head())
 
     # load taxi_zones data
@@ -134,7 +134,7 @@ def geo_merge(buffer_radii: ndarray, stations: List[str]=None, plot_only: bool=F
 
                 # create plots
                 annotate: bool = False
-                if stations is not None:
+                if station_ids is not None:
                     annotate = True
                 status_2: bool = make_plots(buffer_radius_miles=buffer_radius_miles,
                                             stations_geodf=stations_geodf,

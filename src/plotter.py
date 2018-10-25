@@ -36,12 +36,12 @@ station_complex_map: Dict[str, str] = {
                                 '86 ST': '86TH STREET-4TH AVENUE',
                                 'SOUTH FERRY': 'WHITEHALL STREET'
                               }
-station_map: Dict[str, str] = {
-                                'BOWERY': 'Bowery',
-                                'WALL ST': 'Wall St',
-                                'COURT SQ': 'Court Sq',
-                                '86 ST': '86 St',
-                                'SOUTH FERRY': 'South Ferry'
+station_map: Dict[str, int] = {
+                                'BOWERY': 103,
+                                'WALL ST': 413,
+                                'COURT SQ': 274,
+                                '86 ST': 397,
+                                'SOUTH FERRY': 330
                               }
 weekday_map: Dict[int, str] = {
                                 0 : 'Monday',
@@ -640,8 +640,8 @@ def plot(*args) -> bool:
 
     # make geo plots
     file_path: str = freq+'/'+filterby+filterval+'/'
-    station_names: List[str] = [station_map[station] for station in stations]
-    geo_merge(array([.5, 3, 5]), station_names, plot_only=True, plot_path=file_path)
+    station_ids: List[int] = [station_map[station] for station in stations]
+    geo_merge(array([.5, 3, 5]), station_ids, plot_only=True, plot_path=file_path)
     # spawn plot process for each station
     processes = []
     print(cpu_count())
