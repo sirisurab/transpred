@@ -42,7 +42,7 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
 
 def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str,
                 ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None,
-                multiplot: bool=False, multicol: str=None):
+                multiplot: bool=False, multicol: str=None, station: str=''):
     sns.lineplot(data=df1[varcol1], ax=ax, color=BASE_COLOR, label=label1)
     ax1 = ax.twinx()
     if weighted:
@@ -51,7 +51,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
 
     if multiplot:
         df2 = df2.reset_index()
-        g = sns.lineplot(x='date', y=varcol2, estimator=None, ax=ax1, hue=multicol, data=df2, linewidth=.7)
+        g = sns.lineplot(x='date', y=varcol2, estimator=None, ax=ax1, hue=multicol, data=df2, linewidth=.7, legend=False)
     else:
         g = sns.lineplot(data=df2[varcol2], ax=ax1, color=COLOR1, label=label2)
     ax.set_ylabel(label1)
@@ -60,10 +60,10 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     #box = g.get_position()
     #g.set_position([box.x0, box.y0, box.width * .85, box.height])
     #g.legend(loc='upper right', bbox_to_anchor=(1.05, 1), ncol=1)
-    ax.set_title(label1 + ' vs ' + label2)
+    ax.set_title(station+' '+label1 + ' vs ' + label2)
     #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
-    #handles, labels = ax.get_legend_handles_labels()
-    #ax.legend(handles, labels, handletextpad=0, columnspacing=1, loc='upper left', ncol=2, frameon=True)
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles, labels, handletextpad=0, columnspacing=1, loc='upper left', ncol=2, frameon=True)
     return
 
 
@@ -216,7 +216,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
 
                 # plots for cabs
                 if dolocationids.size > 0 and gcabs_df.size > 0:
-                    gcabs_label = 'gcabs '
+                    gcabs_label = 'green cabs '
                     gcabs_col = 'passengers'
                     create_plot(df1=transit_df,
                                 varcol1=ts_col1,
@@ -279,7 +279,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
 
                 # plots for cabs
                 if dolocationids.size > 0 and ycabs_df.size > 0:
-                    ycabs_label = 'ycabs '
+                    ycabs_label = 'yellow cabs '
                     ycabs_col = 'passengers'
                     create_plot(df1=transit_df,
                                 varcol1=ts_col1,
