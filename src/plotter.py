@@ -11,6 +11,7 @@ from error_handling import errors
 from scipy import stats
 from geo_merger import geo_merge
 from numpy import array
+from time import sleep
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
 RGFARES_BUCKET: str = 'rg-tsfare'
@@ -644,7 +645,8 @@ def plot(*args) -> bool:
     station_ids: List[int] = [station_map[station] for station in stations]
     geo_merge(array([.5, 3, 5]), station_ids, plot_only=True, plot_path=file_path)
     # spawn plot process for each station
-    processes = []
+    sub_tasks: List[str] =  ['gcabs', 'ycabs', 'traffic', 'gas', 'weather', 'fares']
+    processes = {station+sub_task: () for sub_task in sub_tasks for station in stations}
     print(cpu_count())
     init_plot_kwargs = lambda station : {'task': task,
                                          'freq':freq,
@@ -658,7 +660,7 @@ def plot(*args) -> bool:
                                        'weather_df': None}
 
     for station in stations:
-        for sub_task in ['gcabs', 'ycabs', 'traffic', 'gas', 'weather', 'fares']:
+        for sub_task in sub_tasks:
             plot_kwargs: Dict = init_plot_kwargs(station)
             plot_kwargs['sub_task'] = sub_task
             if sub_task in ['gcabs', 'ycabs']:
@@ -670,15 +672,30 @@ def plot(*args) -> bool:
             elif sub_task == 'weather':
                 plot_kwargs['weather_df'] = weather_df
 
-            p = Process(target=plot_for_station, kwargs=plot_kwargs)
+            p = Process(target=plot_for_station, name=station+sub_task, kwargs=plot_kwargs)
             p.start()
             print('started process %(pid)s for %(station)s %(sub_task)s' % {'pid': p.name,
                                                                             'station': station,
                                                                             'sub_task': sub_task})
-            processes.append(p)
+            #processes.append(p)
+            processes[station+sub_task] = (p, plot_kwargs)
 
-    for p in processes:
-        p.join()
+    #for p in processes:
+    #    p.join()
+
+    while len(processes) > 0:
+        for p_name in processes.keys():
+            sleep(.5)
+            p = processes[p_name][0]
+            if p.exitcode is None and not p.is_alive():
+                print(p.name, ' is gone as if never born!')
+            elif p.exitcode < 0:
+                p = Process(target=plot_for_station, name=p_name, kwargs=processes[p_name][1])
+                print('restarted process ',p.name)
+            else:
+                print(p.name, ' completed')
+                p.join()
+                processes.pop(p_name)
 
     return True
 
