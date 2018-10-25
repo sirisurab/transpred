@@ -32,8 +32,7 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     stations_points_geodf = stations_geodf.copy().set_geometry('point').drop(columns=['circle'])
     stations_points_geodf.plot(ax=ax, color='#787064', markersize=.5)
     if annotate:
-        for _, row in stations_points_geodf.iterrows():
-            plt.annotate(s=row['tsstation'], xy=row['point'], horizontalalignment='center')
+        stations_points_geodf.apply(lambda x: plt.annotate(text=x['tsstation'], xy=x['point'], horizontalalignment='center'))
     links_df.plot(ax=ax, color='#AE4B16', linewidth=0.5)
 
     # save plots
