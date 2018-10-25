@@ -29,12 +29,19 @@ BASE_COLOR='#34495E'
 COLOR1='#E74C3C'
 COLOR2='#2ECC71'
 
-station_map: Dict[str, str] = {
+station_complex_map: Dict[str, str] = {
                                 'BOWERY': 'BOWERY STREET-DELANCEY ST',
                                 'WALL ST': 'WALL STREET',
                                 'COURT SQ': 'COURT SQ',
                                 '86 ST': '86TH STREET-4TH AVENUE',
                                 'SOUTH FERRY': 'WHITEHALL STREET'
+                              }
+station_map: Dict[str, str] = {
+                                'BOWERY': 'Bowery',
+                                'WALL ST': 'Wall St',
+                                'COURT SQ': 'Court Sq',
+                                '86 ST': '86 St',
+                                'SOUTH FERRY': 'South Ferry'
                               }
 weekday_map: Dict[int, str] = {
                                 0 : 'Monday',
@@ -137,9 +144,9 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
         transit_df = transit_df.set_index('datetime').resample(freq).sum().loc[start_date: end_date]
         #print(transit_df.head())
 
-        # read fares data for station complex using station_map dictionary
+        # read fares data for station complex using station_complex_map dictionary
         fares_file_path: str = freq+'/'
-        fares_filename: str = fares_file_path+station_map[station.upper()]
+        fares_filename: str = fares_file_path+station_complex_map[station.upper()]
         filestream = ps.get_file_stream(bucket=RGFARES_BUCKET, filename=fares_filename)
         fares_datecols = ['date']
         fares_dtypes = {
@@ -633,7 +640,8 @@ def plot(*args) -> bool:
 
     # make geo plots
     file_path: str = freq+'/'+filterby+filterval+'/'
-    geo_merge(array([.5, 3, 5]), stations, plot_only=True, plot_path=file_path)
+    station_names: List[str] = [station_map[station] for station in stations]
+    geo_merge(array([.5, 3, 5]), station_names, plot_only=True, plot_path=file_path)
     # spawn plot process for each station
     processes = []
     print(cpu_count())
