@@ -226,7 +226,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                 label2=gcabs_label + gcabs_col,
                                 ax=axes[0, 0],
                                 weighted=True,
-                                weight_col='weight')
+                                weight_col='weight',
+                                station=station)
 
                     create_plot(df1=transit_df,
                                 varcol1=ts_col2,
@@ -236,7 +237,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                 label2=gcabs_label + gcabs_col,
                                 ax=axes[0, 1],
                                 weighted=True,
-                                weight_col='weight')
+                                weight_col='weight',
+                                station=station)
 
                     df = transit_df.join(gcabs_df, how='outer') \
                         [[ts_col1, ts_col2, gcabs_col, 'weight']]
@@ -289,7 +291,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                 label2=ycabs_label + ycabs_col,
                                 ax=axes[0, 0],
                                 weighted=True,
-                                weight_col='weight')
+                                weight_col='weight',
+                                station=station)
 
                     create_plot(df1=transit_df,
                                 varcol1=ts_col2,
@@ -299,7 +302,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                 label2=ycabs_label + ycabs_col,
                                 ax=axes[0, 1],
                                 weighted=True,
-                                weight_col='weight')
+                                weight_col='weight',
+                                station=station)
 
                     df = transit_df.join(ycabs_df, how='outer') \
                         [[ts_col1, ts_col2, ycabs_col, 'weight']]
@@ -362,7 +366,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             label2=tr_label+tr_col,
                             ax=axes[0, 0],
                             weighted=True,
-                            weight_col='weight')
+                            weight_col='weight',
+                            station=station)
 
                 create_plot(df1=transit_df,
                             varcol1=ts_col2,
@@ -372,7 +377,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             label2=tr_label+tr_col,
                             ax=axes[0, 1],
                             weighted=True,
-                            weight_col='weight')
+                            weight_col='weight',
+                            station=station)
 
                 df = transit_df.join(traffic_df, how='outer') \
                     [[ts_col1, ts_col2, tr_col, 'weight']]
@@ -404,7 +410,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             label2=tsf_label,
                             ax=axes[0, 0],
                             multiplot=True,
-                            multicol='fare_type')
+                            multicol='fare_type',
+                            station=station)
 
                 create_plot(df1=transit_df,
                             varcol1=ts_col2,
@@ -414,7 +421,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             label2=tsf_label,
                             ax=axes[0, 1],
                             multiplot=True,
-                            multicol='fare_type')
+                            multicol='fare_type',
+                            station=station)
 
                 df = transit_df.join(fares_df, how='outer') \
                     [[ts_col1, ts_col2, tsf_col, 'fare_type']]
@@ -448,7 +456,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                         df2=gas_df,
                         varcol2=gas_col,
                         label2=gas_label + gas_col,
-                        ax=axes[0, 0])
+                        ax=axes[0, 0],
+                        station=station)
 
             create_plot(df1=transit_df,
                         varcol1=ts_col2,
@@ -456,7 +465,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                         df2=gas_df,
                         varcol2=gas_col,
                         label2=gas_label + gas_col,
-                        ax=axes[0, 1])
+                        ax=axes[0, 1],
+                        station=station)
 
             df = transit_df.join(gas_df, how='outer') \
                 [[ts_col1, ts_col2, gas_col]].groupby(Grouper(freq=freq, level=0)).agg({ts_col1: 'sum',
@@ -487,7 +497,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                         df2=weather_df,
                         varcol2=wr_col,
                         label2=wr_label + wr_col,
-                        ax=axes[0, 0])
+                        ax=axes[0, 0],
+                        station=station)
 
             create_plot(df1=transit_df,
                         varcol1=ts_col2,
@@ -495,7 +506,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                         df2=weather_df,
                         varcol2=wr_col,
                         label2=wr_label + wr_col,
-                        ax=axes[0, 1])
+                        ax=axes[0, 1],
+                        station=station)
 
             df = transit_df.join(weather_df, how='outer') \
                 [[ts_col1, ts_col2, wr_col]]
