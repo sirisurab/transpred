@@ -10,7 +10,7 @@ from multiprocessing import Process, cpu_count
 from error_handling import errors
 from scipy import stats
 from geo_merger import geo_merge
-from numpy import ndarray
+from numpy import array
 
 RGTRANSIT_BUCKET: str = 'rg-transit'
 RGFARES_BUCKET: str = 'rg-tsfare'
@@ -633,7 +633,7 @@ def plot(*args) -> bool:
 
     # make geo plots
     file_path: str = freq+'/'+filterby+filterval+'/'
-    geo_merge(ndarray([.5, 3, 5]), stations, plot_only=True, plot_path=file_path)
+    geo_merge(array([.5, 3, 5]), stations, plot_only=True, plot_path=file_path)
     # spawn plot process for each station
     processes = []
     print(cpu_count())
