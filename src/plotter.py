@@ -140,8 +140,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
             '7-D UNL': 'int64',
             '30-D UNL': 'int64',
             #'14-D RFM UNL': 'int64',
-            '1-D UNL': 'int64',
-            '14-D UNL': 'int64',
+            #'1-D UNL': 'int64',
+            #'14-D UNL': 'int64',
             #'7D-XBUS PASS': 'int64',
             #'TCMC': 'int64',
             #'RF 2 TRIP': 'int64',
@@ -162,8 +162,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                          encoding='utf-8', dtype=fares_dtypes)
         # fares data is for one week starting saturday and is dated as of the starting saturday.
         # shift dates from saturday to end of week (1W resampled data uses end-ofweek i.e. Sunday) used for rest of the data
-        # shift by one day
-        td: Timedelta = Timedelta(1, unit='d')
+        # shift by one day + one week to move to end of time period
+        td: Timedelta = Timedelta(8, unit='d')
         fares_df[fares_datecols[0]] = fares_df[fares_datecols[0]] + td
         fares_df = melt(fares_df, id_vars=fares_datecols, var_name='fare_type', value_name='total_users')
         fares_df = fares_df.groupby(fares_datecols+['fare_type']).sum()
