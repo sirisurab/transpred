@@ -34,6 +34,15 @@ station_map: Dict[str, str] = {
                                 '86 ST': '86TH STREET-4TH AVENUE',
                                 'SOUTH FERRY': 'WHITEHALL STREET'
                               }
+weekday_map: Dict[int, str] = {
+                                0 : 'Monday',
+                                1 : 'Tuesday',
+                                2 : 'Wednesday',
+                                3 : 'Thursday',
+                                4 : 'Friday',
+                                5 : 'Saturday',
+                                6 : 'Sunday'
+                              }
 
 
 def get_axis_range(df: DataFrame, col: str) -> Tuple:
@@ -42,7 +51,7 @@ def get_axis_range(df: DataFrame, col: str) -> Tuple:
 
 def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varcol2: str, label2: str,
                 ax: plt.Axes.axis, weighted: bool=False, weight_col: str=None,
-                multiplot: bool=False, multicol: str=None, station: str=''):
+                multiplot: bool=False, multicol: str=None, station: str='', weekday: int=None):
     sns.lineplot(data=df1[varcol1], ax=ax, color=BASE_COLOR, label=label1)
     ax1 = ax.twinx()
     if weighted:
@@ -60,7 +69,7 @@ def create_plot(df1: DataFrame, varcol1: str, label1: str, df2: DataFrame, varco
     #box = g.get_position()
     #g.set_position([box.x0, box.y0, box.width * .85, box.height])
     #g.legend(loc='upper right', bbox_to_anchor=(1.05, 1), ncol=1)
-    ax.set_title(station+' '+label1 + ' vs ' + label2)
+    ax.set_title(station+' '+label1 + ' vs ' + label2+ ' for '+weekday_map[weekday])
     #ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=.0)
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles, labels, handletextpad=0, columnspacing=1, loc='upper left', ncol=2, frameon=True)
@@ -227,7 +236,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                 ax=axes[0, 0],
                                 weighted=True,
                                 weight_col='weight',
-                                station=station)
+                                station=station,
+                                weekday=int(filterval))
 
                     create_plot(df1=transit_df,
                                 varcol1=ts_col2,
@@ -238,7 +248,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                 ax=axes[0, 1],
                                 weighted=True,
                                 weight_col='weight',
-                                station=station)
+                                station=station,
+                                weekday=int(filterval))
 
                     df = transit_df.join(gcabs_df, how='outer') \
                         [[ts_col1, ts_col2, gcabs_col, 'weight']]
@@ -292,7 +303,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                 ax=axes[0, 0],
                                 weighted=True,
                                 weight_col='weight',
-                                station=station)
+                                station=station,
+                                weekday=int(filterval))
 
                     create_plot(df1=transit_df,
                                 varcol1=ts_col2,
@@ -303,7 +315,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                                 ax=axes[0, 1],
                                 weighted=True,
                                 weight_col='weight',
-                                station=station)
+                                station=station,
+                                weekday=int(filterval))
 
                     df = transit_df.join(ycabs_df, how='outer') \
                         [[ts_col1, ts_col2, ycabs_col, 'weight']]
@@ -367,7 +380,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             ax=axes[0, 0],
                             weighted=True,
                             weight_col='weight',
-                            station=station)
+                            station=station,
+                            weekday=int(filterval))
 
                 create_plot(df1=transit_df,
                             varcol1=ts_col2,
@@ -378,7 +392,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             ax=axes[0, 1],
                             weighted=True,
                             weight_col='weight',
-                            station=station)
+                            station=station,
+                            weekday=int(filterval))
 
                 df = transit_df.join(traffic_df, how='outer') \
                     [[ts_col1, ts_col2, tr_col, 'weight']]
@@ -411,7 +426,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             ax=axes[0, 0],
                             multiplot=True,
                             multicol='fare_type',
-                            station=station)
+                            station=station,
+                            weekday=int(filterval))
 
                 create_plot(df1=transit_df,
                             varcol1=ts_col2,
@@ -422,7 +438,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                             ax=axes[0, 1],
                             multiplot=True,
                             multicol='fare_type',
-                            station=station)
+                            station=station,
+                            weekday=int(filterval))
 
                 df = transit_df.join(fares_df, how='outer') \
                     [[ts_col1, ts_col2, tsf_col, 'fare_type']]
@@ -457,7 +474,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                         varcol2=gas_col,
                         label2=gas_label + gas_col,
                         ax=axes[0, 0],
-                        station=station)
+                        station=station,
+                        weekday=int(filterval))
 
             create_plot(df1=transit_df,
                         varcol1=ts_col2,
@@ -466,7 +484,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                         varcol2=gas_col,
                         label2=gas_label + gas_col,
                         ax=axes[0, 1],
-                        station=station)
+                        station=station,
+                        weekday=int(filterval))
 
             df = transit_df.join(gas_df, how='outer') \
                 [[ts_col1, ts_col2, gas_col]].groupby(Grouper(freq=freq, level=0)).agg({ts_col1: 'sum',
@@ -498,7 +517,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                         varcol2=wr_col,
                         label2=wr_label + wr_col,
                         ax=axes[0, 0],
-                        station=station)
+                        station=station,
+                        weekday=int(filterval))
 
             create_plot(df1=transit_df,
                         varcol1=ts_col2,
@@ -507,7 +527,8 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
                         varcol2=wr_col,
                         label2=wr_label + wr_col,
                         ax=axes[0, 1],
-                        station=station)
+                        station=station,
+                        weekday=int(filterval))
 
             df = transit_df.join(weather_df, how='outer') \
                 [[ts_col1, ts_col2, wr_col]]
