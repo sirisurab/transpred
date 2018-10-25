@@ -80,8 +80,10 @@ def geo_merge(buffer_radii: ndarray, stations: List[str]=None, plot_only: bool=F
     stations_df: GeoDataFrame = file_io.fetch_geodf_from_zip(filename=st_filename,
                                                              zipname=st_zipname,
                                                              bucket=REFBASE_BUCKET)
+    print(stations_df.head())
     if stations is not None:
         stations_df = stations_df.loc[stations_df['tsstation'].isin(stations)]
+        print(stations_df.head())
 
     # load taxi_zones data
     tz_zipname: str = 'taxi_zones.zip'
