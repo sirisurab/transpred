@@ -83,7 +83,7 @@ def geo_merge(buffer_radii: ndarray, stations: List[str]=None, plot_only: bool=F
                                                              bucket=REFBASE_BUCKET)
     print(stations_df.head())
     if stations is not None:
-        stations_df = stations_df.loc[stations_df['tsstation'].isin(stations)]
+        stations_df = stations_df.loc[stations_df['stop_name'].isin(stations)]
         print(stations_df.head())
 
     # load taxi_zones data
