@@ -40,10 +40,11 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     plt.show()
     plotfilepath: str = '/tmp/'
     plotfilename: str = 'geomerged' + str(buffer_radius_miles) + '.png'
-    if plot_path is not None:
-        plotfilename = plot_path + plotfilename
+    remotefilename: str = plotfilename
     plt.savefig(plotfilepath + plotfilename)
-    status: bool = ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plotfilename, source=plotfilepath + plotfilename)
+    if plot_path is not None:
+        remotefilename = plot_path + plotfilename
+    status: bool = ps.copy_file(dest_bucket=PLOTS_BUCKET, file=remotefilename, source=plotfilepath + plotfilename)
 
     return status
 
