@@ -19,7 +19,8 @@ METERS_PER_MILE: float = 1609.34
 GEOG_N_POINTS: int = 20
 
 
-def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zone_df: GeoDataFrame, links_df: GeoDataFrame) -> bool:
+def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zone_df: GeoDataFrame,
+               links_df: GeoDataFrame, annotate: bool=False, plot_path: str=None) -> bool:
     sns.set()
     sns.set_style('darkgrid')
     # create plots
@@ -30,12 +31,17 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     stations_geodf.plot(ax=ax, facecolor='#618A98', edgecolor='#618A98', alpha=0.2/buffer_radius_miles)
     stations_points_geodf = stations_geodf.copy().set_geometry('point').drop(columns=['circle'])
     stations_points_geodf.plot(ax=ax, color='#787064', markersize=.5)
+    if annotate:
+        for i, row in stations_points_geodf['point'].iterrows():
+            plt.annotate(s=row['tsstation'], xy=row['point'], horizontalalignment='center')
     links_df.plot(ax=ax, color='#AE4B16', linewidth=0.5)
 
     # save plots
     plt.show()
     plotfilepath: str = '/tmp/'
     plotfilename: str = 'geomerged' + str(buffer_radius_miles) + '.png'
+    if plot_path is not None:
+        plotfilename = plot_path + plotfilename
     plt.savefig(plotfilepath + plotfilename)
     status: bool = ps.copy_file(dest_bucket=PLOTS_BUCKET, file=plotfilename, source=plotfilepath + plotfilename)
 
@@ -65,7 +71,7 @@ def create_spatial_join_traffic(buffer_radius_miles: float, stations_geodf: GeoD
     return stations_traffic_df
 
 
-def geo_merge(buffer_radii: ndarray) -> bool:
+def geo_merge(buffer_radii: ndarray, stations: List[str]=None, plot_only: bool=False, plot_path: str=None) -> bool:
     #gc_radius_miles: float = 3963 - 13 * sin(NYC_LATITUDE * pi/180)
 
     # load station data
@@ -74,6 +80,8 @@ def geo_merge(buffer_radii: ndarray) -> bool:
     stations_df: GeoDataFrame = file_io.fetch_geodf_from_zip(filename=st_filename,
                                                              zipname=st_zipname,
                                                              bucket=REFBASE_BUCKET)
+    if stations is not None:
+        stations_df = stations_df.loc[stations_df['tsstation'].isin(stations)]
 
     # load taxi_zones data
     tz_zipname: str = 'taxi_zones.zip'
@@ -122,44 +130,51 @@ def geo_merge(buffer_radii: ndarray) -> bool:
                 stations_geodf = stations_geodf.rename(columns={'geometry': 'point'}).set_geometry('circle')
 
                 # create plots
+                annotate: bool = False
+                if stations is not None:
+                    annotate = True
                 status_2: bool = make_plots(buffer_radius_miles=buffer_radius_miles,
                                             stations_geodf=stations_geodf,
                                             taxi_zone_df=taxi_zone_df,
-                                            links_df=links_df)
+                                            links_df=links_df,
+                                            annotate=annotate,
+                                            plot_path=plot_path)
 
-                cabs_df = concat([cabs_df, create_spatial_join_cabs(buffer_radius_miles=buffer_radius_miles,
-                                                       stations_geodf=stations_geodf,
-                                                       taxi_zone_df=taxi_zone_df)], ignore_index=True)
+                if not plot_only:
+                    cabs_df = concat([cabs_df, create_spatial_join_cabs(buffer_radius_miles=buffer_radius_miles,
+                                                           stations_geodf=stations_geodf,
+                                                           taxi_zone_df=taxi_zone_df)], ignore_index=True)
 
-                traffic_df = concat([traffic_df, create_spatial_join_traffic(buffer_radius_miles=buffer_radius_miles,
-                                                                  stations_geodf=stations_geodf,
-                                                                  links_df=links_df)], ignore_index=True)
+                    traffic_df = concat([traffic_df, create_spatial_join_traffic(buffer_radius_miles=buffer_radius_miles,
+                                                                      stations_geodf=stations_geodf,
+                                                                      links_df=links_df)], ignore_index=True)
 
 
             except Exception as err:
                 print('Error in geo_merge %(radius)s' % {'radius': str(buffer_radius_miles)})
                 raise err
 
-    cabs_df = cabs_df.groupby(['station_id', 'locationid']).agg({'stop_id': 'first',
-                                                              'stop_name': 'first',
-                                                              'tsstation': 'first',
-                                                              'borough': 'first',
-                                                              'weight': 'min'})
-    traffic_df = traffic_df.groupby(['station_id', 'linkid']).agg({'stop_id': 'first',
-                                                                 'stop_name': 'first',
-                                                                 'tsstation': 'first',
-                                                                 'borough': 'first',
-                                                                 'weight': 'min'})
+    if not plot_only:
+        cabs_df = cabs_df.groupby(['station_id', 'locationid']).agg({'stop_id': 'first',
+                                                                  'stop_name': 'first',
+                                                                  'tsstation': 'first',
+                                                                  'borough': 'first',
+                                                                  'weight': 'min'})
+        traffic_df = traffic_df.groupby(['station_id', 'linkid']).agg({'stop_id': 'first',
+                                                                     'stop_name': 'first',
+                                                                     'tsstation': 'first',
+                                                                     'borough': 'first',
+                                                                     'weight': 'min'})
 
-    # write files
-    # if stations_cabs_df.size > 0:
-    geomerged_file = GEOMERGED_PATH + '/cabs.csv'
-    status_1 = file_io.write_csv(df=cabs_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
-    # if stations_traffic_df.size > 0:
-    geomerged_file = GEOMERGED_PATH + '/traffic.csv'
-    status_2 = file_io.write_csv(df=traffic_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
+        # write files
+        # if stations_cabs_df.size > 0:
+        geomerged_file = GEOMERGED_PATH + '/cabs.csv'
+        status_1 = file_io.write_csv(df=cabs_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
+        # if stations_traffic_df.size > 0:
+        geomerged_file = GEOMERGED_PATH + '/traffic.csv'
+        status_2 = file_io.write_csv(df=traffic_df, bucket=REFBASE_BUCKET, filename=geomerged_file)
 
-    return status_1 and status_2
+    return True
 
 
 if __name__ == '__main__':
