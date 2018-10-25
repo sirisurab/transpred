@@ -24,7 +24,7 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     sns.set()
     sns.set_style('darkgrid')
     # create plots
-    fig, ax = plt.subplots(1, figsize=(18, 18), clear=True)
+    fig, ax = plt.subplots(1, figsize=(18, 6), clear=True)
     # taxi zones plot
     taxi_zone_df.plot(ax=ax, facecolor='#F9DA95', edgecolor='#FFFFFF', linewidth=0.5)
 
@@ -41,7 +41,7 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     # save plots
     plt.show()
     plotfilepath: str = '/tmp/'
-    plotfilename: str = 'geomerged' + str(buffer_radius_miles) + '.png'
+    plotfilename: str = 'geomerged' + str(buffer_radius_miles) + '.pdf'
     remotefilename: str = plotfilename
     plt.savefig(plotfilepath + plotfilename)
     if plot_path is not None:
