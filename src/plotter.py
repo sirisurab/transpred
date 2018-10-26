@@ -694,6 +694,7 @@ def plot(*args) -> bool:
                 elif p.exitcode is not None and p.exitcode > 0:
                     p = Process(target=plot_for_station, name=p_name, kwargs=processes[p_name][2])
                     p.start()
+                    processes[p_name] = (True, p, processes[p_name][2])
                     print('restarted process ', p.name)
                 elif p.exitcode is not None and p.exitcode <= 0:
                     #print(p.name, ' completed')
