@@ -686,7 +686,6 @@ def plot(*args) -> bool:
             status = processes[p_name][0]
             p = processes[p_name][1]
             if status:
-                i = i+1
                 if p.exitcode is None and not p.is_alive():
                     print(p.name, ' is gone as if never born!')
                     processes[p_name][0] = False

@@ -70,10 +70,10 @@ def copy_file(dest_bucket: str, file: str, source: str) -> bool:
         mc.make_bucket(dest_bucket)
         print('made bucket '+dest_bucket)
     except BucketAlreadyOwnedByYou as err:
-        print('bucket already owned by you '+dest_bucket)
+        #print('bucket already owned by you '+dest_bucket)
         pass
     except BucketAlreadyExists as err:
-        print('bucket already exists '+dest_bucket)
+        #print('bucket already exists '+dest_bucket)
         pass
     except ResponseError as err:
         print('error creating bucket '+dest_bucket)
@@ -136,10 +136,10 @@ def create_bucket(bucket: str) -> bool:
         mc.set_bucket_policy(bucket, policy_read_write)
         print('made bucket '+bucket)
     except BucketAlreadyOwnedByYou:
-        print('bucket already owned by you '+bucket)
+        #print('bucket already owned by you '+bucket)
         pass
     except BucketAlreadyExists:
-        print('bucket already exists '+bucket)
+        #print('bucket already exists '+bucket)
         pass
     except ResponseError as err:
         print('error creating bucket '+bucket)
