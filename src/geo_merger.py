@@ -23,7 +23,7 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
                links_df: GeoDataFrame, annotate: bool=False, plot_path: str=None) -> bool:
 
     sns.set(font_scale=.65)
-    sns.set_style('darkgrid')
+    sns.set_style('white')
     plt.close('all')
     # create plots
     fig, ax = plt.subplots(1, figsize=(18, 10), clear=True)
@@ -38,6 +38,8 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     links_df.plot(ax=ax, color='#AE4B16', linewidth=0.5)
 
     fig.text(.5, .05, 'NYC stations with circles-of-influence (radius '+str(buffer_radius_miles)+' miles)', ha='center')
+    ax.set_axis_off()
+    plt.axis('equal')
 
     # save plots
     plt.show()
