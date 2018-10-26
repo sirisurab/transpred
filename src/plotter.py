@@ -687,17 +687,17 @@ def plot(*args) -> bool:
             p = processes[p_name][1]
             if status:
                 if p.exitcode is None and not p.is_alive():
-                    print(p.name, ' is gone as if never born!')
-                    processes[p_name][0] = False
-                elif p.exitcode is None and p.is_alive():
-                    print(p.name, ' is still running')
+                    #print(p.name, ' is gone as if never born!')
+                    processes[p_name] = (False, p, processes[p_name][2])
+                #elif p.exitcode is None and p.is_alive():
+                    #print(p.name, ' is still running')
                 elif p.exitcode is not None and p.exitcode > 0:
                     p = Process(target=plot_for_station, name=p_name, kwargs=processes[p_name][2])
                     print('restarted process ', p.name)
-                else:
-                    print(p.name, ' completed')
+                elif p.exitcode is not None and p.exitcode <= 0:
+                    #print(p.name, ' completed')
                     p.join()
-                    processes[p_name][0] = False
+                    processes[p_name] = (False, p, processes[p_name][2])
 
         running_processes = reduce(lambda a, x: a+x[0], processes.values(), 0)
         print(running_processes,' processes are still running')
