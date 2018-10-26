@@ -34,7 +34,6 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     stations_points_geodf = stations_geodf.copy().set_geometry('point').drop(columns=['circle'])
     stations_points_geodf.plot(ax=ax, color='#787064', markersize=.5)
     if annotate:
-        print(stations_points_geodf.head())
         stations_points_geodf.apply(lambda x: plt.annotate(text=x['tsstation'], xy=x['point'].coords[0], horizontalalignment='center'), axis=1)
     links_df.plot(ax=ax, color='#AE4B16', linewidth=0.5)
 
@@ -85,10 +84,8 @@ def geo_merge(buffer_radii: ndarray, station_ids: List[int]=None, plot_only: boo
     stations_df: GeoDataFrame = file_io.fetch_geodf_from_zip(filename=st_filename,
                                                              zipname=st_zipname,
                                                              bucket=REFBASE_BUCKET)
-    print(stations_df.head())
     if station_ids is not None:
         stations_df = stations_df.loc[stations_df['station_id'].isin(station_ids)]
-        print(stations_df.head())
 
     # load taxi_zones data
     tz_zipname: str = 'taxi_zones.zip'
