@@ -689,9 +689,9 @@ def plot(*args) -> bool:
             p = processes[p_name][0]
             if p.exitcode is None and not p.is_alive():
                 print(p.name, ' is gone as if never born!')
-            elif p.exitcode < 0:
+            elif p.exitcode is not None and p.exitcode < 0:
                 p = Process(target=plot_for_station, name=p_name, kwargs=processes[p_name][1])
-                print('restarted process ',p.name)
+                print('restarted process ', p.name)
             else:
                 print(p.name, ' completed')
                 p.join()
