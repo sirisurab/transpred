@@ -9,7 +9,7 @@ import seaborn as sns
 from multiprocessing import Process, cpu_count
 from error_handling import errors
 from scipy import stats
-from geo_merger import geo_merge
+from geo_merger import geo_merge, EXT
 from numpy import array
 from time import sleep
 from functools import reduce
@@ -561,7 +561,7 @@ def plot_for_station(task: str, freq: str, filterby: str, filterval: str, statio
 
         fig.tight_layout()
         # save plots in out bucket
-        filename = sub_task+'.pdf'
+        filename = sub_task+EXT
         local_filename = station+'_'+filename
         remote_filename = station+'/'+filename
         local_file = tmp_filepath + local_filename

@@ -17,6 +17,7 @@ NYC_LATITUDE: float = 40.7128
 PLOTS_BUCKET: str = 'plots'
 METERS_PER_MILE: float = 1609.34
 GEOG_N_POINTS: int = 20
+EXT: str = '.png'
 
 
 def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zone_df: GeoDataFrame,
@@ -44,7 +45,7 @@ def make_plots(buffer_radius_miles: float, stations_geodf: GeoDataFrame, taxi_zo
     # save plots
     plt.show()
     plotfilepath: str = '/tmp/'
-    plotfilename: str = 'geomerged' + str(buffer_radius_miles) + '.pdf'
+    plotfilename: str = 'geomerged' + str(buffer_radius_miles) + EXT
     remotefilename: str = plotfilename
     plt.savefig(plotfilepath + plotfilename)
     if plot_path is not None:
