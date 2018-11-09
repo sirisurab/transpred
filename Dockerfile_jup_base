@@ -25,6 +25,8 @@ RUN apt-get update && \
 # for matplotlib
 apt-get -y install  libfreetype6-dev \
                     pkg-config \
+# ssh only needed for the jupyter-notebook version
+                    ssh \
 # for redis-cli
                     redis-tools && \
 mkdir /minio && \
