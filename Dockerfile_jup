@@ -2,7 +2,9 @@ FROM sirisurab/tp-jup-app-pkgs AS app
 ARG SSH_PRIVATE_KEY
 ARG SSH_PUB_KEY
 ARG SSH_KEY_PASSPHRASE
-RUN rm -Rf /app && mkdir /app && \
+RUN sudo rm -Rf /app && \
+sudo mkdir /app && \
+sudo chmod -R 777 /app && \
 mkdir -p /root/.ssh && \
 echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa && \
 echo "${SSH_PUB_KEY}" > /root/.ssh/id_rsa.pub && \
@@ -10,7 +12,6 @@ chmod -R 400 /root/.ssh/ && \
 ssh-keyscan github.com > /root/.ssh/known_hosts && \
 eval $(ssh-agent -s) && \
 printf "${SSH_KEY_PASSPHRASE}\n" | ssh-add /root/.ssh/id_rsa && \
-sudo git clone -v "ssh://git@github.com/sirisurab/transpred.git" /app
+git clone -v "ssh://git@github.com/sirisurab/transpred.git" /app
 # Set the working directory to /app
 WORKDIR /app
-RUN chmod -R 777 /app
