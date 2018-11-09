@@ -1,9 +1,9 @@
-# to be tagged as sirisurab/tp-base
+# to be tagged as sirisurab/tp-jup-base
 
 # Use an official Python runtime as a parent image
 
-FROM continuumio/miniconda3 AS base
-
+FROM jupyter/minimal-notebook AS base
+USER root
 RUN mkdir app
 # this is for geopandas
 RUN apt-get update && \
@@ -18,6 +18,7 @@ make && \
 make install && \
 ldconfig
 
+# to be tagged as sirisurab/tp-jup-beefy-base
 FROM base AS beefy-base
 
 RUN apt-get update && \
@@ -31,8 +32,7 @@ wget -P /minio/ https://dl.minio.io/client/mc/release/linux-amd64/mc && \
 chmod -R +x /minio && \
 apt-get -y install libsnappy-dev
 
-# to be tagged as sirisurab/tp-app-pkgs
-
+# to be tagged as sirisurab/tp-jup-app-pkgs
 FROM beefy-base AS app-pkgs
 
 COPY ./environment.yml /tmp/environment.yml
