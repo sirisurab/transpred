@@ -1,4 +1,5 @@
 FROM sirisurab/tp-jup-app-pkgs AS app
+USER root
 ARG SSH_PRIVATE_KEY
 ARG SSH_PUB_KEY
 ARG SSH_KEY_PASSPHRASE
