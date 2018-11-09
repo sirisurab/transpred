@@ -38,6 +38,8 @@ apt-get -y install libsnappy-dev
 FROM beefy-base AS app-pkgs
 USER jovyan
 COPY ./environment.yml /tmp/environment.yml
-RUN conda env create -f /tmp/environment.yml
-RUN ["/bin/bash","-c","source activate transpred"]
-ENV PATH="/minio:/opt/conda/envs/transpred/bin:${PATH}"
+#RUN conda env create -f /tmp/environment.yml
+RUN conda env update -n  base -f /tmp/environment.yml
+#RUN ["/bin/bash","-c","source activate transpred"]
+RUN ["/bin/bash","-c","source activate base"]
+ENV PATH="/minio:${CONDA_DIR}/bin:${PATH}"
