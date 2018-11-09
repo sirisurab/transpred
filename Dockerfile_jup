@@ -1,8 +1,8 @@
 FROM sirisurab/tp-jup-app-pkgs AS app
-USER root
 ARG SSH_PRIVATE_KEY
 ARG SSH_PUB_KEY
 ARG SSH_KEY_PASSPHRASE
+USER root
 RUN apt-get -yq update && \
 apt-get -yqq install ssh && \
 rm -Rf /app && mkdir /app && \
