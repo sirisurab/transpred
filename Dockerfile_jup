@@ -2,10 +2,12 @@ FROM sirisurab/tp-jup-app-pkgs AS app
 ARG SSH_PRIVATE_KEY
 ARG SSH_PUB_KEY
 ARG SSH_KEY_PASSPHRASE
-RUN sudo rm -Rf /app && \
-sudo mkdir /app && \
-sudo chmod -R 777 /app && \
-mkdir -p /root/.ssh && \
+USER root
+RUN rm -Rf /app && \
+mkdir /app && \
+chmod -R 777 /app
+USER jovyan
+RUN mkdir -p /root/.ssh && \
 echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa && \
 echo "${SSH_PUB_KEY}" > /root/.ssh/id_rsa.pub && \
 chmod -R 400 /root/.ssh/ && \
