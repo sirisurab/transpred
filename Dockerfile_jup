@@ -13,3 +13,4 @@ printf "${SSH_KEY_PASSPHRASE}\n" | ssh-add /root/.ssh/id_rsa && \
 git clone -v "ssh://git@github.com/sirisurab/transpred.git" /app
 # Set the working directory to /app
 WORKDIR /app
+RUN chmod -R 777 /app
