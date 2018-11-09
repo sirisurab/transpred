@@ -16,4 +16,4 @@ printf "${SSH_KEY_PASSPHRASE}\n" | ssh-add /root/.ssh/id_rsa && \
 git clone -v "ssh://git@github.com/sirisurab/transpred.git" /app
 # Set the working directory to /app
 WORKDIR /app
-ENV PATH="/app/src:${PATH}"
+ENV PATH="/app/src:${PYTHONPATH}"
