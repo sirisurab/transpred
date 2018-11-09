@@ -36,7 +36,7 @@ apt-get -y install libsnappy-dev
 
 # to be tagged as sirisurab/tp-jup-app-pkgs
 FROM beefy-base AS app-pkgs
-
+USER jovyan
 COPY ./environment.yml /tmp/environment.yml
 RUN conda env create -f /tmp/environment.yml
 RUN ["/bin/bash","-c","source activate transpred"]
