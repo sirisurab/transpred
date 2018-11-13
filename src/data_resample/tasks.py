@@ -288,7 +288,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                           path=s3_out_url,
                           engine='fastparquet',
                           compute=True,
-                          #write_index=True,
+                          write_index=True,
                           compression='GZIP',
                           storage_options=s3_options)
 
