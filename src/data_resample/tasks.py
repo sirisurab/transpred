@@ -11,7 +11,7 @@ from toolz.functoolz import compose
 from dask.distributed import Client
 resample_map: Dict = {
     'filter_by': {
-        'key': 'weekday',
+        'key': 'all',
         'value': 5
     },
     'freq': '1W'
