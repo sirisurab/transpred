@@ -12,9 +12,9 @@ from dask.distributed import Client
 resample_map: Dict = {
     'filter_by': {
         'key': 'all',
-        'value': 5
+        'value': ''
     },
-    'freq': '1W'
+    'freq': '1D'
 }
 
 
@@ -254,9 +254,6 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                                      engine='fastparquet')
                 df = dd.concat([df, df_2], axis=0)
 
-            partitions = df.npartitions
-            if partitions < 5:
-                df.repartition(npartitions=5)
 
             # filter
             if filter_by_key == 'weekday':
@@ -290,10 +287,10 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             #dd.to_parquet(df=df,
             #              path=s3_out_url,
             #              engine='fastparquet',
-            #              #compute=True,
-            #              #write_index=True,
+            #              compute=True,
+                          #write_index=True,
             #              compression='GZIP',
-            #             storage_options=s3_options)
+            #              storage_options=s3_options)
 
     except Exception as err:
         print('error in perform_cabs %s')
