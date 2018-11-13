@@ -241,6 +241,7 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                                  storage_options=s3_options,
                                  engine='fastparquet')
 
+
             if task_type in ['rs-gcabs', 'rs-ycabs'] and int(year) == 2016:
                 #resample_at_path(s3_in_url + '/normal/',
                 #                 s3_out_url,
@@ -252,6 +253,10 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                                      storage_options=s3_options,
                                      engine='fastparquet')
                 df = dd.concat([df, df_2], axis=0)
+
+            partitions = df.npartitions
+            if partitions < 5:
+                df.repartition(npartitions=5)
 
             # filter
             if filter_by_key == 'weekday':
