@@ -279,18 +279,18 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
             print('after grouping and resampling %s' % str(df.shape))
 
             # save in out bucket
-            dd.to_csv(df=df,
-                      filename=s3_out_url,
+            #dd.to_csv(df=df,
+            #          filename=s3_out_url,
                       #name_function=lambda i: out_file_prefix + '_' + str(i),
-                      storage_options=s3_options)
+            #          storage_options=s3_options)
 
-            #dd.to_parquet(df=df,
-            #              path=s3_out_url,
-            #              engine='fastparquet',
-            #              compute=True,
+            dd.to_parquet(df=df,
+                          path=s3_out_url,
+                          engine='fastparquet',
+                          compute=True,
                           #write_index=True,
-            #              compression='GZIP',
-            #              storage_options=s3_options)
+                          compression='GZIP',
+                          storage_options=s3_options)
 
     except Exception as err:
         print('error in perform_cabs %s')
