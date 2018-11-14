@@ -310,9 +310,9 @@ task_type_map: Dict = {
                                 'split_by': ['dolocationid'],
                                 'date_cols': ['dodatetime'],
                                 'dtypes': {
-                                        'passengers': float64,
+                                        'passengers': int64,
                                         'dolocationid': int64,
-                                        'pulocationid': int64,
+                                        'pulocationid': float64,
                                         'distance': float64
                                         }
                                 },
