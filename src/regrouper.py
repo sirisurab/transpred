@@ -100,7 +100,8 @@ def regroup_dask(task_type: str, years: List[str], resample_freq: str, filter_ke
                                      ) for year in years])
 
         print('read files from in bucket and concat-ted into one df')
-        df.fillna(0)
+        fillna_dict: Dict = {key: 0 for key in dtypes}
+        df.fillna(fillna_dict)
         if task_type == 'rg-tsfare':
             s3_sub_path = resample_freq + '/'
         df.groupby(split_by).apply(partial(write_group_to_csv, split_by=split_by, out_bucket=out_bucket, out_path=s3_sub_path), meta=('int')).compute()
