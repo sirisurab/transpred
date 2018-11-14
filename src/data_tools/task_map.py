@@ -227,7 +227,7 @@ task_type_map: Dict = {
                                         'by_cols': ['station'],
                                         'aggr_func': sum,
                                         'meta': {
-                                            'datetime': 'datetime64[ns]',
+                                            'datetime': object,
                                             'station': object,
                                             'delex': int64,
                                             'delent': int64
