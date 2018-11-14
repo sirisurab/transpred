@@ -254,11 +254,11 @@ def perform_dask(task_type: str, years: List[str]) -> bool:
                                      engine='fastparquet')
                 df = dd.concat([df, df_2], axis=0)
 
-            partitions = df.npartitions
-            if partitions < 5:
-                print('repartitioning to 5')
-                df = df.repartition(npartitions=5)
-                client.persist(df)
+            #partitions = df.npartitions
+            #if partitions < 5:
+            #    print('repartitioning to 5')
+            #    df = df.repartition(npartitions=5)
+            #    client.persist(df)
 
             # filter
             if filter_by_key == 'weekday':
